@@ -29,6 +29,7 @@ export default defineConfig({
     alias: {
       // For `readable-stream` to properly resolve Cloudflare runtime polyfill
       "process/": "process",
+      "buffer/": "buffer",
     },
     esbuild: {
       options: {
