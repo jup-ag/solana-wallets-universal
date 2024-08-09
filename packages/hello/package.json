@@ -1,0 +1,63 @@
+{
+  "name": "@solana-wallets-solid/hello",
+  "version": "0.0.1",
+  "description": "Example hello world package in the your-repository-name repository.",
+  "license": "MIT",
+  "author": "your-author-name",
+  "contributors": [],
+  "homepage": "https://github.com/your-nickname/your-repository-name#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-nickname/your-repository-name.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-nickname/your-repository-name/issues"
+  },
+  "keywords": [
+    "solid"
+  ],
+  "private": true,
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "solid": {
+      "development": "./dist/dev.jsx",
+      "import": "./dist/index.jsx"
+    },
+    "development": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/dev.js"
+      }
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "browser": {},
+  "typesVersions": {},
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "concurrently pnpm:test:*",
+    "test:client": "vitest -c ../../configs/vitest.config.ts",
+    "test:ssr": "pnpm run test:client --mode ssr",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "solid-js": "^1.8.9"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.8.9"
+  }
+}

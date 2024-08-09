@@ -1,0 +1,42 @@
+{
+	"name": "solana-wallets-solid",
+	"description": "solana wallets on solidjs",
+	"version": "0.0.1",
+	"license": "MIT",
+	"author": "aidanaden",
+	"contributors": [],
+	"private": true,
+	"scripts": {
+		"postinstall": "pnpm build",
+		"dev": "pnpm run --parallel --filter ./packages/* dev",
+		"build": "turbo run build --filter=./packages/*",
+		"test": "turbo run test --filter=./packages/*",
+		"typecheck": "turbo run typecheck --filter=./packages/*",
+		"build-test": "turbo run build test typecheck --filter=./packages/*",
+		"format": "prettier --ignore-path .gitignore -w \"packages/**/*.{js,ts,json,css,tsx,jsx,md}\" \"examples/**/*.{js,ts,json,css,tsx,jsx,md}\"",
+		"changeset": "changeset",
+		"version-packages": "changeset version && pnpm i",
+		"ci:version": "changeset version && pnpm i --no-frozen-lockfile && git add .",
+		"release": "pnpm build && changeset publish",
+		"update-deps": "pnpm up -Lri"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.26.0",
+		"@types/node": "^22.1.0",
+		"concurrently": "^8.2.2",
+		"jsdom": "^24.1.1",
+		"prettier": "^3.3.3",
+		"solid-js": "^1.8.18",
+		"tsup": "^8.2.4",
+		"tsup-preset-solid": "^2.2.0",
+		"turbo": "^2.0.12",
+		"typescript": "^5.5.4",
+		"vite": "^5.4.0",
+		"vite-plugin-solid": "^2.5.0",
+		"vitest": "^2.0.5"
+	},
+	"packageManager": "pnpm@7.22.0",
+	"engines": {
+		"node": ">=18.0.0"
+	}
+}
