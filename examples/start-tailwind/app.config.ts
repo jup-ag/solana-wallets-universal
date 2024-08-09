@@ -25,7 +25,7 @@ export default defineConfig({
    * @see https://nitro.unjs.io/config
    */
   server: {
-    preset: "cloudflare-pages",
+    preset: "cloudflare",
     alias: {
       // For `readable-stream` to properly resolve Cloudflare runtime polyfill
       "process/": "process",
