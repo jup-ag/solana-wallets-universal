@@ -1,5 +1,5 @@
 // app.config.ts
-import { defineConfig } from "@solidjs/start/config";
+import { defineConfig } from "@solidjs/start/config"
 var app_config_default = defineConfig({
   /**
    *	Toggle between client and server rendering.
@@ -55,7 +55,7 @@ var app_config_default = defineConfig({
     /**
      * Enable "islands" mode.
      */
-    islands: false
+    islands: false,
   },
   /**
    *	Vite config object. Can be configured for each router which has
@@ -63,8 +63,6 @@ var app_config_default = defineConfig({
    *
    *	@see https://vitejs.dev/config/shared-options.html
    */
-  vite: {}
-});
-export {
-  app_config_default as default
-};
+  vite: {},
+})
+export { app_config_default as default }
