@@ -1,4 +1,4 @@
-import { createEffect, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, For, onCleanup, onMount, Show } from "solid-js"
 import { useWallet } from "@solana-wallets-solid/core"
 import { getWallets, DEPRECATED_getWallets } from "@wallet-standard/app"
 
@@ -8,9 +8,21 @@ import { A } from "@solidjs/router"
 import { StandardWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base"
 import { isWalletAdapterCompatibleStandardWallet } from "@solana/wallet-adapter-base"
 
+const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
+
 export default function Home() {
-  const { autoConnect, connect, initialize, select, wallets, adapter, publicKey, disconnect } =
-    useWallet()
+  const {
+    autoConnect,
+    connect,
+    initialize,
+    select,
+    wallets,
+    name,
+    adapter,
+    publicKey,
+    disconnect,
+    signMessage,
+  } = useWallet()
 
   function updateWallets() {
     // get installed wallets compatible with the standard
@@ -104,15 +116,20 @@ export default function Home() {
   //   })
   // }
   //
-  async function handleConnect() {
-    const firstWallet = wallets[0]
-    console.log({ firstWallet })
-    const pubKey = publicKey()
-    if (!pubKey) {
-      await select(firstWallet.adapter.name)
-      await connect()
-    } else {
-      await disconnect()
+
+  async function signArbitary() {
+    try {
+      const signMsg = signMessage()
+      if (!signMsg) {
+        console.error("connected wallet is unable to sign arbitrary message!")
+        return
+      }
+      const res = await signMsg(SIGN_ARBITRARY_MSG)
+      console.log(res)
+      alert("Sign success! Check console logs for details.")
+    } catch (err) {
+      console.error(err)
+      alert((err as Error).message)
     }
   }
 
@@ -126,9 +143,12 @@ export default function Home() {
       removeUnregisterListener()
     })
   })
+  createEffect(() => {
+    console.log("connected wallet: ", { adapter: adapter() })
+  })
 
   createEffect(() => {
-    console.log("connected pub key: ", { adapter: adapter(), pubkey: publicKey() })
+    console.log("connected pub key: ", { pubkey: publicKey() })
   })
   return (
     <main class="text-center mx-auto text-gray-700 p-4 space-y-8">
@@ -136,14 +156,39 @@ export default function Home() {
 
       <Hello />
       <div class="flex flex-col gap-y-3 items-center justify-center">
+        <For each={Object.values(wallets)}>
+          {w => (
+            <button
+              class="rounded-lg px-3 py-1.5 text-lg bg-blue-300 w-fit"
+              onClick={async () => {
+                const _adapter = adapter()
+                if (!_adapter) {
+                  await select(w.adapter.name)
+                  await connect()
+                } else if (_adapter.name === w.adapter.name) {
+                  await disconnect()
+                }
+              }}
+            >
+              <Show
+                when={!adapter() || name() !== w.adapter.name}
+                fallback={`disconnect from ${w.adapter.name}`}
+              >
+                connect to {w.adapter.name}
+              </Show>
+            </button>
+          )}
+        </For>
+      </div>
+      <div class="flex flex-col gap-y-3 items-center justify-center">
         <Show when={publicKey() != null} fallback={""}>
           <code>{publicKey()!.toString()}</code>
         </Show>
-        <button class="rounded-lg px-3 py-1.5 text-lg bg-blue-300 w-fit" onClick={handleConnect}>
-          <Show when={!publicKey()} fallback={"Disconnect!"}>
-            Connect!
-          </Show>
-        </button>
+        <Show when={publicKey()}>
+          <button class="rounded-lg px-3 py-1.5 text-lg bg-blue-300 w-fit" onClick={signArbitary}>
+            Sign message!
+          </button>
+        </Show>
       </div>
 
       <Counter />

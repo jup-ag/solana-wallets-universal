@@ -1,22 +1,21 @@
 {
   "name": "@solana-wallets-solid/core",
   "version": "0.2.0",
-  "description": "Example hello world package in the your-repository-name repository.",
+  "description": "Example hello world package in the solana-wallets-solid repository.",
   "license": "MIT",
-  "author": "your-author-name",
+  "author": "aidanaden",
   "contributors": [],
-  "homepage": "https://github.com/your-nickname/your-repository-name#readme",
+  "homepage": "https://github.com/aidanaden/solana-wallets-solid#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-nickname/your-repository-name.git"
+    "url": "git+https://github.com/aidanaden/solana-wallets-solid.git"
   },
   "bugs": {
-    "url": "https://github.com/your-nickname/your-repository-name/issues"
+    "url": "https://github.com/aidanaden/solana-wallets-solid/issues"
   },
   "keywords": [
     "solid"
   ],
-  "private": true,
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -60,5 +59,8 @@
   },
   "peerDependencies": {
     "solid-js": "^1.8.18"
+  },
+  "directories": {
+    "test": "test"
   }
 }

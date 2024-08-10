@@ -1,5 +1,5 @@
 # https://developers.cloudflare.com/pages/functions/wrangler-configuration
-name = "start-tailwind"
+name = "solana-wallets-solid-start-tailwind"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-07-24"
 compatibility_flags = ["nodejs_compat"]

@@ -59,6 +59,11 @@ pnpm run version-packages
 # Applies changesets to bump package versions and update CHANGELOGs
 # "changeset version && pnpm i
 
+# NOTE: to publish scoped packages you must
+# first create an org.
+# 1. create an org in npmjs.com
+# 2. login to npm via `npm login`
+# 3. name org/scope according to package name
 pnpm run release
 # Builds and publishes changed packages to npm
 # pnpm run build-test && changeset publish
