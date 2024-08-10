@@ -30,7 +30,6 @@ export default defineConfig({
       // For `readable-stream` to properly resolve Cloudflare runtime polyfill
       "process/": "process",
       "buffer/": "buffer",
-      "string-decoder/": "string-decoder",
     },
     esbuild: {
       options: {

@@ -1,0 +1,14 @@
+diff --git a/package.json b/package.json
+index 1be9a0598b9dc5f7ef4de4f2c8fe4e5237b86961..f8444bb8cd4a87fedb2593dd157ae144461bc9fe 100644
+--- a/package.json
++++ b/package.json
+@@ -19,7 +19,8 @@
+         "./package.json": "./package.json",
+         ".": {
+             "import": "./lib/esm/index.js",
+-            "require": "./lib/cjs/index.js"
++            "require": "./lib/cjs/index.js",
++            "types": "./lib/types/index.d.ts"
+         }
+     },
+     "files": [
