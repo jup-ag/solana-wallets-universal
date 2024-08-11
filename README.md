@@ -61,6 +61,7 @@ pnpm run version-packages
 
 # NOTE: to publish scoped packages you must
 # first create an org.
+# @see https://docs.npmjs.com/creating-and-publishing-scoped-public-packages
 # 1. create an org in npmjs.com
 # 2. login to npm via `npm login`
 # 3. name org/scope according to package name

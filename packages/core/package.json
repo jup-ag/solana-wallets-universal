@@ -51,8 +51,10 @@
   },
   "dependencies": {
     "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
     "@solana/web3.js": "^1.95.2",
-    "@solid-primitives/context": "^0.2.3"
+    "@solid-primitives/context": "^0.2.3",
+    "@wallet-standard/app": "0.0.0-20240703212708"
   },
   "devDependencies": {
     "solid-js": "^1.8.18"

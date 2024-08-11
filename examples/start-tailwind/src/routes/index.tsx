@@ -1,71 +1,22 @@
-import { createEffect, For, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, For, Show } from "solid-js"
 import { useWallet } from "@solana-wallets-solid/core"
-import { getWallets, DEPRECATED_getWallets } from "@wallet-standard/app"
-
-import Counter from "~/components/Counter"
 import { Hello } from "@solana-wallets-solid/hello"
 import { A } from "@solidjs/router"
-import { StandardWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base"
-import { isWalletAdapterCompatibleStandardWallet } from "@solana/wallet-adapter-base"
+// import {
+//   createDefaultAddressSelector,
+//   createDefaultAuthorizationResultCache,
+//   createDefaultWalletNotFoundHandler,
+//   SolanaMobileWalletAdapter,
+//   SolanaMobileWalletAdapterWalletName,
+// } from "@solana-mobile/wallet-adapter-mobile"
+
+import Counter from "~/components/Counter"
 
 const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
 
 export default function Home() {
-  const {
-    autoConnect,
-    connect,
-    initialize,
-    select,
-    wallets,
-    name,
-    adapter,
-    publicKey,
-    disconnect,
-    signMessage,
-  } = useWallet()
-
-  function updateWallets() {
-    // get installed wallets compatible with the standard
-    const { get } = DEPRECATED_getWallets()
-    const _wallets = get()
-      .filter(w => w.accounts.length > 0)
-      .map(w => ({
-        ...w,
-        accounts: w.accounts.map(w => ({ ...w, publicKey: new Uint8Array(w.publicKey) })),
-      }))
-    const standardWallets = _wallets
-      // select wallets compatible with the Wallet Standard
-      .filter(w => isWalletAdapterCompatibleStandardWallet(w))
-      // select wallets not already configured by the dapp
-      // .filter(wallet => !wallets.some(({ adapter }) => adapter.name === name))
-      // wrap as a Standard Adapter class
-      .map(wallet => new StandardWalletAdapter({ wallet }))
-
-    const allWallets = [...standardWallets, ...wallets.map(w => w.adapter)]
-    console.log({ allWallets })
-
-    // merge standard mobile wallet if available
-    // const mobileWallet = getMobileWallet(allWallets)
-    // if (mobileWallet) allWallets.unshift(mobileWallet)
-
-    // sort 'Installed' wallets first and 'Loadable' next
-    // const installedFirst = (a: Adapter, b: Adapter) =>
-    //   detectedFirst(WalletReadyState.Installed, a, b)
-    // const loadableFirst = (a: Adapter, b: Adapter) => detectedFirst(WalletReadyState.Loadable, a, b)
-    // allWallets.sort(loadableFirst).sort(installedFirst)
-
-    // initialize wallets store
-    initialize({ wallets: allWallets, autoConnect, localStorageKey: "hielasd" })
-  }
-
-  // function detectedFirst(state: WalletReadyState, a: Adapter, b: Adapter) {
-  //   let sort: number = 0
-  //   const isDetected = (c: Adapter) => c.readyState === state
-  //
-  //   if (isDetected(a) && !isDetected(b)) sort = -1
-  //   if (!isDetected(a) && isDetected(b)) sort = 1
-  //   return sort
-  // }
+  const { connect, select, wallets, name, adapter, publicKey, disconnect, signMessage } =
+    useWallet()
 
   // function getMobileWallet(wallets: Adapter[]) {
   //   /**
@@ -98,24 +49,24 @@ export default function Home() {
   //     const { location } = globalThis
   //     if (location) return `${location.protocol}//${location.host}`
   //   }
-
-  // /**
-  //  * Return Mobile Wallet Adapter object if we are running
-  //  * on a device that supports MWA like Android
-  //  * and we are *not* running in a WebView.
-  //  */
-  // if (ua && isOnAndroid(ua) && !isInWebView(ua)) {
-  //   return new SolanaMobileWalletAdapter({
-  //     addressSelector: createDefaultAddressSelector(),
-  //     appIdentity: {
-  //       uri: getUriForAppIdentity(),
-  //     },
-  //     authorizationResultCache: createDefaultAuthorizationResultCache(),
-  //     chain: getChainForEndpoint($workSpace?.connection?.rpcEndpoint || ""),
-  //     onWalletNotFound: createDefaultWalletNotFoundHandler(),
-  //   })
-  // }
   //
+  //   /**
+  //    * Return Mobile Wallet Adapter object if we are running
+  //    * on a device that supports MWA like Android
+  //    * and we are *not* running in a WebView.
+  //    */
+  //   if (ua && isOnAndroid(ua) && !isInWebView(ua)) {
+  //     return new SolanaMobileWalletAdapter({
+  //       addressSelector: createDefaultAddressSelector(),
+  //       appIdentity: {
+  //         uri: getUriForAppIdentity(),
+  //       },
+  //       authorizationResultCache: createDefaultAuthorizationResultCache(),
+  //       chain: getChainForEndpoint($workSpace?.connection?.rpcEndpoint || ""),
+  //       onWalletNotFound: createDefaultWalletNotFoundHandler(),
+  //     })
+  //   }
+  // }
 
   async function signArbitary() {
     try {
@@ -133,16 +84,6 @@ export default function Home() {
     }
   }
 
-  onMount(() => {
-    updateWallets()
-    const { on } = getWallets()
-    const removeRegisterListener = on("register", updateWallets)
-    const removeUnregisterListener = on("unregister", updateWallets)
-    onCleanup(() => {
-      removeRegisterListener()
-      removeUnregisterListener()
-    })
-  })
   createEffect(() => {
     console.log("connected wallet: ", { adapter: adapter() })
   })

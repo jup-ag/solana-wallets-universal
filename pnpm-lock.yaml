@@ -135,12 +135,18 @@ importers:
       '@solana/wallet-adapter-base':
         specifier: ^0.9.23
         version: 0.9.23(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      '@solana/wallet-standard-wallet-adapter-base':
+        specifier: ^1.1.2
+        version: 1.1.2(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(bs58@5.0.0)
       '@solana/web3.js':
         specifier: ^1.95.2
         version: 1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@solid-primitives/context':
         specifier: ^0.2.3
         version: 0.2.3(solid-js@1.8.20)
+      '@wallet-standard/app':
+        specifier: 0.0.0-20240703212708
+        version: 0.0.0-20240703212708
     devDependencies:
       solid-js:
         specifier: ^1.8.18
