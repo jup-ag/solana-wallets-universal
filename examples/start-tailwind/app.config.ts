@@ -1,4 +1,5 @@
 import { defineConfig } from "@solidjs/start/config"
+import { nodePolyfills } from "vite-plugin-node-polyfills"
 
 /**
  * Solid-start specific config file
@@ -29,7 +30,6 @@ export default defineConfig({
     alias: {
       // For `readable-stream` to properly resolve Cloudflare runtime polyfill
       "process/": "process",
-      "buffer/": "buffer",
     },
     esbuild: {
       options: {
@@ -78,5 +78,6 @@ export default defineConfig({
       // Node.js global to browser globalThis
       global: "globalThis",
     },
+    plugins: [],
   },
 })

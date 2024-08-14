@@ -4,11 +4,7 @@ import "./app.css"
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
-import {
-  UnifiedWalletModalProvider,
-  UnifiedWalletProvider,
-  Wallet,
-} from "@solana-wallets-solid/unified"
+// import { UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
 
 /**
  * NOTE: import each wallet adapter idependently due to build
@@ -27,6 +23,7 @@ import {
 } from "@solana-mobile/wallet-adapter-mobile"
 
 import Nav from "~/components/Nav"
+import { UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
 
 export default function App() {
   const adapters = [
@@ -73,7 +70,20 @@ export default function App() {
   const wallets: Wallet[] = adapters.map(a => ({ adapter: a, readyState: a.readyState }))
   // createEffect(() => {
   //   console.log({ wallets })
+  //
   // })
+
+  // return (
+  //   <Router
+  //     root={props => (
+  //       <>
+  //           <Nav />
+  //           <Suspense>{props.children}</Suspense>
+  //       </>
+  //     )}
+  //   >
+  //     <FileRoutes />
+  //   </Router>)
   return (
     <Router
       root={props => (
