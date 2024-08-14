@@ -1,9 +1,14 @@
+import "@solana-wallets-solid/unified/dist/index.css"
 import "./app.css"
 
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
-import { Wallet, WalletProvider } from "@solana-wallets-solid/core"
+import {
+  UnifiedWalletModalProvider,
+  UnifiedWalletProvider,
+  Wallet,
+} from "@solana-wallets-solid/unified"
 
 /**
  * NOTE: import each wallet adapter idependently due to build
@@ -73,10 +78,23 @@ export default function App() {
     <Router
       root={props => (
         <>
-          <WalletProvider autoConnect={true} wallets={wallets}>
+          <UnifiedWalletProvider
+            autoConnect={true}
+            wallets={wallets}
+            config={{
+              env: "mainnet-beta",
+              theme: "jupiter",
+              metadata: {
+                name: "UnifiedWallet",
+                description: "UnifiedWallet",
+                url: "https://jup.ag",
+                iconUrls: ["https://jup.ag/favicon.ico"],
+              },
+            }}
+          >
             <Nav />
             <Suspense>{props.children}</Suspense>
-          </WalletProvider>
+          </UnifiedWalletProvider>
         </>
       )}
     >

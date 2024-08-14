@@ -1,5 +1,5 @@
 import { createEffect, For, Show } from "solid-js"
-import { useWallet } from "@solana-wallets-solid/core"
+import { UnifiedWalletButton, useUnifiedWallet } from "@solana-wallets-solid/unified"
 import { Hello } from "@solana-wallets-solid/hello"
 import { A } from "@solidjs/router"
 // import {
@@ -15,8 +15,24 @@ import Counter from "~/components/Counter"
 const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
 
 export default function Home() {
-  const { connect, select, wallets, name, adapter, publicKey, disconnect, signMessage } =
-    useWallet()
+  const {
+    connect,
+    select,
+    wallets,
+    name,
+    adapter,
+    publicKey,
+    disconnect,
+    signMessage,
+    env,
+    theme,
+    metadata,
+    locale,
+  } = useUnifiedWallet()
+
+  createEffect(() => {
+    console.log({ env, theme, metadata, locale: locale() })
+  })
 
   // function getMobileWallet(wallets: Adapter[]) {
   //   /**
@@ -121,6 +137,7 @@ export default function Home() {
           )}
         </For>
       </div>
+      <UnifiedWalletButton />
       <div class="flex flex-col gap-y-3 items-center justify-center">
         <Show when={publicKey() != null} fallback={""}>
           <code>{publicKey()!.toString()}</code>

@@ -74,12 +74,12 @@ importers:
       '@solana-mobile/wallet-adapter-mobile':
         specifier: ^2.1.3
         version: 2.1.3(patch_hash=qbxae6zm2h3enxvucaqfabwilu)(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(bufferutil@4.0.8)(react@16.13.1)(utf-8-validate@5.0.10))(react@16.13.1)
-      '@solana-wallets-solid/core':
-        specifier: workspace:*
-        version: link:../../packages/core
       '@solana-wallets-solid/hello':
         specifier: workspace:*
         version: link:../../packages/hello
+      '@solana-wallets-solid/unified':
+        specifier: workspace:*
+        version: link:../../packages/unified
       '@solana/wallet-adapter-base':
         specifier: ^0.9.23
         version: 0.9.23(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
@@ -132,6 +132,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@solana-mobile/wallet-adapter-mobile':
+        specifier: ^2.1.3
+        version: 2.1.3(patch_hash=qbxae6zm2h3enxvucaqfabwilu)(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(bufferutil@4.0.8)(react@16.13.1)(utf-8-validate@5.0.10))(react@16.13.1)
       '@solana/wallet-adapter-base':
         specifier: ^0.9.23
         version: 0.9.23(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
@@ -157,6 +160,43 @@ importers:
       solid-js:
         specifier: ^1.8.9
         version: 1.8.20
+
+  packages/unified:
+    dependencies:
+      '@corvu/dialog':
+        specifier: ^0.2.3
+        version: 0.2.3(solid-js@1.8.20)
+      '@solana-mobile/wallet-adapter-mobile':
+        specifier: ^2.1.3
+        version: 2.1.3(patch_hash=qbxae6zm2h3enxvucaqfabwilu)(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(bufferutil@4.0.8)(react@16.13.1)(utf-8-validate@5.0.10))(react@16.13.1)
+      '@solana-wallets-solid/core':
+        specifier: workspace:*
+        version: link:../core
+      '@solana/wallet-adapter-base':
+        specifier: ^0.9.23
+        version: 0.9.23(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      '@solana/wallet-standard-wallet-adapter-base':
+        specifier: ^1.1.2
+        version: 1.1.2(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(bs58@5.0.0)
+      '@solana/web3.js':
+        specifier: ^1.95.2
+        version: 1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@solid-primitives/context':
+        specifier: ^0.2.3
+        version: 0.2.3(solid-js@1.8.20)
+      solid-js:
+        specifier: ^1.8.9
+        version: 1.8.20
+    devDependencies:
+      autoprefixer:
+        specifier: ^10.4.19
+        version: 10.4.20(postcss@8.4.41)
+      postcss:
+        specifier: ^8.4.38
+        version: 8.4.41
+      tailwindcss:
+        specifier: ^3.4.3
+        version: 3.4.9
 
 packages:
 
@@ -989,6 +1029,21 @@ packages:
   '@cloudflare/workers-shared@0.1.0':
     resolution: {integrity: sha512-SyD4iw6jM4anZaG+ujgVETV4fulF2KHBOW31eavbVN7TNpk2l4aJgwY1YSPK00IKSWsoQuH2TigR446KuT5lqQ==}
 
+  '@corvu/dialog@0.2.3':
+    resolution: {integrity: sha512-1p1lG2Pdu7CtDYw0FP+gdU0Db4zsB2ljOP7UxszZIQpvVvnrAYhNPfu/8IpscB38c0hZCodEnv5hR0NaEEA/Ag==}
+    peerDependencies:
+      solid-js: ^1.8
+
+  '@corvu/utils@0.3.2':
+    resolution: {integrity: sha512-ZWlyWEE8qV9+CB9OAyo2bTrZGXQN9ZeM+JfYv89zoR+lRACKTDuoOZEdiyL8Uc7U5dUSH1uTqKhTTnaHWb+wZA==}
+    peerDependencies:
+      solid-js: ^1.8
+
+  '@corvu/utils@0.4.0':
+    resolution: {integrity: sha512-LTjH/gSf4t/slzGoQdFYWrAykHp3A7JZYH+KjM5KCppVjDEY7pLjZkMTHU/vPF7gvjiXDYgA+6q68eiHRiJ8wA==}
+    peerDependencies:
+      solid-js: ^1.8
+
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
@@ -1605,6 +1660,15 @@ packages:
 
   '@fivebinaries/coin-selection@2.2.1':
     resolution: {integrity: sha512-iYFsYr7RY7TEvTqP9NKR4p/yf3Iybf9abUDR7lRjzanGsrLwVsREvIuyE05iRYFrvqarlk+gWRPsdR1N2hUBrg==}
+
+  '@floating-ui/core@1.6.7':
+    resolution: {integrity: sha512-yDzVT/Lm101nQ5TCVeK65LtdN7Tj4Qpr9RTXJ2vPFLqtLxwOrpoxAHAJI8J3yYWUc40J0BDBheaitK5SJmno2g==}
+
+  '@floating-ui/dom@1.6.10':
+    resolution: {integrity: sha512-fskgCFv8J8OamCmyun8MfjB1Olfn+uZKjOKZ0vhYF3gRmEUXcGOjxWL8bBr7i4kIuPZ2KD2S3EUIOxnjC8kl2A==}
+
+  '@floating-ui/utils@0.2.7':
+    resolution: {integrity: sha512-X8R8Oj771YRl/w+c1HqAC1szL8zWQRwFvgDwT129k9ACdBoud/+/rX9V0qiMl6LWUdP9voC2nDVZYPMQQsb6eA==}
 
   '@fractalwagmi/popup-connection@1.1.1':
     resolution: {integrity: sha512-hYL+45iYwNbwjvP2DxP3YzVsrAGtj/RV9LOgMpJyCxsfNoyyOoi2+YrnywKkiANingiG2kJ1nKsizbu1Bd4zZw==}
@@ -6120,8 +6184,28 @@ packages:
     resolution: {integrity: sha512-l5x7VUUWbjVFbafGLxPWkYsHIhEvmF85tbIeFZWc8ZPtoMyybuEhL7Jye/ooC4/d48FgOjSJXgsF/AJPYCW8Zw==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
 
+  solid-dismissible@0.1.0:
+    resolution: {integrity: sha512-tgIYWdtdAiuv6k4t/ozB1ZDS7D0q38QQFcjaeemQihpYT5Rb0tXgr/AbJ2e0+mxK4sODv3GZpva7HMoq2X5sTA==}
+    peerDependencies:
+      solid-js: ^1.8
+
+  solid-focus-trap@0.1.7:
+    resolution: {integrity: sha512-NSJiIkL+WTWGgca+OKQA9rV3bD51lT23iLn1Z+Ap1Qk3rJBxQ8SoEAQ0FvXoQThtyXFKAK1ibcVBBMMEcu6YMw==}
+    peerDependencies:
+      solid-js: ^1.8
+
   solid-js@1.8.20:
     resolution: {integrity: sha512-SsgaExCJ97mPm9WpAusjZ484Z8zTp8ggiueQOsrm81iAP7UaxaN+wiOgnPcJ9u6B2SQpoQ4FiDPAZBqVWi1V4g==}
+
+  solid-presence@0.1.8:
+    resolution: {integrity: sha512-pWGtXUFWYYUZNbg5YpG5vkQJyOtzn2KXhxYaMx/4I+lylTLYkITOLevaCwMRN+liCVk0pqB6EayLWojNqBFECA==}
+    peerDependencies:
+      solid-js: ^1.8
+
+  solid-prevent-scroll@0.1.9:
+    resolution: {integrity: sha512-KuZG4K8ZN48EeopB9NKquxxL3sX8JzYuRtMZ4jXLQd1ggqtTklahEUhXFFQs1kxWmyKyK068Nq4iN0jk5fgD1Q==}
+    peerDependencies:
+      solid-js: ^1.8
 
   solid-refresh@0.6.3:
     resolution: {integrity: sha512-F3aPsX6hVw9ttm5LYlth8Q15x6MlI/J3Dn+o3EQyRTtTxidepSTwAYdozt01/YA+7ObcciagGEyXIopGZzQtbA==}
@@ -8222,6 +8306,25 @@ snapshots:
 
   '@cloudflare/workers-shared@0.1.0': {}
 
+  '@corvu/dialog@0.2.3(solid-js@1.8.20)':
+    dependencies:
+      '@corvu/utils': 0.4.0(solid-js@1.8.20)
+      solid-dismissible: 0.1.0(solid-js@1.8.20)
+      solid-focus-trap: 0.1.7(solid-js@1.8.20)
+      solid-js: 1.8.20
+      solid-presence: 0.1.8(solid-js@1.8.20)
+      solid-prevent-scroll: 0.1.9(solid-js@1.8.20)
+
+  '@corvu/utils@0.3.2(solid-js@1.8.20)':
+    dependencies:
+      '@floating-ui/dom': 1.6.10
+      solid-js: 1.8.20
+
+  '@corvu/utils@0.4.0(solid-js@1.8.20)':
+    dependencies:
+      '@floating-ui/dom': 1.6.10
+      solid-js: 1.8.20
+
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -8567,6 +8670,17 @@ snapshots:
     dependencies:
       '@emurgo/cardano-serialization-lib-browser': 11.5.0
       '@emurgo/cardano-serialization-lib-nodejs': 11.5.0
+
+  '@floating-ui/core@1.6.7':
+    dependencies:
+      '@floating-ui/utils': 0.2.7
+
+  '@floating-ui/dom@1.6.10':
+    dependencies:
+      '@floating-ui/core': 1.6.7
+      '@floating-ui/utils': 0.2.7
+
+  '@floating-ui/utils@0.2.7': {}
 
   '@fractalwagmi/popup-connection@1.1.1(react-dom@16.13.1(react@16.13.1))(react@16.13.1)':
     dependencies:
@@ -14481,11 +14595,31 @@ snapshots:
       ip-address: 9.0.5
       smart-buffer: 4.2.0
 
+  solid-dismissible@0.1.0(solid-js@1.8.20):
+    dependencies:
+      '@corvu/utils': 0.4.0(solid-js@1.8.20)
+      solid-js: 1.8.20
+
+  solid-focus-trap@0.1.7(solid-js@1.8.20):
+    dependencies:
+      '@corvu/utils': 0.3.2(solid-js@1.8.20)
+      solid-js: 1.8.20
+
   solid-js@1.8.20:
     dependencies:
       csstype: 3.1.3
       seroval: 1.1.1
       seroval-plugins: 1.1.1(seroval@1.1.1)
+
+  solid-presence@0.1.8(solid-js@1.8.20):
+    dependencies:
+      '@corvu/utils': 0.4.0(solid-js@1.8.20)
+      solid-js: 1.8.20
+
+  solid-prevent-scroll@0.1.9(solid-js@1.8.20):
+    dependencies:
+      '@corvu/utils': 0.3.2(solid-js@1.8.20)
+      solid-js: 1.8.20
 
   solid-refresh@0.6.3(solid-js@1.8.20):
     dependencies:

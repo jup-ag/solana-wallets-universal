@@ -165,6 +165,10 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       console.error("onConnect: missing adapter: ", _adapter)
       return
     }
+    console.log("onConnect new values: ", {
+      pubKey: _adapter.publicKey,
+      connected: _adapter.connected,
+    })
     batch(() => {
       setPublicKey(_adapter.publicKey ?? undefined)
       setConnected(_adapter.connected)
@@ -209,6 +213,9 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
    * to track newly connected wallet
    */
   function updateAdapter(adapter: Adapter | undefined) {
+    console.log(
+      "updateAdapter! (remove adapter event listeners, add if adapter exists and sets adapter)",
+    )
     removeAdapterEventListeners()
     if (adapter) {
       addAdapterEventListeners(adapter)
@@ -231,6 +238,12 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
 
   function updateWalletState(adapter: Adapter | undefined) {
     updateAdapter(adapter)
+
+    const newReady = adapter?.readyState ?? WalletReadyState.Unsupported
+    const newPubKey = adapter?.publicKey ?? undefined
+    const newConnected = adapter?.connected ?? false
+
+    console.log("updateWalletState! ", { adapter, newReady, newPubKey, newConnected })
 
     batch(() => {
       setReady(adapter?.readyState ?? WalletReadyState.Unsupported)
@@ -284,6 +297,9 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
 
   async function autoConnectAdapter() {
     const _adapter = adapter()
+    console.log("autoConnectAdapter! will run adapter.connect if not undefined: ", {
+      adapter: _adapter,
+    })
     try {
       setConnecting(true)
       await _adapter?.connect()
