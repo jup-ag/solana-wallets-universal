@@ -24,7 +24,7 @@ import {
 import { batch, createSignal, Accessor, onMount, createMemo, onCleanup } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createContextProvider } from "@solid-primitives/context"
-import { getWallets } from "@wallet-standard/app"
+import { DEPRECATED_getWallets } from "@wallet-standard/app"
 import { StandardWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base"
 
 import { getLocalStorage, setLocalStorage } from "./localstorage"
@@ -368,7 +368,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
    */
   function updateWallets() {
     console.log("updateWallets!")
-    const { get } = getWallets()
+    const { get } = DEPRECATED_getWallets()
     const _wallets = get()
       .filter(w => w.accounts.length > 0)
       .map(w => ({
@@ -383,7 +383,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       // wrap as a Standard Adapter class
       .map(wallet => new StandardWalletAdapter({ wallet }))
 
-    console.log({ standardWallets, wallets: wallets.map(w => w.adapter) })
+    console.log({ _wallets, standardWallets, wallets: wallets.map(w => w.adapter) })
     const allWallets = [...standardWallets, ...wallets.map(w => w.adapter)]
 
     // // merge standard mobile wallet if available
@@ -396,7 +396,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     const loadableFirst = (a: Adapter, b: Adapter) => detectedFirst(WalletReadyState.Loadable, a, b)
     allWallets.sort(loadableFirst).sort(installedFirst)
 
-    console.log("updateWallets: ", {})
+    console.log("updateWallets: ", { allWallets })
   }
 
   onMount(async () => {
@@ -432,7 +432,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
   onMount(() => {
     console.log("onMount: updateWallets!")
     updateWallets()
-    const { on } = getWallets()
+    const { on } = DEPRECATED_getWallets()
     const removeRegisterListener = on("register", updateWallets)
     const removeUnregisterListener = on("unregister", updateWallets)
     onCleanup(() => {

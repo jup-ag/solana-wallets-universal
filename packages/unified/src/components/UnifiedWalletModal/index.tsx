@@ -79,6 +79,14 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
     return list().highlight.length + list().others.length === 0
   })
 
+  async function onWalletClick(adapter: Adapter) {
+    if (adapter.readyState === WalletReadyState.NotDetected) {
+      setShowNotInstalled(adapter)
+      return
+    }
+    await handleConnectClick(adapter)
+  }
+
   // let wrapperEl: HTMLDivElement | undefined
   // const open = createMemo(() => props.isOpen)
   // createEffect(
@@ -109,6 +117,14 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
     if (hasNoWallets()) {
       setShowOnboarding(true)
     }
+  })
+
+  createEffect(() => {
+    console.log({ showOnboarding: showOnboarding(), showNotInstalled: showNotInstalled() })
+  })
+
+  createEffect(() => {
+    console.log({ list: list() })
   })
 
   return (
@@ -169,14 +185,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                 return (
                   <button
                     type="button"
-                    onClick={event => {
-                      if (adapter.readyState === WalletReadyState.NotDetected) {
-                        setShowNotInstalled(adapter)
-                        return
-                      }
-                      event.preventDefault()
-                      handleConnectClick(adapter)
-                    }}
+                    onClick={() => onWalletClick(adapter)}
                     class="py-4 px-4 border border-white/10 rounded-lg flex items-center cursor-pointer flex-1 hover:backdrop-blur-xl transition-all hover:shadow-2xl hover:bg-white/10 bg-jupiter-bg"
                     // classList={{
                     //   "bg-gray-50 hover:shadow-lg hover:border-black/10": theme === "light",
@@ -232,7 +241,10 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                     <For each={list().others}>
                       {adapter => (
                         <ul>
-                          <WalletListItem handleClick={() => {}} adapter={adapter} />
+                          <WalletListItem
+                            handleClick={() => onWalletClick(adapter)}
+                            adapter={adapter}
+                          />
                         </ul>
                       )}
                     </For>
@@ -410,6 +422,7 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
       const { previouslyConnected, ...rest } = filteredAdapters
 
       const highlight = filteredAdapters.previouslyConnected.slice(0, 3)
+      console.log("original others: ", Object.values(rest).flat())
       let others = Object.values(rest)
         .flat()
         .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
@@ -421,6 +434,8 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
         ),
       )
       others = others.filter(Boolean)
+
+      console.log("filtered others: ", others)
 
       return {
         highlightedBy: "PreviouslyConnected",
@@ -457,35 +472,8 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
   createEffect(() => {
     console.log({ list: list() })
   })
-  //
   // <Show when={walletModalAttachments?.footer}>{walletModalAttachments?.footer}</Show>
 
-  // <div
-  //   class="px-5 py-6 flex justify-between leading-none"
-  //   // classList={{
-  //   //   "border-b": theme === "light",
-  //   // }}
-  // >
-  //   <div>
-  //     <div class="font-semibold">
-  //       <span>{t(`Connect Wallet`)}</span>
-  //     </div>
-  //     <div
-  //       class="text-xs mt-1 text-white/50"
-  //       // classList={{
-  //       //   "text-black/50": theme === "light",
-  //       //   "text-white/50": theme !== "light",
-  //       // }}
-  //     >
-  //       <span>{t(`You need to connect a Solana wallet.`)}</span>
-  //     </div>
-  //   </div>
-  //
-  //   <button class="absolute top-4 right-4" onClick={() => props.onClose()}>
-  //     <CloseIcon width={12} height={12} />
-  //   </button>
-  // </div>
-  //
   return (
     <Dialog open={showModal()} onOpenChange={setShowModal}>
       <Dialog.Portal>

@@ -2,7 +2,12 @@ import "@solana-wallets-solid/unified/index.css"
 import "./index.css"
 
 import type { Component } from "solid-js"
-import { UnifiedWalletButton, UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
+import {
+  HARDCODED_WALLET_STANDARDS,
+  UnifiedWalletButton,
+  UnifiedWalletProvider,
+  Wallet,
+} from "@solana-wallets-solid/unified"
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom"
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare"
 import {
@@ -72,6 +77,7 @@ const App: Component = () => {
         walletlistExplanation: {
           href: "https://station.jup.ag/docs/additional-topics/wallet-list",
         },
+        hardcodedWallets: HARDCODED_WALLET_STANDARDS,
       }}
     >
       <div

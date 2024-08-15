@@ -5,15 +5,26 @@ import {
   WalletReadyState,
 } from "@solana/wallet-adapter-base"
 import { Cluster } from "@solana/web3.js"
-import { createEffect, createSignal, JSXElement, on, ParentComponent, splitProps } from "solid-js"
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  JSXElement,
+  on,
+  ParentComponent,
+  splitProps,
+} from "solid-js"
 import { createContextProvider } from "@solid-primitives/context"
-import { useWallet, WalletProvider, WalletProviderProps } from "@solana-wallets-solid/core"
+import { useWallet, Wallet, WalletProvider, WalletProviderProps } from "@solana-wallets-solid/core"
 
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
 import { TranslationProvider, useTranslation } from "../translation/useTranslation"
 import { UnifiedWalletModal } from "../../components"
 import { shortenAddress } from "../../utils"
-import { THardcodedWalletStandardAdapter } from "./HardcodedWalletStandardAdapter"
+import HardcodedWalletStandardAdapter, {
+  THardcodedWalletStandardAdapter,
+} from "./HardcodedWalletStandardAdapter"
+import { HARDCODED_WALLET_STANDARDS } from "../../constants"
 // import { UnifiedWalletModal } from "../../components/UnifiedWalletModal"
 
 export const MWA_NOT_FOUND_ERROR = "MWA_NOT_FOUND_ERROR"
@@ -122,7 +133,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       }),
     )
 
-    function handleConnectClick(adapter: Adapter) {
+    async function handleConnectClick(adapter: Adapter) {
       try {
         setShowModal(false)
 
@@ -140,7 +151,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
         })
 
         // Might throw WalletReadyState.WalletNotReady
-        select(adapter.name)
+        await select(adapter.name)
 
         // Weird quirks for autoConnect to require select and connect
         // if (!props.autoConnect) {
@@ -265,10 +276,22 @@ const useUnifiedWallet = () => {
 
 const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> = _props => {
   const [local, rest] = splitProps(_props, ["children"])
+  const wallets = createMemo(() => {
+    const passed = rest.wallets
+    const passedNames = passed.map(w => w.adapter.name)
+    const hardcoded: Wallet[] = HARDCODED_WALLET_STANDARDS.filter(
+      w => !passedNames.includes(w.name),
+    ).map(w => ({
+      adapter: new HardcodedWalletStandardAdapter(w),
+      readyState: WalletReadyState.NotDetected,
+    }))
+    console.log({ passed, hardcoded })
+    return [...passed, ...hardcoded]
+  })
   return (
     <TranslationProvider locale={rest.locale ?? DEFAULT_LOCALE}>
       <WalletProvider
-        wallets={rest.wallets}
+        wallets={wallets()}
         autoConnect={rest.autoConnect}
         localStorageKey="walletAdapter"
       >

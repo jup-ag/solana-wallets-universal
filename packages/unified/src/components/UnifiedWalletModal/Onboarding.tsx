@@ -179,6 +179,9 @@ export const OnboardingFlow: Component<OnboardingFlowProps> = props => {
       }
     }),
   )
+  createEffect(() => {
+    console.log({ flow: flow() })
+  })
 
   return (
     <div
