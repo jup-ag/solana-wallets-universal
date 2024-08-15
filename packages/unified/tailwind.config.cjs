@@ -5,8 +5,9 @@ module.exports = {
     extend: {
       colors: {
         "jupiter-input-light": "#EBEFF1",
-        "jupiter-bg": "#3A3B43",
-        "jupiter-dark-bg": "#292A33",
+        "jupiter-bg": "#313E4C",
+        "jupiter-dark-bg": "#3A3B43",
+        "jupiter-light-bg": "#fff",
         "jupiter-jungle-green": "#24AE8F",
         "jupiter-primary": "#FBA43A",
         warning: "#FAA63C",
@@ -59,7 +60,8 @@ module.exports = {
     },
   },
   corePlugins: {
-    preflight: false,
+    preflight: true,
   },
+  // prefix: "unified",
   plugins: [],
 }

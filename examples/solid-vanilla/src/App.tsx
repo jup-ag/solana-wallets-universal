@@ -1,18 +1,8 @@
 import "@solana-wallets-solid/unified/index.css"
-import "./app.css"
+import "./index.css"
 
-import { Router } from "@solidjs/router"
-import { FileRoutes } from "@solidjs/start/router"
-import { Suspense } from "solid-js"
-// import { UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
-
-/**
- * NOTE: import each wallet adapter idependently due to build
- * error when deploying on cloudflare-pages when importing
- * them all from @solana/wallet-adapter-wallets
- *
- * @see https://github.com/unjs/nitro/issues/1821
- */
+import type { Component } from "solid-js"
+import { UnifiedWalletButton, UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom"
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare"
 import {
@@ -22,10 +12,7 @@ import {
   SolanaMobileWalletAdapter,
 } from "@solana-mobile/wallet-adapter-mobile"
 
-import Nav from "~/components/Nav"
-import { UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
-
-export default function App() {
+const App: Component = () => {
   const adapters = [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
@@ -68,50 +55,37 @@ export default function App() {
     // }),
   ]
   const wallets: Wallet[] = adapters.map(a => ({ adapter: a, readyState: a.readyState }))
-  // createEffect(() => {
-  //   console.log({ wallets })
-  //
-  // })
-
-  // return (
-  //   <Router
-  //     root={props => (
-  //       <>
-  //           <Nav />
-  //           <Suspense>{props.children}</Suspense>
-  //       </>
-  //     )}
-  //   >
-  //     <FileRoutes />
-  //   </Router>)
   return (
-    <Router
-      root={props => (
-        <>
-          <UnifiedWalletProvider
-            autoConnect={true}
-            wallets={wallets}
-            config={{
-              env: "mainnet-beta",
-              theme: "jupiter",
-              metadata: {
-                name: "UnifiedWallet",
-                description: "UnifiedWallet",
-                url: "https://jup.ag",
-                iconUrls: ["https://jup.ag/favicon.ico"],
-              },
-              walletlistExplanation: {
-                href: "https://station.jup.ag/docs/additional-topics/wallet-list",
-              },
-            }}
-          >
-            <Nav />
-            <Suspense>{props.children}</Suspense>
-          </UnifiedWalletProvider>
-        </>
-      )}
+    <UnifiedWalletProvider
+      locale={"en"}
+      autoConnect={true}
+      wallets={wallets}
+      config={{
+        env: "mainnet-beta",
+        theme: "jupiter",
+        metadata: {
+          name: "UnifiedWallet",
+          description: "UnifiedWallet",
+          url: "https://jup.ag",
+          iconUrls: ["https://jup.ag/favicon.ico"],
+        },
+        walletlistExplanation: {
+          href: "https://station.jup.ag/docs/additional-topics/wallet-list",
+        },
+      }}
     >
-      <FileRoutes />
-    </Router>
+      <div
+        style={{
+          display: "flex",
+          "align-items": "center",
+          "justify-content": "center",
+          height: "100vh",
+        }}
+      >
+        <UnifiedWalletButton />
+      </div>
+    </UnifiedWalletProvider>
   )
 }
+
+export default App

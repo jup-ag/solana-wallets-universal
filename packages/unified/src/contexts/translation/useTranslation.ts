@@ -11,13 +11,13 @@ const [TranslationProvider, _useTranslation] = createContextProvider(
     const [locale, setLocale] = createSignal(props.locale)
 
     function t(text: string) {
-      const dict = dictionaries[text]
-      if (!dict) {
-        return
-      }
       const _locale = locale()
       if (_locale === Locale.EN) {
         return text
+      }
+      const dict = dictionaries[text]
+      if (!dict) {
+        return
       }
       const found = dict[_locale]
       return found ? found : "not found"

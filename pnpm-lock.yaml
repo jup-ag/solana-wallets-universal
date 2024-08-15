@@ -53,11 +53,38 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5(@types/node@22.1.0)(jsdom@24.1.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.5)
 
-  examples/sandbox:
+  examples/solid-vanilla:
     dependencies:
-      '@solana-wallets-solid/hello':
+      '@solana-mobile/wallet-adapter-mobile':
+        specifier: ^2.1.3
+        version: 2.1.3(patch_hash=qbxae6zm2h3enxvucaqfabwilu)(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(bufferutil@4.0.8)(react@16.13.1)(utf-8-validate@5.0.10))(react@16.13.1)
+      '@solana-wallets-solid/unified':
         specifier: workspace:*
-        version: link:../../packages/hello
+        version: link:../../packages/unified
+      '@solana/wallet-adapter-base':
+        specifier: ^0.9.23
+        version: 0.9.23(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      '@solana/wallet-adapter-phantom':
+        specifier: ^0.9.24
+        version: 0.9.24(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      '@solana/wallet-adapter-solflare':
+        specifier: ^0.6.28
+        version: 0.6.28(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      '@solana/wallet-adapter-walletconnect':
+        specifier: ^0.1.16
+        version: 0.1.16(@react-native-async-storage/async-storage@1.24.0(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(bufferutil@4.0.8)(react@16.13.1)(utf-8-validate@5.0.10)))(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(bufferutil@4.0.8)(ioredis@5.4.1)(utf-8-validate@5.0.10)
+      '@solana/web3.js':
+        specifier: ^1.95.2
+        version: 1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@solidjs/router':
+        specifier: ^0.14.1
+        version: 0.14.1(solid-js@1.8.20)
+      '@solidjs/start':
+        specifier: ^1.0.6
+        version: 1.0.6(rollup@4.20.0)(solid-js@1.8.20)(vinxi@0.4.1(@types/node@22.1.0)(idb-keyval@6.2.1)(ioredis@5.4.1)(terser@5.31.5))(vite@5.4.0(@types/node@22.1.0)(terser@5.31.5))
+      '@wallet-standard/app':
+        specifier: 0.0.0-20240703212708
+        version: 0.0.0-20240703212708
       solid-js:
         specifier: ^1.8.18
         version: 1.8.20
@@ -89,15 +116,6 @@ importers:
       '@solana/wallet-adapter-solflare':
         specifier: ^0.6.28
         version: 0.6.28(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
-      '@solana/wallet-adapter-walletconnect':
-        specifier: ^0.1.16
-        version: 0.1.16(@react-native-async-storage/async-storage@1.24.0(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(bufferutil@4.0.8)(react@16.13.1)(utf-8-validate@5.0.10)))(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(bufferutil@4.0.8)(ioredis@5.4.1)(utf-8-validate@5.0.10)
-      '@solana/wallet-standard-util':
-        specifier: ^1.1.1
-        version: 1.1.1
-      '@solana/wallet-standard-wallet-adapter-base':
-        specifier: ^1.1.2
-        version: 1.1.2(@solana/web3.js@1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(bs58@5.0.0)
       '@solana/web3.js':
         specifier: ^1.95.2
         version: 1.95.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -107,9 +125,6 @@ importers:
       '@solidjs/start':
         specifier: ^1.0.6
         version: 1.0.6(rollup@4.20.0)(solid-js@1.8.20)(vinxi@0.4.1(@types/node@22.1.0)(idb-keyval@6.2.1)(ioredis@5.4.1)(terser@5.31.5))(vite@5.4.0(@types/node@22.1.0)(terser@5.31.5))
-      '@wallet-standard/app':
-        specifier: 0.0.0-20240703212708
-        version: 0.0.0-20240703212708
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.20(postcss@8.4.41)

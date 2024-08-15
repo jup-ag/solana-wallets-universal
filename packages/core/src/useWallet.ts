@@ -24,7 +24,7 @@ import {
 import { batch, createSignal, Accessor, onMount, createMemo, onCleanup } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createContextProvider } from "@solid-primitives/context"
-import { getWallets, DEPRECATED_getWallets } from "@wallet-standard/app"
+import { getWallets } from "@wallet-standard/app"
 import { StandardWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base"
 
 import { getLocalStorage, setLocalStorage } from "./localstorage"
@@ -367,7 +367,8 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
    * and adds them to pre-added list of wallets
    */
   function updateWallets() {
-    const { get } = DEPRECATED_getWallets()
+    console.log("updateWallets!")
+    const { get } = getWallets()
     const _wallets = get()
       .filter(w => w.accounts.length > 0)
       .map(w => ({
@@ -382,6 +383,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       // wrap as a Standard Adapter class
       .map(wallet => new StandardWalletAdapter({ wallet }))
 
+    console.log({ standardWallets, wallets: wallets.map(w => w.adapter) })
     const allWallets = [...standardWallets, ...wallets.map(w => w.adapter)]
 
     // // merge standard mobile wallet if available
@@ -393,6 +395,8 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       detectedFirst(WalletReadyState.Installed, a, b)
     const loadableFirst = (a: Adapter, b: Adapter) => detectedFirst(WalletReadyState.Loadable, a, b)
     allWallets.sort(loadableFirst).sort(installedFirst)
+
+    console.log("updateWallets: ", {})
   }
 
   onMount(async () => {
@@ -426,6 +430,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
   })
 
   onMount(() => {
+    console.log("onMount: updateWallets!")
     updateWallets()
     const { on } = getWallets()
     const removeRegisterListener = on("register", updateWallets)

@@ -79,18 +79,18 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
     return list().highlight.length + list().others.length === 0
   })
 
-  let wrapperEl: HTMLDivElement | undefined
-  const open = createMemo(() => props.isOpen)
-  createEffect(
-    on(open, open => {
-      const classText = "mb-7"
-      if (open) {
-        wrapperEl?.classList.add(classText)
-      } else {
-        wrapperEl?.classList.remove(classText)
-      }
-    }),
-  )
+  // let wrapperEl: HTMLDivElement | undefined
+  // const open = createMemo(() => props.isOpen)
+  // createEffect(
+  //   on(open, open => {
+  //     const classText = "mb-7"
+  //     if (open) {
+  //       wrapperEl?.classList.add(classText)
+  //     } else {
+  //       wrapperEl?.classList.remove(classText)
+  //     }
+  //   }),
+  // )
 
   let othersListEl: HTMLDivElement | undefined
   const numOthers = createMemo(() => list().others.length)
@@ -138,14 +138,13 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
         }
       >
         <div
-          id="wrapper123"
-          ref={e => (wrapperEl = e)}
-          class="hideScrollbar h-full overflow-y-scroll pt-3 pb-8 px-5 relative"
+          // ref={e => (wrapperEl = e)}
+          class="hideScrollbar h-full overflow-y-scroll pt-2 pb-8 px-5 relative"
           // classList={{
           //   "mb-7": props.isOpen,
           // }}
         >
-          <span class="mt-6 text-xs font-semibold">
+          <span class="text-xs font-semibold">
             <Switch>
               <Match when={list().highlightedBy === "PreviouslyConnected"}>
                 {t(`Recently used`)}
@@ -178,7 +177,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                       event.preventDefault()
                       handleConnectClick(adapter)
                     }}
-                    class="py-4 px-4 border border-white/10 rounded-lg flex items-center cursor-pointer flex-1 hover:backdrop-blur-xl transition-all hover:shadow-2xl hover:bg-white/10"
+                    class="py-4 px-4 border border-white/10 rounded-lg flex items-center cursor-pointer flex-1 hover:backdrop-blur-xl transition-all hover:shadow-2xl hover:bg-white/10 bg-jupiter-bg"
                     // classList={{
                     //   "bg-gray-50 hover:shadow-lg hover:border-black/10": theme === "light",
                     //   "hover:shadow-2xl hover:bg-white/10": theme !== "light",
@@ -189,7 +188,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                       width={isMobile() ? 24 : 30}
                       height={isMobile() ? 24 : 30}
                     />
-                    <span class="font-semibold text-xs ml-4">{adapterName()}</span>
+                    <span class="font-semibold text-xs ml-4 text-white">{adapterName()}</span>
                     <Show when={attachment}>{_attachment => <div>{_attachment()}</div>}</Show>
                   </button>
                 )
@@ -261,7 +260,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
           </Show>
 
           <div class="text-xs font-semibold mt-4 -mb-2 text-white/80 underline cursor-pointer">
-            <button type="button" onClick={() => setShowOnboarding(true)}>
+            <button class="bg-jupiter-bg" type="button" onClick={() => setShowOnboarding(true)}>
               <span
                 class="text-white"
                 // classList={{ "text-black": theme === "light", "text-white": theme !== "light" }}
@@ -276,7 +275,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
         <Show when={props.isOpen && list().others.length > 6}>
           <>
             <div
-              class="block w-full h-20 absolute left-0 bottom-7 z-50 bg-gradient-to-t from-[#313E4C] to-transparent pointer-events-none"
+              class="block w-full h-20 absolute left-0 bottom-7 z-50 bg-gradient-to-t from-jupiter-bg to-transparent pointer-events-none"
               // classList={{
               //   "bg-gradient-to-t from-[#ffffff] to-transparent pointer-events-none":
               //     theme === "light",
@@ -454,8 +453,10 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
       .sort(sortByPrecedence(walletPrecedence || []))
     return { highlightedBy: "TopWallet", highlight: top3, others }
   })
-  // }, [wallets, previouslyConnected])
 
+  createEffect(() => {
+    console.log({ list: list() })
+  })
   //
   // <Show when={walletModalAttachments?.footer}>{walletModalAttachments?.footer}</Show>
 
@@ -490,21 +491,25 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
       <Dialog.Portal>
         <Dialog.Overlay class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" />
 
-        <div class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
           <Dialog.Content
-            class="max-w-md w-full relative flex flex-col overflow-hidden rounded-xl max-h-[90vh] lg:max-h-[576px] transition-height duration-500 ease-in-out text-white bg-[#313E4C]"
+            class="max-w-md w-full relative flex flex-col overflow-hidden rounded-xl max-h-[90vh] lg:max-h-[576px] transition-height duration-500 ease-in-out text-white bg-jupiter-bg"
             // class="z-50 w-[95vw] max-w-xs rounded-lg border border-white/10 duration-200 corvu-open:animate-in corvu-open:fade-in-0 corvu-open:zoom-in-95 corvu-open:slide-in-from-left-1/2 corvu-open:slide-in-from-top-[60%] corvu-closed:animate-out corvu-closed:fade-out-0 corvu-closed:zoom-out-95 corvu-closed:slide-out-to-left-1/2 corvu-closed:slide-out-to-top-[60%] bg-gray-800 text-slate-100"
           >
-            <div class="px-5 py-6 flex justify-between leading-none border-b border-white/10">
+            <div class="px-5 py-6 flex justify-between leading-none border-b border-b-white/10">
               <div>
-                <Dialog.Label class="text-sm font-semibold h-min">
-                  {t(`Connect Wallet`)}
-                </Dialog.Label>
-                <Dialog.Description class="text-xs text-white/50 h-min">
-                  {t(`You need to connect a Solana wallet.`)}
-                </Dialog.Description>
+                <div>
+                  <Dialog.Label as="span" class="text-sm font-semibold h-min">
+                    {t(`Connect Wallet`)}
+                  </Dialog.Label>
+                </div>
+                <div>
+                  <Dialog.Description as="span" class="text-xs text-white/50 h-min">
+                    {t(`You need to connect a Solana wallet.`)}
+                  </Dialog.Description>
+                </div>
               </div>
-              <Dialog.Close class="absolute top-4 right-4">
+              <Dialog.Close class="absolute top-4 right-4 bg-jupiter-bg">
                 <CloseIcon width={12} height={12} />
               </Dialog.Close>
             </div>

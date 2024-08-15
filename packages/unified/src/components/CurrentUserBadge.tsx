@@ -1,5 +1,6 @@
 import { Component, ComponentProps, createEffect, Show } from "solid-js"
-import { shortenAddress, useUnifiedWallet } from "../contexts"
+import { useUnifiedWallet } from "../contexts"
+import { shortenAddress } from "../utils"
 
 type Props = ComponentProps<"button">
 

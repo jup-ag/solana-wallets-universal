@@ -61,17 +61,17 @@ export const WalletListItem: Component<WalletListItemProps> = props => {
       <button
         type="button"
         onClick={props.handleClick}
-        class="flex items-center w-full px-5 py-4 space-x-5 transition-all border rounded-lg cursor-pointer border-white/10 hover:bg-white/10 hover:backdrop-blur-xl hover:shadow-2xl"
+        class="flex items-center w-full px-5 py-4 space-x-5 transition-all border rounded-lg cursor-pointer border-white/10 hover:bg-white/10 hover:backdrop-blur-xl hover:shadow-2xl bg-jupiter-bg text-white"
         // classList={{
         //   "bg-gray-50 hover:shadow-lg hover:border-black/10": theme === "light",
         //   "hover:shadow-2xl hover:bg-white/10": theme !== "light",
         // }}
       >
-        {isMobile() ? (
-          <WalletIcon wallet={props.adapter} width={24} height={24} />
-        ) : (
-          <WalletIcon wallet={props.adapter} width={30} height={30} />
-        )}
+        <WalletIcon
+          wallet={props.adapter}
+          width={isMobile() ? 24 : 30}
+          height={isMobile() ? 24 : 30}
+        />
         <span class="font-semibold text-xs overflow-hidden text-ellipsis">{adapterName()}</span>
       </button>
     </li>

@@ -12,21 +12,12 @@ import { useWallet, WalletProvider, WalletProviderProps } from "@solana-wallets-
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
 import { TranslationProvider, useTranslation } from "../translation/useTranslation"
 import { UnifiedWalletModal } from "../../components"
+import { shortenAddress } from "../../utils"
+import { THardcodedWalletStandardAdapter } from "./HardcodedWalletStandardAdapter"
 // import { UnifiedWalletModal } from "../../components/UnifiedWalletModal"
 
 export const MWA_NOT_FOUND_ERROR = "MWA_NOT_FOUND_ERROR"
 export type UnifiedTheme = "light" | "dark" | "jupiter"
-
-export function shortenAddress(address: string, chars = 4): string {
-  return `${address.slice(0, chars)}...${address.slice(-chars)}`
-}
-
-export type HardcodedWalletStandardAdapter = {
-  id: string
-  name: WalletName
-  url: string
-  icon: string
-}
 
 export type WalletNotification = {
   publicKey: string
@@ -44,7 +35,7 @@ export type UnifiedWalletConfig = {
   metadata: UnifiedWalletMetadata
   env: Cluster
   walletPrecedence?: WalletName[]
-  hardcodedWallets?: HardcodedWalletStandardAdapter[]
+  hardcodedWallets?: THardcodedWalletStandardAdapter[]
   notificationCallback?: {
     onConnect: (props: WalletNotification) => void
     onConnecting: (props: WalletNotification) => void

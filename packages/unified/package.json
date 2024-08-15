@@ -44,11 +44,11 @@
 				"default": "./dist/index.js"
 			}
 		},
-		"./dist/*.css": {
+		"./index.css": {
 			"development": {
 				"import": "./dist/dev.css"
 			},
-			"import": "./dist/*.css"
+			"import": "./dist/index.css"
 		}
 	},
 	"browser": {},
