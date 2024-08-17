@@ -13,12 +13,12 @@ import {
 } from "solid-js"
 import Dialog from "@corvu/dialog"
 import { Adapter, WalletName, WalletReadyState } from "@solana/wallet-adapter-base"
+import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
 
 import { useUnifiedWallet } from "../../contexts"
 import CloseIcon from "../../icons/CloseIcon"
 import { OnboardingFlow } from "./Onboarding"
 import { NotInstalled } from "./NotInstalled"
-import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
 import { isMobile } from "../../utils"
 import { WalletIcon, WalletListItem } from "./WalletListItem"
 import ChevronUpIcon from "../../icons/ChevronUpIcon"
@@ -87,19 +87,6 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
     await handleConnectClick(adapter)
   }
 
-  // let wrapperEl: HTMLDivElement | undefined
-  // const open = createMemo(() => props.isOpen)
-  // createEffect(
-  //   on(open, open => {
-  //     const classText = "mb-7"
-  //     if (open) {
-  //       wrapperEl?.classList.add(classText)
-  //     } else {
-  //       wrapperEl?.classList.remove(classText)
-  //     }
-  //   }),
-  // )
-
   let othersListEl: HTMLDivElement | undefined
   const numOthers = createMemo(() => list().others.length)
   createEffect(
@@ -153,13 +140,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
           </>
         }
       >
-        <div
-          // ref={e => (wrapperEl = e)}
-          class="hideScrollbar h-full overflow-y-scroll pt-2 pb-8 px-5 relative"
-          // classList={{
-          //   "mb-7": props.isOpen,
-          // }}
-        >
+        <div class="hideScrollbar h-full overflow-y-scroll pt-2 pb-8 px-5 relative">
           <span class="text-xs font-semibold">
             <Switch>
               <Match when={list().highlightedBy === "PreviouslyConnected"}>

@@ -2,7 +2,7 @@ import { Component, createEffect, JSXElement, Match, Show, Switch } from "solid-
 import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
 
 import { MWA_NOT_FOUND_ERROR, useUnifiedWallet } from "../contexts"
-import { CurrentUserBadge } from "./CurrentUserBadge"
+import { shortenAddress } from "../utils"
 
 type Props = {
   overrideContent?: JSXElement
@@ -11,7 +11,7 @@ type Props = {
 }
 
 export const UnifiedWalletButton: Component<Props> = props => {
-  const { t, setShowModal, connect, connecting, connected, disconnect, adapter } =
+  const { t, setShowModal, connect, connecting, connected, disconnect, adapter, publicKey } =
     useUnifiedWallet()
 
   async function handleClick() {
@@ -40,8 +40,23 @@ export const UnifiedWalletButton: Component<Props> = props => {
   return (
     <>
       <Switch>
-        <Match when={adapter() && !!connected()}>
-          <CurrentUserBadge onClick={disconnect} class={props.currentUserClassName} />
+        <Match when={adapter() && !!connected() && publicKey()}>
+          <button
+            type="button"
+            class="flex items-center py-2 px-3 rounded-2xl h-7 cursor-pointer bg-v3-bg text-white w-auto"
+            onClick={disconnect}
+            // class={props.currentUserClassName}
+          >
+            <span
+              class="w-4 h-4 rounded-full flex justify-center items-center"
+              style={{ position: "relative" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="Wallet logo" width={16} height={16} src={adapter()?.icon} />
+            </span>
+
+            <span class="ml-2 text-xs text-white">{shortenAddress(`${publicKey()}`)}</span>
+          </button>
         </Match>
         <Match when={props.overrideContent}>
           <div

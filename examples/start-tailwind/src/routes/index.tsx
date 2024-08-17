@@ -2,13 +2,6 @@ import { createEffect, For, Show } from "solid-js"
 import { UnifiedWalletButton, useUnifiedWallet } from "@solana-wallets-solid/unified"
 import { Hello } from "@solana-wallets-solid/hello"
 import { A } from "@solidjs/router"
-// import {
-//   createDefaultAddressSelector,
-//   createDefaultAuthorizationResultCache,
-//   createDefaultWalletNotFoundHandler,
-//   SolanaMobileWalletAdapter,
-//   SolanaMobileWalletAdapterWalletName,
-// } from "@solana-mobile/wallet-adapter-mobile"
 
 import Counter from "~/components/Counter"
 
@@ -16,7 +9,6 @@ const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
 
 export default function Home() {
   const {
-    connect,
     select,
     wallets,
     name,
@@ -33,56 +25,6 @@ export default function Home() {
   createEffect(() => {
     console.log({ env, theme, metadata, locale: locale() })
   })
-
-  // function getMobileWallet(wallets: Adapter[]) {
-  //   /**
-  //    * Return null if Mobile wallet adapter is already in the list or if ReadyState is Installed.
-  //    *
-  //    * There are only two ways a browser extension adapter should be able to reach `Installed` status:
-  //    *   1. Its browser extension is installed.
-  //    *   2. The app is running on a mobile wallet's in-app browser.
-  //    * In either case, we consider the environment to be desktop-like and not 'mobile'.
-  //    */
-  //   if (
-  //     wallets.some(
-  //       ({ name, readyState }) =>
-  //         name === SolanaMobileWalletAdapterWalletName || readyState === WalletReadyState.Installed,
-  //     )
-  //   ) {
-  //     return null
-  //   }
-  //
-  //   const ua = globalThis.navigator?.userAgent ?? null
-  //
-  //   const isOnAndroid = (ua: string) => /android/i.test(ua)
-  //
-  //   const isInWebView = (ua: string) =>
-  //     /(WebView|Version\/.+(Chrome)\/(\d+)\.(\d+)\.(\d+)\.(\d+)|; wv\).+(Chrome)\/(\d+)\.(\d+)\.(\d+)\.(\d+))/i.test(
-  //       ua,
-  //     )
-  //
-  //   const getUriForAppIdentity = () => {
-  //     const { location } = globalThis
-  //     if (location) return `${location.protocol}//${location.host}`
-  //   }
-  //
-  //   /**
-  //    * Return Mobile Wallet Adapter object if we are running
-  //    * on a device that supports MWA like Android
-  //    * and we are *not* running in a WebView.
-  //    */
-  //   if (ua && isOnAndroid(ua) && !isInWebView(ua)) {
-  //     return new SolanaMobileWalletAdapter({
-  //       addressSelector: createDefaultAddressSelector(),
-  //       appIdentity: {
-  //         uri: getUriForAppIdentity(),
-  //       },
-  //       authorizationResultCache: createDefaultAuthorizationResultCache(),
-  //       chain: getChainForEndpoint($workSpace?.connection?.rpcEndpoint || ""),
-  //       onWalletNotFound: createDefaultWalletNotFoundHandler(),
-  //     })
-  //   }
-  // }
 
   async function signArbitary() {
     try {
@@ -121,7 +63,6 @@ export default function Home() {
                 const _adapter = adapter()
                 if (!_adapter) {
                   await select(w.adapter.name)
-                  await connect()
                 } else if (_adapter.name === w.adapter.name) {
                   await disconnect()
                 }
@@ -137,7 +78,9 @@ export default function Home() {
           )}
         </For>
       </div>
-      <UnifiedWalletButton />
+      <div class="flex items-center justify-center w-full">
+        <UnifiedWalletButton />
+      </div>
       <div class="flex flex-col gap-y-3 items-center justify-center">
         <Show when={publicKey() != null} fallback={""}>
           <code>{publicKey()!.toString()}</code>

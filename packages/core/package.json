@@ -52,10 +52,15 @@
   "dependencies": {
     "@solana-mobile/wallet-adapter-mobile": "^2.1.3",
     "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-standard-features": "^1.2.0",
     "@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
     "@solana/web3.js": "^1.95.2",
     "@solid-primitives/context": "^0.2.3",
-    "@wallet-standard/app": "0.0.0-20240703212708"
+    "@solid-primitives/deep": "^0.2.9",
+    "@wallet-standard/app": "0.0.0-20240703212708",
+    "@wallet-standard/base": "0.0.0-20240703212708",
+    "@wallet-standard/core": "0.0.0-20240703212708",
+    "@wallet-standard/features": "0.0.0-20240703212708"
   },
   "devDependencies": {
     "solid-js": "^1.8.18"
