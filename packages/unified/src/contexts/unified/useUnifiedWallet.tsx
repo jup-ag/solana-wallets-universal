@@ -84,8 +84,8 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       signMessage,
       signAllTransactions,
       connect,
-      connecting,
       connected,
+      connecting,
       disconnect,
     } = useWallet()
     const [showModal, setShowModal] = createSignal<boolean>(true)
@@ -110,8 +110,8 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
     }
 
     createEffect(
-      on([adapter, connected], ([adapter, connected]) => {
-        if (!connected || !adapter) {
+      on([adapter, publicKey], ([adapter, pubKey]) => {
+        if (!pubKey || !adapter) {
           return
         }
         const prevConnected = getPreviouslyConnected()
@@ -220,8 +220,8 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       publicKey,
       select,
       connect,
-      connecting,
       connected,
+      connecting,
       disconnect,
       signMessage,
       signTransaction,
@@ -265,6 +265,7 @@ const useUnifiedWallet = () => {
 
 const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> = _props => {
   const [local, rest] = splitProps(_props, ["children"])
+  console.log("rest.wallets: ", rest.wallets)
   return (
     <TranslationProvider locale={rest.locale ?? DEFAULT_LOCALE}>
       <WalletProvider

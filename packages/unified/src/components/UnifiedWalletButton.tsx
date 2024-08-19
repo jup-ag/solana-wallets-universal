@@ -1,4 +1,4 @@
-import { Component, createEffect, JSXElement, Match, Show, Switch } from "solid-js"
+import { Component, JSXElement, Match, Show, Switch } from "solid-js"
 import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
 
 import { MWA_NOT_FOUND_ERROR, useUnifiedWallet } from "../contexts"
@@ -11,36 +11,39 @@ type Props = {
 }
 
 export const UnifiedWalletButton: Component<Props> = props => {
-  const { t, setShowModal, connect, connecting, connected, disconnect, adapter, publicKey } =
+  const { t, setShowModal, connect, connecting, disconnect, adapter, publicKey } =
     useUnifiedWallet()
 
-  async function handleClick() {
+  /**
+   * Only attempt to connect if mobile wallet adapter already connected,
+   * otherwise prompt user to select a wallet to connect to
+   */
+  async function handleConnect() {
     const _adapter = adapter()
+
+    if (!_adapter || _adapter.name !== SolanaMobileWalletAdapterWalletName) {
+      setShowModal(true)
+      return
+    }
+
     try {
-      if (_adapter?.name === SolanaMobileWalletAdapterWalletName) {
-        await connect()
-        return
+      await connect(_adapter)
+    } catch (err) {
+      if (err instanceof Error && err.message === MWA_NOT_FOUND_ERROR) {
+        setShowModal(true)
       } else {
-        setShowModal(true)
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message === MWA_NOT_FOUND_ERROR) {
-        setShowModal(true)
+        console.error("unknown error trying to connect to mobile wallet adapter: ", {
+          err,
+          _adapter,
+        })
       }
     }
   }
 
-  createEffect(() => {
-    const _adapter = adapter()
-    const _connected = connected()
-    const displayConnectText = !!_adapter && !_connected
-    console.log({ displayConnectText, adapter, connected: _connected })
-  })
-
   return (
     <>
       <Switch>
-        <Match when={adapter() && !!connected() && publicKey()}>
+        <Match when={adapter() && publicKey()}>
           <button
             type="button"
             class="flex items-center py-2 px-3 rounded-2xl h-7 cursor-pointer bg-v3-bg text-white w-auto"
@@ -62,7 +65,7 @@ export const UnifiedWalletButton: Component<Props> = props => {
           <div
             class="bg-v3-bg text-white"
             // class={props.buttonClassName}
-            onClick={handleClick}
+            onClick={handleConnect}
           >
             {props.overrideContent}
           </div>
@@ -72,7 +75,7 @@ export const UnifiedWalletButton: Component<Props> = props => {
             type="button"
             class="rounded-lg text-xs py-3 px-5 font-semibold cursor-pointer text-center w-auto bg-v3-bg text-white"
             // class={props.buttonClassName}
-            onClick={handleClick}
+            onClick={handleConnect}
           >
             <Show
               when={!connecting()}

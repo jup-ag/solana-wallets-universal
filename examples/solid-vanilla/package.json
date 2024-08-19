@@ -24,6 +24,6 @@
 		"@solana/web3.js": "^1.95.2",
 		"@solidjs/router": "^0.14.1",
 		"@solidjs/start": "^1.0.6",
-		"@wallet-standard/app": "0.0.0-20240703212708"
+		"@wallet-standard/app": "1.0.1"
 	}
 }

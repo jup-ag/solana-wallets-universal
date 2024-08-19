@@ -4,14 +4,18 @@ import "./app.css"
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
-// import { UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
+import { UnifiedWalletProvider, Wallet } from "@solana-wallets-solid/unified"
+import { CoinbaseWalletAdapter } from "@solana/wallet-adapter-coinbase"
+import { TrezorWalletAdapter } from "@solana/wallet-adapter-trezor"
+import { LedgerWalletAdapter } from "@solana/wallet-adapter-ledger"
 
 import Nav from "~/components/Nav"
-import { UnifiedWalletProvider } from "@solana-wallets-solid/unified"
 
 export default function App() {
   const adapters = [
-    // new PhantomWalletAdapter(),
+    new CoinbaseWalletAdapter(),
+    new TrezorWalletAdapter(),
+    new LedgerWalletAdapter(),
     // new SolflareWalletAdapter(),
     // new WalletConnectWalletAdapter({
     //   network: WalletAdapterNetwork.Mainnet,
@@ -27,14 +31,15 @@ export default function App() {
     //   },
     // }),
   ]
-  // const wallets: Wallet[] = adapters.map(a => ({ adapter: a, readyState: a.readyState }))
+  const wallets: Wallet[] = adapters.map(a => ({ adapter: a, readyState: a.readyState }))
+  // console.log("app wallets: ", wallets)
   return (
     <Router
       root={props => (
         <>
           <UnifiedWalletProvider
             autoConnect={true}
-            wallets={[]}
+            wallets={wallets}
             config={{
               env: "mainnet-beta",
               theme: "jupiter",

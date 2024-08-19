@@ -1,24 +1,18 @@
 import {
   Adapter,
   isWalletAdapterCompatibleStandardWallet,
-  MessageSignerWalletAdapter,
-  MessageSignerWalletAdapterProps,
   SendTransactionOptions,
-  SignerWalletAdapter,
-  SignerWalletAdapterProps,
   WalletAdapter,
   WalletError,
   WalletName,
-  // isWalletAdapterCompatibleStandardWallet,
   WalletNotConnectedError,
   WalletNotReadyError,
   WalletReadyState,
+  WalletSendTransactionError,
   WalletSignMessageError,
+  WalletSignTransactionError,
 } from "@solana/wallet-adapter-base"
-import {
-  type Wallet as StandardWallet,
-  type WalletWithFeatures as StandardWalletWithFeatures,
-} from "@wallet-standard/base"
+import { type Wallet as StandardWallet } from "@wallet-standard/base"
 import {
   Connection,
   PublicKey,
@@ -27,16 +21,7 @@ import {
   VersionedTransaction,
   Cluster,
 } from "@solana/web3.js"
-import {
-  batch,
-  createSignal,
-  Accessor,
-  onMount,
-  createMemo,
-  onCleanup,
-  createEffect,
-  on,
-} from "solid-js"
+import { createSignal, onMount, createMemo, onCleanup, createEffect, on, batch } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createContextProvider } from "@solid-primitives/context"
 import { getWallets } from "@wallet-standard/app"
@@ -48,43 +33,19 @@ import {
   createDefaultAuthorizationResultCache,
 } from "@solana-mobile/wallet-adapter-mobile"
 import { StandardWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base"
-// import { M } from '@wallet-standard/base';
-import type { StandardEventsFeature } from "@wallet-standard/features"
-import { StandardEvents, StandardConnect } from "@wallet-standard/features"
-
+import type { WalletWithStandardFeatures, EventsChangeProperties } from "@wallet-standard/features"
+import bs58 from "bs58"
+import {
+  SolanaSignAndSendTransaction,
+  SolanaSignAndSendTransactionInput,
+  SolanaSignMessage,
+  SolanaSignTransaction,
+  SolanaSignTransactionInput,
+} from "@solana/wallet-standard-features"
 import type { WalletAccount } from "@wallet-standard/core"
-import { ReadonlyWalletAccount } from "@wallet-standard/core"
-
-export abstract class PossiblyLedgerWalletAccount extends ReadonlyWalletAccount {
-  abstract readonly ledger: boolean
-}
-
-export class SignerWalletAccount extends PossiblyLedgerWalletAccount {
-  get ledger() {
-    return false
-  }
-
-  constructor(account: WalletAccount) {
-    super(account)
-    if (new.target === SignerWalletAccount) {
-      Object.freeze(this)
-    }
-  }
-}
-
-export function walletHasStandardEventsFeature(
-  wallet: StandardWallet,
-): wallet is StandardWalletWithFeatures<StandardEventsFeature> {
-  console.log({ wallet })
-  if (wallet.features) {
-    return StandardEvents in wallet.features
-  } else {
-    return false
-  }
-}
 
 import { getLocalStorage, setLocalStorage } from "./localstorage"
-import { SolanaSignMessage } from "@solana/wallet-standard-features"
+import { detectedFirst, isInWebView, isOnAndroid } from "./utils"
 
 export type Wallet = {
   adapter: Adapter
@@ -92,98 +53,49 @@ export type Wallet = {
 }
 
 export type ErrorHandler = (error: WalletError) => void
-export type WalletPropsConfig = Pick<WalletContext, "autoConnect"> & {
+export type WalletPropsConfig = {
+  autoConnect: boolean | ((adapter: Adapter) => boolean)
   localStorageKey: string
   wallets: Adapter[]
 }
-export type WalletProviderProps = Pick<WalletContext, "wallets" | "autoConnect"> & {
+export type WalletProviderProps = {
+  autoConnect: boolean | ((adapter: Adapter) => boolean)
+  wallets: Wallet[]
   env?: Cluster
   localStorageKey: string
 }
 
-export type WalletStatus = Pick<WalletContext, "connected" | "publicKey">
-
-export type WalletContext = {
-  // props
-  autoConnect: boolean | ((adapter: Adapter) => boolean)
-  wallets: Wallet[]
-
-  // wallet state
-  env: Cluster
-  adapter: Accessor<Adapter | undefined>
-  connected: Accessor<boolean>
-  connecting: Accessor<boolean>
-  disconnecting: Accessor<boolean>
-  localStorageKey: Accessor<string>
-  publicKey: Accessor<PublicKey | undefined>
-  ready: Accessor<WalletReadyState>
-  walletsByName: Record<WalletName, Adapter>
-  name: Accessor<WalletName | undefined>
-
-  // wallet methods
-  connect(): Promise<void>
-  disconnect(): Promise<void>
-  select(walletName: WalletName): void
-  sendTransaction(
-    transaction: Transaction | VersionedTransaction,
-    connection: Connection,
-    options?: SendTransactionOptions,
-  ): Promise<TransactionSignature>
-  signAllTransactions: Accessor<SignerWalletAdapterProps["signAllTransactions"] | undefined>
-  signMessage: Accessor<MessageSignerWalletAdapterProps["signMessage"] | undefined>
-  signTransaction: Accessor<SignerWalletAdapter["signTransaction"] | undefined>
-}
-
-function detectedFirst(state: WalletReadyState, a: Adapter, b: Adapter) {
-  let sort: number = 0
-  const isDetected = (c: Adapter) => c.readyState === state
-
-  if (isDetected(a) && !isDetected(b)) sort = -1
-  if (!isDetected(a) && isDetected(b)) sort = 1
-  return sort
-}
-
 const [WalletProvider, _useWallet] = createContextProvider((props: WalletProviderProps) => {
   // All wallet info
+  const { get } = getWallets()
+
+  const [standardWallets, setStandardWallets] = createSignal<StandardWallet[]>([])
   const [wallets, setWallets] = createStore<Wallet[]>(props.wallets ?? [])
-  const walletsByName = createMemo(() => {
-    console.log("updating walletsByName")
+  const walletsByName = createMemo<Record<WalletName, Adapter>>(prev => {
     return wallets.reduce<Record<WalletName, Adapter>>((_walletsByName, newWallet) => {
       const existing = _walletsByName[newWallet.adapter.name]
-      // Update no existing wallet adapter
+      // Add wallet adapter if not yet added
       if (!existing) {
-        console.log("Update no existing wallet adapter: ", newWallet.adapter)
         _walletsByName[newWallet.adapter.name] = newWallet.adapter
         return _walletsByName
       }
-      // Don't update existing non-standard wallet adapters
+      // Don't update existing custom wallet adapters
       if (!(existing instanceof StandardWalletAdapter)) {
         return _walletsByName
       }
-      // Update standard wallet adapter if more accounts added
-      if (
-        newWallet instanceof StandardWalletAdapter &&
-        newWallet.wallet.accounts.length > existing.wallet.accounts.length
-      ) {
-        console.log("Update standard wallet adapter if more accounts added: ", newWallet.adapter)
+      // ALWAYS update standard wallet adapter, we assume
+      // that any
+      if (newWallet instanceof StandardWalletAdapter) {
         _walletsByName[newWallet.adapter.name] = newWallet.adapter
         return _walletsByName
       }
       return _walletsByName
-    }, {})
+    }, prev ?? {})
   })
-
-  // Selected wallet info
-  //  const [adapter, setAdapter] = createSignal<Adapter | undefined>()
-  // const [name, setName] = createSignal<WalletName | undefined>()
-  //  const [publicKey, setPublicKey] = createSignal<PublicKey | undefined>()
-  //  const name = createMemo<WalletName | undefined>(() => {
-  //    const _adapter = adapter()
-  //    return _adapter ? _adapter.name : undefined
-  //  })
 
   const [name, setName] = createSignal<WalletName | undefined>()
   const [publicKey, setPublicKey] = createSignal<PublicKey | undefined>()
+  const connected = createMemo<boolean>(() => !!publicKey())
   const [account, setAccount] = createSignal<WalletAccount | undefined>()
   const adapter = (): Adapter | undefined => {
     const _name = name()
@@ -193,13 +105,9 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     const _adapter = walletsByName()[_name]
     return _adapter
   }
-  createEffect(() => {
-    console.log("adapter updated: ", { adapter: adapter() })
-  })
 
   // Selected wallet connection state
   const [env] = createSignal<Cluster>(props.env ?? "mainnet-beta")
-  const [connected, setConnected] = createSignal<boolean>(false)
   const [connecting, setConnecting] = createSignal<boolean>(false)
   const [disconnecting, setDisconnecting] = createSignal<boolean>(false)
   const [ready, setReady] = createSignal<WalletReadyState>(WalletReadyState.Unsupported)
@@ -215,118 +123,11 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     const _ready = ready()
     const connectableState =
       _ready === WalletReadyState.Installed || _ready === WalletReadyState.Loadable
-    return adapterAutoConnect && !!_adapter && !connected() && !connecting() && connectableState
-  }
-
-  const signTransaction = createMemo<SignerWalletAdapter["signTransaction"] | undefined>(() => {
-    const _adapter = adapter()
-    if (!_adapter) {
-      return
-    }
-    if (!("signTransaction" in _adapter)) {
-      return
-    }
-    return async tx => {
-      if (!_adapter.connected) {
-        throw new WalletNotConnectedError()
-      }
-      return await _adapter.signTransaction(tx)
-    }
-  })
-
-  const signAllTransactions = createMemo<SignerWalletAdapter["signAllTransactions"] | undefined>(
-    () => {
-      const _adapter = adapter()
-      if (!_adapter) {
-        return
-      }
-      if (!("signTransaction" in _adapter)) {
-        return
-      }
-      return async tx => {
-        if (!_adapter.connected) {
-          throw new WalletNotConnectedError()
-        }
-        return await _adapter.signAllTransactions(tx)
-      }
-    },
-  )
-
-  const signMessage = (): MessageSignerWalletAdapter["signMessage"] | undefined => {
-    const _connected = connected()
-    const _account = account()
-    const _adapter = adapter()
-    console.log({ _connected, _adapter, _account })
-    if (!_adapter || !_connected || !_account) {
-      console.log("cannot sign message, missing connected adapter with pubKey: ", {
-        _connected,
-        _adapter,
-      })
-      return
-    }
-    if (_adapter instanceof StandardWalletAdapter) {
-      console.log("sign message found in _adapter.wallet.features")
-      return async tx => {
-        const _connected = connected()
-        const _account = account()
-        if (!_connected || !_account) {
-          throw new WalletNotConnectedError()
-        }
-        const _adapter = adapter()
-        if (!_adapter) {
-          throw new WalletNotConnectedError()
-        }
-        if (!(_adapter instanceof StandardWalletAdapter)) {
-          throw new WalletSignMessageError("adapter is not a standard wallet adapter!")
-        }
-        if (!(SolanaSignMessage in _adapter.wallet.features)) {
-          throw new WalletSignMessageError(
-            "SolanaSignMessage NOT found in _adapter.wallet.features: ",
-          )
-        }
-        const feature = _adapter.wallet.features[SolanaSignMessage]
-        console.log({
-          _account,
-          _adapter,
-        })
-        const res = await feature.signMessage({
-          account: _account as any,
-          message: tx,
-        })
-        console.log({ res })
-        const firstRes = res[0]
-        if (!firstRes) {
-          throw new WalletError("failed to sign message")
-        }
-        return firstRes.signature
-      }
-    }
-    if (!("signMessage" in _adapter)) {
-      console.log("signMessage not found in _adapter!")
-      return
-    }
-    return async tx => {
-      if (!_adapter.connected) {
-        throw new WalletNotConnectedError()
-      }
-      return await _adapter.signMessage(tx)
-    }
+    return adapterAutoConnect && !!_adapter && !publicKey() && !connecting() && connectableState
   }
 
   function onConnect(newKey: PublicKey) {
-    const _adapter = adapter()
-    if (!_adapter) {
-      console.error("onConnect: missing adapter: ", _adapter)
-      return
-    }
-    console.log("onConnect new values: ", {
-      pubKey: newKey,
-      connected: _adapter.connected,
-    })
-    batch(() => {
-      setPublicKey(newKey)
-      setConnected(true)
-    })
+    setPublicKey(newKey)
   }
 
   function onDisconnect() {
@@ -342,7 +143,6 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
   }
 
   function resetWallet() {
-    console.log("resetWallet!")
     updateWallet(undefined)
   }
 
@@ -351,60 +151,8 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     setName(name)
   }
 
-  createEffect(
-    on(adapter, async adapter => {
-      console.log("adapter updated to: ", { adapter })
-      if (!adapter) {
-        setReady(WalletReadyState.NotDetected)
-        return
-      }
-
-      /**
-       * Update connect/disconnect event listeners
-       * to track newly connected wallet
-       */
-      removeAdapterEventListeners(adapter)
-      adapter.on("connect", onConnect)
-      adapter.on("disconnect", onDisconnect)
-
-      setReady(WalletReadyState.Loadable)
-
-      const autoConnect = shouldAutoConnect()
-      console.log({ autoConnect })
-
-      if (autoConnect) {
-        console.log("autoConnectAdapter! will run adapter.connect if not undefined: ", {
-          adapter,
-        })
-        await connect()
-      }
-      //   try {
-      //     setConnecting(true)
-      //     await adapter.connect()
-      //   } catch (error: unknown) {
-      //     // Clear the selected wallet
-      // console.log("")
-      //     resetWallet()
-      //     // Don't throw error, but onError will still be called
-      //   } finally {
-      //     setConnecting(false)
-      //   }
-      // }
-
-      // const newReady = adapter.readyState
-      // const newPubKey = adapter.publicKey ?? undefined
-      // const newConnected = adapter.connected
-      // console.log("updateWalletState! ", { adapter, newReady, newPubKey, newConnected })
-      // batch(() => {
-      //   setReady(newReady)
-      //   setPublicKey(newPubKey)
-      //   setConnected(newConnected)
-      // })
-    }),
-  )
-
   async function select(walletName: WalletName): Promise<void> {
-    console.log("1.selecting wallet: ", { walletName })
+    console.log("selecting wallet: ", { walletName })
     const _name = name()
     if (_name === walletName && _name != null) {
       console.error(" already connected: ", { _name })
@@ -412,120 +160,101 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     }
 
     const _adapter = adapter()
-    console.log("2.disconnecting existing unmatching adapter: ", { _adapter })
     if (_adapter) {
       console.error("another wallet connected, disconnecting: ", { _adapter })
       await disconnect()
     }
 
-    console.log("3.updating wallet to ", { walletName })
     updateWallet(walletName)
-
-    // console.log("4.connect fn call")
-    // await connect()
   }
 
-  async function sendTransaction(
-    transaction: Transaction | VersionedTransaction,
-    connection: Connection,
-    options?: SendTransactionOptions,
-  ): Promise<TransactionSignature> {
-    const _connected = connected()
-    if (!_connected) {
-      throw new WalletNotConnectedError()
-    }
-    const _adapter = adapter()
-    if (!_adapter) {
-      throw new Error("sendTransaction failed: WALLET NOT CONNECTED")
-    }
-    const res = await _adapter.sendTransaction(transaction, connection, options)
-    return res
-  }
+  type StandardWalletConnectResult =
+    | {
+        type: "standard"
+        pubKey: PublicKey
+        account: WalletAccount
+      }
+    | undefined
 
-  // /**
-  //  * Returns the feature object from the Wallet Standard `Wallet` that underlies a `UiWalletHandle`.
-  //  * If the wallet does not support the feature, a `WalletStandardError` will be thrown.
-  //  */
-  //  function getWalletFeature(
-  //     uiWalletHandle: TWalletHandle,
-  //     featureName: TWalletHandle['features'][number]
-  // ): unknown {
-  //     const wallet = getWalletForHandle_DO_NOT_USE_OR_YOU_WILL_BE_FIRED(uiWalletHandle);
-  //     if (!(featureName in wallet.features)) {
-  //         const err = new WalletStandardError(WALLET_STANDARD_ERROR__FEATURES__WALLET_FEATURE_UNIMPLEMENTED, {
-  //             featureName,
-  //             supportedChains: [...wallet.chains],
-  //             supportedFeatures: Object.keys(wallet.features),
-  //             walletName: wallet.name,
-  //         });
-  //         safeCaptureStackTrace(err, getWalletFeature);
-  //         throw err;
-  //     }
-  //     return wallet.features[featureName];
-  // }
-
-  async function connect(): Promise<void> {
-    if (connected() || connecting() || disconnecting()) {
-      console.error("failed to connect since: ", {
-        connected: connected(),
-        connecting: connecting(),
-        disconnecting: disconnecting(),
-      })
+  async function connectStandardWallet(
+    wallet: WalletWithStandardFeatures,
+  ): Promise<StandardWalletConnectResult> {
+    if (!("standard:connect" in wallet.features)) {
+      console.error("standard wallet does NOT have standard:connect feature enabled!")
       return
     }
-    const _adapter = adapter()
+    const res = await wallet.features["standard:connect"].connect()
+    if (res.accounts.length === 0) {
+      return
+    }
+    const acc = res.accounts[0]
+    if (!acc) {
+      console.error("account not connected: ", { acc })
+      return
+    }
+    return {
+      type: "standard",
+      pubKey: new PublicKey(acc.publicKey),
+      account: acc,
+    }
+  }
+
+  type CustomWalletConnectResult =
+    | {
+        type: "custom"
+        pubKey: PublicKey
+      }
+    | undefined
+
+  async function connectCustomWallet(adapter: Adapter): Promise<CustomWalletConnectResult> {
+    await adapter.connect()
+    const pubKey = adapter.publicKey
+    if (!pubKey) {
+      return
+    }
+    return {
+      type: "custom",
+      pubKey,
+    }
+  }
+
+  async function connect(adapter: Adapter): Promise<void> {
+    if (connecting() || disconnecting()) {
+      console.error("failed to connect, currently connecting/disconnecting")
+      return
+    }
     const _ready = ready()
-    console.error("connect! ", { _adapter, _ready })
-    if (!_adapter) {
-      console.error("failed to connect, missing adapter!")
-      return
-    }
 
     if (!(_ready === WalletReadyState.Installed || _ready === WalletReadyState.Loadable)) {
-      console.error("resetting wallet!")
+      console.error("failed to connect, invalid ready state (not installed/loadable)")
       resetWallet()
-
       if (typeof window !== "undefined") {
-        window.open(_adapter.url, "_blank")
+        window.open(adapter.url, "_blank")
       }
-
       throw new WalletNotReadyError()
     }
 
     try {
       setConnecting(true)
-      console.log("connecting: ", { _adapter })
-      if (_adapter instanceof StandardWalletAdapter) {
-        const res = await _adapter.wallet.features[StandardConnect].connect()
-        console.log({ res })
-        if (res.accounts.length > 0) {
-          const acc = res.accounts[0]
-          if (!acc) {
-            console.log("res.accounts[0] is undefined: ", { acc })
-            return
-          }
-          batch(() => {
-            setReady(WalletReadyState.Loadable)
-            setPublicKey(new PublicKey(acc.publicKey))
-            setAccount(acc)
-            setConnected(true)
-          })
-        }
-      } else {
-        await _adapter.connect()
-        console.error("connected adapter is NOT standard wallet adapter")
-        batch(() => {
-          setReady(_adapter.readyState)
-          setPublicKey(_adapter.publicKey ?? undefined)
-          setConnected(true)
-        })
+      const res =
+        adapter instanceof StandardWalletAdapter
+          ? await connectStandardWallet(adapter.wallet)
+          : await connectCustomWallet(adapter)
+      if (!res) {
+        console.error("failed to connect, missing response after connecting wallet")
+        return
+      }
+      if (res.type === "custom") {
+        setPublicKey(res.pubKey)
+      } else if (res.type === "standard") {
+        setPublicKey(res.pubKey)
+        setAccount(res.account)
       }
     } catch (error: unknown) {
-      console.log("error running adapter.connect: ", { error })
+      console.error("failed to connect, error occurred connecting: ", { error })
       resetWallet()
     } finally {
       setConnecting(false)
-      // setTempWallets([...get()])
     }
   }
 
@@ -546,9 +275,214 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       setDisconnecting(true)
       await _adapter.disconnect()
     } finally {
+      console.log("adapter, pubkey after disconnect: ", { adapter: adapter(), pubKey: publicKey() })
       setDisconnecting(false)
-      setConnected(false)
+      setPublicKey()
     }
+  }
+
+  createEffect(
+    on(adapter, async adapter => {
+      console.log("adapter updated to: ", { adapter })
+      if (!adapter) {
+        setReady(WalletReadyState.NotDetected)
+        setPublicKey()
+        return
+      }
+
+      /**
+       * Update connect/disconnect event listeners
+       * to track newly connected wallet
+       */
+      removeAdapterEventListeners(adapter)
+      adapter.on("connect", onConnect)
+      adapter.on("disconnect", onDisconnect)
+
+      setReady(WalletReadyState.Loadable)
+
+      const autoConnect = shouldAutoConnect()
+      if (autoConnect) {
+        await connect(adapter)
+      }
+    }),
+  )
+
+  async function signTransaction<T extends Transaction | VersionedTransaction>(tx: T) {
+    const _pubKey = publicKey()
+    const _adapter = adapter()
+    if (!_adapter || !_pubKey) {
+      throw new WalletNotConnectedError("signTransaction failed, missing adapter/public key!")
+    }
+
+    if (!(_adapter instanceof StandardWalletAdapter)) {
+      if (!("signTransaction" in _adapter)) {
+        throw new WalletSignTransactionError(
+          "signTransaction failed, `signTransaction` method not found in custom adapter",
+        )
+      }
+      const res = await _adapter.signTransaction(tx)
+      return res
+    }
+
+    const acc = account()
+    if (!acc) {
+      throw new WalletNotConnectedError(
+        "signTransaction failed, missing account! (standard wallet adapter requires an account to sign transactions)",
+      )
+    }
+
+    if (!(SolanaSignTransaction in _adapter.wallet.features)) {
+      throw new WalletSignTransactionError(
+        "solana:signTransaction NOT found in standard wallet features",
+      )
+    }
+
+    const feature = _adapter.wallet.features[SolanaSignTransaction]
+    const input: SolanaSignTransactionInput = {
+      account: acc,
+      transaction: tx.serialize({ verifySignatures: false }),
+    }
+
+    const res = await feature.signTransaction(input)
+    if (res.length === 0 || !res[0]) {
+      throw new WalletSignTransactionError("failed to sign tx, missing sign tx output")
+    }
+    return res[0].signedTransaction
+  }
+
+  async function signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]) {
+    const _pubKey = publicKey()
+    const _adapter = adapter()
+    if (!_adapter || !_pubKey) {
+      throw new WalletNotConnectedError("signAllTransactions failed, missing adapter/public key!")
+    }
+
+    if (!(_adapter instanceof StandardWalletAdapter)) {
+      if (!("signAllTransactions" in _adapter)) {
+        throw new WalletSignTransactionError(
+          "signAllTransactions failed, `signAllTransactions` method not found in custom adapter",
+        )
+      }
+      const res = await _adapter.signAllTransactions(txs)
+      return res
+    }
+
+    const acc = account()
+    if (!acc) {
+      throw new WalletNotConnectedError(
+        "signAllTransactions failed, missing account! (standard wallet adapter requires an account to sign transactions)",
+      )
+    }
+
+    if (!(SolanaSignTransaction in _adapter.wallet.features)) {
+      throw new WalletSignTransactionError(
+        "solana:signTransaction NOT found in standard wallet features",
+      )
+    }
+
+    const feature = _adapter.wallet.features[SolanaSignTransaction]
+    const inputs: SolanaSignTransactionInput[] = txs.map(tx => ({
+      account: acc,
+      transaction: tx.serialize({ verifySignatures: false }),
+    }))
+    const res = await feature.signTransaction(...inputs)
+    if (res.length === 0 || !res[0]) {
+      throw new WalletSignTransactionError(
+        "solana:signTransaction failed, missing sign all txs output",
+      )
+    }
+    return res[0].signedTransaction
+  }
+
+  async function signMessage(tx: Uint8Array): Promise<Uint8Array> {
+    const _publicKey = publicKey()
+    const _adapter = adapter()
+    if (!_adapter || !_publicKey) {
+      throw new WalletNotConnectedError("signMessage failed, missing adapter/public key!")
+    }
+    if (!(_adapter instanceof StandardWalletAdapter)) {
+      if (!("signMessage" in _adapter)) {
+        throw new WalletSignMessageError(
+          "signMessage failed, `signMessage` method not found in custom adapter",
+        )
+      }
+      const res = await _adapter.signMessage(tx)
+      return res
+    }
+    const acc = account()
+    if (!acc) {
+      throw new WalletNotConnectedError(
+        "signMessage failed, missing account! (standard wallet adapter requires an account to sign messages)",
+      )
+    }
+
+    if (!(SolanaSignMessage in _adapter.wallet.features)) {
+      throw new WalletSignMessageError("solana:signMessage NOT found in standard wallet features")
+    }
+
+    const feature = _adapter.wallet.features[SolanaSignMessage]
+    const res = await feature.signMessage({
+      account: acc,
+      message: tx,
+    })
+    const firstRes = res[0]
+    if (!firstRes) {
+      throw new WalletSignMessageError("failed to sign message, missing sign message output")
+    }
+    return firstRes.signature
+  }
+
+  async function sendTransaction(
+    transaction: Transaction | VersionedTransaction,
+    connection: Connection,
+    options?: SendTransactionOptions,
+  ): Promise<TransactionSignature> {
+    const _publicKey = publicKey()
+    const _adapter = adapter()
+    if (!_adapter || !_publicKey) {
+      throw new WalletNotConnectedError("sendTransaction failed: missing adapter / public key!")
+    }
+    if (!(_adapter instanceof StandardWalletAdapter)) {
+      if (!("sendTransaction" in _adapter)) {
+        throw new WalletSendTransactionError(
+          "sendTransaction failed, `sendTransaction` method not found in adapter",
+        )
+      }
+      const res = await _adapter.sendTransaction(transaction, connection, options)
+      return res
+    }
+
+    const acc = account()
+    if (!acc) {
+      throw new WalletNotConnectedError(
+        "sendTransaction failed, missing account! (standard wallet adapter requires an account to send transaction)",
+      )
+    }
+
+    if (!(SolanaSignAndSendTransaction in _adapter.wallet.features)) {
+      throw new WalletSignMessageError(
+        "solana:signAndSendTransaction NOT found in standard wallet features",
+      )
+    }
+
+    const latestHash = await connection.getLatestBlockhash("finalized")
+    if (transaction instanceof Transaction) {
+      transaction.recentBlockhash = latestHash.blockhash
+      transaction.feePayer = new PublicKey(acc.publicKey)
+    }
+    const input: SolanaSignAndSendTransactionInput = {
+      account: acc,
+      transaction: transaction.serialize({ verifySignatures: false }),
+      chain: "solana:devnet",
+    }
+
+    const feature = _adapter.wallet.features[SolanaSignAndSendTransaction]
+    const res = await feature.signAndSendTransaction(input)
+
+    if (res.length === 0 || !res[0]) {
+      throw new Error("Missing tx output from signAndSendTx from connected standard wallet!")
+    }
+    return bs58.encode(res[0].signature)
   }
 
   function getMobileWallet(wallets: Adapter[]) {
@@ -571,16 +505,11 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
 
     const ua = globalThis.navigator?.userAgent ?? null
 
-    const isOnAndroid = (ua: string) => /android/i.test(ua)
-
-    const isInWebView = (ua: string) =>
-      /(WebView|Version\/.+(Chrome)\/(\d+)\.(\d+)\.(\d+)\.(\d+)|; wv\).+(Chrome)\/(\d+)\.(\d+)\.(\d+)\.(\d+))/i.test(
-        ua,
-      )
-
     const getUriForAppIdentity = () => {
       const { location } = globalThis
-      if (location) return `${location.protocol}//${location.host}`
+      if (location) {
+        return `${location.protocol}//${location.host}`
+      }
     }
 
     /**
@@ -611,11 +540,6 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
    * and adds them to pre-added list of wallets
    */
   function updateWallets(ws: StandardWallet[]) {
-    console.log("updateWallets!")
-    // const deprecated = _deprecatedWallets
-    //   // .filter(w => isWalletAdapterCompatibleStandardWallet(w))
-    //   .map(wallet => new StandardWalletAdapter({ wallet }))
-
     const standards: WalletAdapter[] = ws
       .map(w => ({
         name: w.name,
@@ -627,30 +551,24 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
           address: a.address,
           features: a.features,
           icon: a.icon,
-          publicKey: a.publicKey as any,
+          /**
+           * IMPORTANT: directly copy `ReadonlyUint8Array` via reference
+           * because wallet sign functions like `signMessage`, etc
+           * will fail if the publicKey is referentially different
+           * a.k.a public key MUST BE copied via reference
+           */
+          publicKey: a.publicKey,
           chains: a.chains,
         })),
       }))
-      .filter(w => isWalletAdapterCompatibleStandardWallet(w))
       // select wallets compatible with the Wallet Standard
-      // select wallets not already configured by the dapp
-      // .filter(wallet => !wallets.some(({ adapter }) => adapter.name === name))
-      // wrap as a Standard Adapter class
+      .filter(w => isWalletAdapterCompatibleStandardWallet(w))
       .filter(w => {
-        const existing = wallets.find(ex => ex.adapter.name === w.name && ex.adapter)
-        if (!existing) {
-          return true
-        }
-        const adapter = existing.adapter
-        if (!(adapter instanceof StandardWalletAdapter)) {
-          return false
-        }
-        if (w.accounts.length > adapter.wallet.accounts.length) {
-          console.log("new wallet addapter has more accounts than old wallet adapter, replacing")
-          return true
-        }
-        return false
+        const existing = wallets.find(ew => ew.adapter.name === w.name)
+        const existingCustom = existing instanceof StandardWalletAdapter
+        return !existingCustom
       })
+      // wrap as `StandardWalletAdapter`
       .map(wallet => {
         const standard = new StandardWalletAdapter({
           wallet: {
@@ -662,22 +580,13 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
             version: wallet.version,
           },
         })
-        standard.wallet.features[StandardEvents].on("change", x => {
-          console.log("standard event change captured: ", { x: JSON.stringify(x), get: get() })
-          setTempWallets([...get()])
-        })
         return standard
       })
 
-    console.log({
-      // rawStandardWallets: ,
-      standards,
-      // filteredDeprecated: deprecated.map(w => w.name),
-      wallets: wallets.map(w => w.adapter),
-    })
-
-    const filteredExisting = wallets.filter(w => !standards.find(s => s.name === w.adapter.name))
-    const allWallets = [...standards, ...filteredExisting.map(w => w.adapter)]
+    const existingCustomWallets = wallets.filter(
+      w => !standards.find(s => s.name === w.adapter.name),
+    )
+    const allWallets = [...standards, ...existingCustomWallets.map(w => w.adapter)]
 
     // merge standard mobile wallet if available
     const mobileWallet = getMobileWallet(allWallets)
@@ -692,19 +601,53 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     allWallets.sort(loadableFirst).sort(installedFirst)
 
     const newWallets: Wallet[] = allWallets.map(w => ({ adapter: w, readyState: w.readyState }))
-
-    console.log("newWallets: ", { newWallets })
-
     setWallets(newWallets)
   }
 
+  /**
+   * Invalidate adapter listeners before refreshing the page
+   */
   onMount(() => {
-    // Ensure the adapter listeners are invalidated before refreshing the page.
     window.addEventListener("beforeunload", () => removeAdapterEventListeners())
     onCleanup(() => {
       window.removeEventListener("beforeunload", () => removeAdapterEventListeners())
     })
   })
+
+  /**
+   * Update standard wallet connected account + public key
+   * when change event detected
+   */
+  async function onChange(w: StandardWallet, changes: EventsChangeProperties) {
+    console.log("standard event change captured: ", {
+      name: w.name,
+      accounts: changes.accounts,
+    })
+    const connectedWalletName = name()
+    batch(() => {
+      if (connectedWalletName && connectedWalletName === w.name) {
+        /**
+         * w.accounts is empty ONLY IF
+         *	1. a disconnect event occurred
+         *	2. user switched wallet account BUT this particular
+         *  wallet does NOT allow automatic connection to other
+         *  accounts without explicit user permission e.g
+         *  auto-connect not checked (Solflare)
+         *
+         *  if (2) occurs, we disconnect from the wallet to
+         *  reflect the wallet's rejection of the account change
+         */
+        const acc = changes.accounts && changes.accounts[0]
+        if (acc) {
+          setAccount(acc)
+          setPublicKey(new PublicKey(acc.publicKey))
+        } else {
+          disconnect()
+        }
+      }
+      setStandardWallets([...get()])
+    })
+  }
 
   /** Add ready state change listeners for all wallets,
    * wallet state should update regardless of whether
@@ -716,39 +659,32 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     setWallets(ws => ws.adapter.name === this.name, { adapter: this, readyState })
   }
 
-  const { get } = getWallets()
-  const [tempWallets, setTempWallets] = createSignal<StandardWallet[]>([])
-
-  // const { on, get } = getWallets()
-  // createEffect(() => {
-  //   const _wallets = get()
-  //   setTempWallets(_wallets)
-  //   // _wallets.forEach(w => {
-  //   //   ;(w.features[StandardEvents] as any).on("change", () => {
-  //   //     console.log("change triggered: ", get())
-  //   //   })
-  //   // })
-  //
-  //   console.log({ _wallets })
-  //   const handler = (...x: any[]) => {
-  //     console.log({ x })
-  //   }
-  //   const remove = on("register", handler)
-  //   onCleanup(() => {
-  //     remove()
-  //   })
-  // })
-
   onMount(() => {
     const { on } = getWallets()
-    console.log("onMount: updateWallets!")
 
-    setTempWallets([...get()])
-    const addWallet = (w: any) => {
-      console.log("register addWallet called!")
-      console.log({ w })
-      setTempWallets([...get()])
+    const initializedWallets = get().map((w, i) => {
+      console.log(`raw wallet ${i + 1}: `, w)
+      // @ts-ignore
+      if (isWalletAdapterCompatibleStandardWallet(w)) {
+        if (w.features["standard:events"]) {
+          w.features["standard:events"].on("change", async x => await onChange(w, x))
+        }
+      }
+      return w
+    })
+
+    /**
+     * Store standard wallets initially available
+     */
+    setStandardWallets(initializedWallets)
+    const addWallet = () => {
+      setStandardWallets([...get()])
     }
+
+    /**
+     * Add listeners for standard wallets registered
+     * AFTER initial `get` call
+     */
     const removeRegisterListener = on("register", addWallet)
     const removeUnregisterListener = on("unregister", addWallet)
     onCleanup(() => {
@@ -758,7 +694,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
   })
 
   createEffect(
-    on(tempWallets, ws => {
+    on(standardWallets, ws => {
       const filtered: StandardWallet[] = ws
         .filter(w => !!w.features)
         .filter(w =>
@@ -775,16 +711,17 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
               label: a.label,
               icon: a.icon,
               address: a.address,
-              publicKey: new Uint8Array(a.publicKey),
+              publicKey: a.publicKey,
             })),
           }),
         )
-
-      console.log("temp wallets changed: ", { filtered, tempWallets: ws })
       updateWallets(filtered)
     }),
   )
 
+  /**
+   * Add handlers for updating wallet ready states
+   */
   onMount(() => {
     wallets.forEach(({ adapter }) => {
       adapter.on("readyStateChange", onReadyStateChange, adapter)
@@ -796,6 +733,9 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     })
   })
 
+  /*
+   * Automatically connect to most recently connected wallet
+   */
   onMount(async () => {
     const walletName = getLocalStorage<WalletName>(props.localStorageKey)
     if (walletName) {
@@ -819,12 +759,12 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     signTransaction,
     signMessage,
     signAllTransactions,
+    sendTransaction,
 
     autoConnect,
     connect,
     disconnect,
     select,
-    sendTransaction,
   }
 })
 

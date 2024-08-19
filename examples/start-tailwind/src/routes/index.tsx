@@ -4,8 +4,18 @@ import { Hello } from "@solana-wallets-solid/hello"
 import { A } from "@solidjs/router"
 
 import Counter from "~/components/Counter"
+import {
+  Connection,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js"
 
 const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
+export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
+  ? "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
+  : "https://jupiter-frontend.rpcpool.com"
 
 export default function Home() {
   const {
@@ -16,6 +26,8 @@ export default function Home() {
     publicKey,
     disconnect,
     signMessage,
+    // signAllTransactions,
+    sendTransaction,
     env,
     theme,
     metadata,
@@ -28,12 +40,7 @@ export default function Home() {
 
   async function signArbitary() {
     try {
-      const signMsg = signMessage()
-      if (!signMsg) {
-        console.error("connected wallet is unable to sign arbitrary message!")
-        return
-      }
-      const res = await signMsg(SIGN_ARBITRARY_MSG)
+      const res = await signMessage(SIGN_ARBITRARY_MSG)
       console.log(res)
       alert("Sign success! Check console logs for details.")
     } catch (err) {
@@ -42,13 +49,28 @@ export default function Home() {
     }
   }
 
-  createEffect(() => {
-    console.log("connected wallet: ", { adapter: adapter() })
-  })
+  async function sendTx() {
+    const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
+    const APPEAL_WALLET_PUBKEY = new PublicKey("Hm9YjuVadcekDPbLeCSFE83r1QLpS2ksmKk7Sn5BCpfL")
+    const pubKey = publicKey()
+    if (!pubKey) {
+      console.error("cannot sign tx, no pub key: ", { pubKey })
+      return
+    }
+    const connection = new Connection(DEVNET_RPC_ENDPOINT, "confirmed")
+    const lamportsToSend = 0.1 * LAMPORTS_PER_SOL
+    const transferTransaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: pubKey,
+        toPubkey: APPEAL_WALLET_PUBKEY,
+        lamports: lamportsToSend,
+      }),
+    )
+    const res = await sendTransaction(transferTransaction, connection)
+    console.log("successful tx: ", { res })
+    // signTransaction
+  }
 
-  createEffect(() => {
-    console.log("connected pub key: ", { pubkey: publicKey() })
-  })
   return (
     <main class="text-center mx-auto text-gray-700 p-4 space-y-8">
       <h1 class="max-6-xs text-6xl text-sky-700 font-thin uppercase my-16">Hello world!</h1>
@@ -88,6 +110,9 @@ export default function Home() {
         <Show when={publicKey()}>
           <button class="rounded-lg px-3 py-1.5 text-lg bg-blue-300 w-fit" onClick={signArbitary}>
             Sign message!
+          </button>
+          <button class="rounded-lg px-3 py-1.5 text-lg bg-blue-300 w-fit" onClick={sendTx}>
+            Send tx!
           </button>
         </Show>
       </div>

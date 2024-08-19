@@ -106,14 +106,6 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
     }
   })
 
-  createEffect(() => {
-    console.log({ showOnboarding: showOnboarding(), showNotInstalled: showNotInstalled() })
-  })
-
-  createEffect(() => {
-    console.log({ list: list() })
-  })
-
   return (
     <>
       <Show
@@ -403,7 +395,6 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
       const { previouslyConnected, ...rest } = filteredAdapters
 
       const highlight = filteredAdapters.previouslyConnected.slice(0, 3)
-      console.log("original others: ", Object.values(rest).flat())
       let others = Object.values(rest)
         .flat()
         .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
@@ -415,8 +406,6 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
         ),
       )
       others = others.filter(Boolean)
-
-      console.log("filtered others: ", others)
 
       return {
         highlightedBy: "PreviouslyConnected",
@@ -450,9 +439,6 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
     return { highlightedBy: "TopWallet", highlight: top3, others }
   })
 
-  createEffect(() => {
-    console.log({ list: list() })
-  })
   // <Show when={walletModalAttachments?.footer}>{walletModalAttachments?.footer}</Show>
 
   return (
