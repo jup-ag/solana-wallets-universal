@@ -27,16 +27,8 @@ export default function Home() {
     signMessage,
     // signAllTransactions,
     sendTransaction,
-    env,
-    theme,
-    metadata,
-    locale,
     showModal,
   } = useUnifiedWallet()
-
-  createEffect(() => {
-    console.log({ env, theme, metadata, locale: locale() })
-  })
 
   async function signArbitary() {
     try {

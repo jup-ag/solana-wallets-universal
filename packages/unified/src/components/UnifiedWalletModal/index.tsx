@@ -333,7 +333,7 @@ export type UnifiedWalletModalProps = {
   onClose: () => void
 }
 
-export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
+const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
   const { t, wallets, getPreviouslyConnected, walletPrecedence, showModal, setShowModal } =
     useUnifiedWallet()
   const [isOpen, setIsOpen] = createSignal(false)
@@ -443,14 +443,7 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
   // <Show when={walletModalAttachments?.footer}>{walletModalAttachments?.footer}</Show>
 
   return (
-    <Dialog
-      initialOpen={false}
-      open={showModal()}
-      onOpenChange={o => {
-        console.log("onOpenChange: ", { o })
-        setShowModal(o)
-      }}
-    >
+    <Dialog open={showModal()} onOpenChange={setShowModal}>
       <Dialog.Portal>
         <Dialog.Overlay class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" />
 
@@ -483,3 +476,5 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
     </Dialog>
   )
 }
+
+export default UnifiedWalletModal

@@ -5,13 +5,20 @@ import {
   WalletReadyState,
 } from "@solana/wallet-adapter-base"
 import { Cluster } from "@solana/web3.js"
-import { createEffect, createSignal, JSXElement, on, ParentComponent, splitProps } from "solid-js"
+import {
+  createEffect,
+  createSignal,
+  JSXElement,
+  lazy,
+  on,
+  ParentComponent,
+  splitProps,
+} from "solid-js"
 import { createContextProvider } from "@solid-primitives/context"
 import { useWallet, WalletProvider, WalletProviderProps } from "@solana-wallets-solid/core"
 
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
 import { TranslationProvider, useTranslation } from "../translation/useTranslation"
-import { UnifiedWalletModal } from "../../components"
 import { shortenAddress } from "../../utils"
 import { THardcodedWalletStandardAdapter } from "./HardcodedWalletStandardAdapter"
 // import { UnifiedWalletModal } from "../../components/UnifiedWalletModal"
@@ -89,7 +96,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       connecting,
       disconnect,
     } = useWallet()
-    const [showModal, setShowModal] = createSignal<boolean>()
+    const [showModal, setShowModal] = createSignal<boolean>(false)
 
     function getPreviouslyConnected() {
       try {
@@ -241,6 +248,8 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
     }
   },
 )
+
+const UnifiedWalletModal = lazy(() => import("../../components/UnifiedWalletModal"))
 
 export const UnifiedWalletModalProvider: ParentComponent = props => {
   const { setShowModal } = useUnifiedWallet()
