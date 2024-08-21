@@ -49,27 +49,23 @@
 		"test:ssr": "pnpm run test:client --mode ssr",
 		"typecheck": "tsc --noEmit"
 	},
-	"dependencies": {
+	"devDependencies": {
+		"solid-js": "^1.8.18",
 		"@solana-mobile/wallet-adapter-mobile": "^2.1.3",
 		"@solana/wallet-adapter-base": "^0.9.23",
 		"@solana/wallet-standard-features": "^1.2.0",
 		"@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
-		"@solana/web3.js": "^1.95.2",
 		"@solid-primitives/context": "^0.2.3",
 		"@solid-primitives/deep": "^0.2.9",
 		"@wallet-standard/app": "1.0.1",
 		"@wallet-standard/base": "1.0.1",
 		"@wallet-standard/core": "1.0.1",
 		"@wallet-standard/features": "1.0.1",
-		"bs58": "^6.0.0"
-	},
-	"devDependencies": {
-		"solid-js": "^1.8.18"
+		"bs58": "^6.0.0",
+		"@solana/web3.js": "^1.95.2"
 	},
 	"peerDependencies": {
-		"solid-js": "^1.8.18"
-	},
-	"directories": {
-		"test": "test"
+		"solid-js": "^1.8.18",
+		"@solana/web3.js": "^1.95.2"
 	}
 }

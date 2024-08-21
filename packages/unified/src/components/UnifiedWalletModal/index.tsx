@@ -102,6 +102,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
 
   createEffect(() => {
     if (hasNoWallets()) {
+      console.log("no wallets, showing onboarding...")
       setShowOnboarding(true)
     }
   })
@@ -442,7 +443,14 @@ export const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
   // <Show when={walletModalAttachments?.footer}>{walletModalAttachments?.footer}</Show>
 
   return (
-    <Dialog open={showModal()} onOpenChange={setShowModal}>
+    <Dialog
+      initialOpen={false}
+      open={showModal()}
+      onOpenChange={o => {
+        console.log("onOpenChange: ", { o })
+        setShowModal(o)
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" />
 

@@ -55,11 +55,13 @@ export type Wallet = {
 export type ErrorHandler = (error: WalletError) => void
 export type WalletPropsConfig = {
   autoConnect: boolean | ((adapter: Adapter) => boolean)
+  disconnectOnAccountChange: boolean
   localStorageKey: string
   wallets: Adapter[]
 }
 export type WalletProviderProps = {
   autoConnect: boolean | ((adapter: Adapter) => boolean)
+  disconnectOnAccountChange: boolean
   wallets: Wallet[]
   env?: Cluster
   localStorageKey: string
@@ -638,10 +640,11 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
          *  reflect the wallet's rejection of the account change
          */
         const acc = changes.accounts && changes.accounts[0]
+        console.log("standard wallet change detected: ", { changes })
         if (acc) {
           setAccount(acc)
           setPublicKey(new PublicKey(acc.publicKey))
-        } else {
+        } else if (props.disconnectOnAccountChange) {
           disconnect()
         }
       }
@@ -667,7 +670,10 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       // @ts-ignore
       if (isWalletAdapterCompatibleStandardWallet(w)) {
         if (w.features["standard:events"]) {
-          w.features["standard:events"].on("change", async x => await onChange(w, x))
+          w.features["standard:events"].on("change", async x => {
+            console.log({ x })
+            await onChange(w, x)
+          })
         }
       }
       return w

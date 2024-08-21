@@ -79,6 +79,17 @@ export default defineConfig({
       // Node.js global to browser globalThis
       global: "globalThis",
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: id => {
+            if (id.includes("ledger") || id.includes("trezor")) {
+              return "hardware-wallet"
+            }
+          },
+        },
+      },
+    },
     plugins: [
       nodePolyfills({
         //   // To add only specific polyfills, add them here. If no option is passed, adds all polyfills

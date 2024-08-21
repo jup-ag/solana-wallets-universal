@@ -57,6 +57,7 @@ export type UnifiedWalletConfig = {
 
 export type UnifiedWalletProviderProps = {
   autoConnect: boolean
+  disconnectOnAccountChange: boolean
   wallets: WalletProviderProps["wallets"]
   config: UnifiedWalletConfig
   locale?: Locale
@@ -88,7 +89,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       connecting,
       disconnect,
     } = useWallet()
-    const [showModal, setShowModal] = createSignal<boolean>(true)
+    const [showModal, setShowModal] = createSignal<boolean>()
 
     function getPreviouslyConnected() {
       try {
@@ -271,6 +272,7 @@ const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> = _prop
       <WalletProvider
         wallets={rest.wallets}
         autoConnect={rest.autoConnect}
+        disconnectOnAccountChange={rest.disconnectOnAccountChange}
         localStorageKey="walletAdapter"
       >
         <_UnifiedWalletProvider {...rest.config}>

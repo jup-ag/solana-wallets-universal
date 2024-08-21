@@ -22,6 +22,7 @@ export const UnifiedWalletButton: Component<Props> = props => {
     const _adapter = adapter()
 
     if (!_adapter || _adapter.name !== SolanaMobileWalletAdapterWalletName) {
+      console.error("showing modal due to missing adapter")
       setShowModal(true)
       return
     }
@@ -30,6 +31,7 @@ export const UnifiedWalletButton: Component<Props> = props => {
       await connect(_adapter)
     } catch (err) {
       if (err instanceof Error && err.message === MWA_NOT_FOUND_ERROR) {
+        console.error("showing modal due to mwa_not_found_error")
         setShowModal(true)
       } else {
         console.error("unknown error trying to connect to mobile wallet adapter: ", {

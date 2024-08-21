@@ -13,7 +13,7 @@ const preset_options: preset.PresetOptions = {
     },
   ],
   // Set to `true` to remove all `console.*` calls and `debugger` statements in prod builds
-  drop_console: true,
+  drop_console: false,
   // Set to `true` to generate a CommonJS build alongside ESM
   // cjs: true,
 }
@@ -30,8 +30,10 @@ export default defineConfig(config => {
   const parsed_options = preset.parsePresetOptions(preset_options, watching)
 
   if (!watching && !CI) {
-    // const package_fields = preset.generatePackageExports(parsed_options)
-    // console.log(`package.json: \n\n${JSON.stringify(package_fields, null, 2)}\n\n`)
+    const package_fields = preset.generatePackageExports(parsed_options)
+
+    console.log(`package.json: \n\n${JSON.stringify(package_fields, null, 2)}\n\n`)
+
     // will update ./package.json with the correct export fields
     // preset.writePackageJson(package_fields)
   }

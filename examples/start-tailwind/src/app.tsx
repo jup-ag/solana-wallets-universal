@@ -39,6 +39,7 @@ export default function App() {
         <>
           <UnifiedWalletProvider
             autoConnect={true}
+            disconnectOnAccountChange={false}
             wallets={wallets}
             config={{
               env: "mainnet-beta",

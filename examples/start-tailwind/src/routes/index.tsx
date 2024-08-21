@@ -1,6 +1,5 @@
 import { createEffect, For, Show } from "solid-js"
 import { UnifiedWalletButton, useUnifiedWallet } from "@solana-wallets-solid/unified"
-import { Hello } from "@solana-wallets-solid/hello"
 import { A } from "@solidjs/router"
 
 import Counter from "~/components/Counter"
@@ -32,6 +31,7 @@ export default function Home() {
     theme,
     metadata,
     locale,
+    showModal,
   } = useUnifiedWallet()
 
   createEffect(() => {
@@ -71,11 +71,14 @@ export default function Home() {
     // signTransaction
   }
 
+  createEffect(() => {
+    console.log({ showmodal: showModal() })
+  })
+
   return (
     <main class="text-center mx-auto text-gray-700 p-4 space-y-8">
       <h1 class="max-6-xs text-6xl text-sky-700 font-thin uppercase my-16">Hello world!</h1>
 
-      <Hello />
       <div class="flex flex-col gap-y-3 items-center justify-center">
         <For each={Object.values(wallets)}>
           {w => (
