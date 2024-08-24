@@ -148,7 +148,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
         })
 
         // Might throw WalletReadyState.WalletNotReady
-        await select(adapter.name)
+        await select(adapter)
 
         // Weird quirks for autoConnect to require select and connect
         // if (!props.autoConnect) {
@@ -275,7 +275,6 @@ const useUnifiedWallet = () => {
 
 const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> = _props => {
   const [local, rest] = splitProps(_props, ["children"])
-  console.log("rest.wallets: ", rest.wallets)
   return (
     <TranslationProvider locale={rest.locale ?? DEFAULT_LOCALE}>
       <WalletProvider

@@ -45,7 +45,7 @@ import {
 import type { WalletAccount } from "@wallet-standard/core"
 
 import { getLocalStorage, setLocalStorage } from "./localstorage"
-import { detectedFirst, isInWebView, isOnAndroid } from "./utils"
+import { detectedFirst, isInWebView, isIosAndWebView, isOnAndroid } from "./utils"
 
 export type Wallet = {
   adapter: Adapter
@@ -95,18 +95,14 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     }, prev ?? {})
   })
 
-  const [name, setName] = createSignal<WalletName | undefined>()
   const [publicKey, setPublicKey] = createSignal<PublicKey | undefined>()
   const connected = createMemo<boolean>(() => !!publicKey())
   const [account, setAccount] = createSignal<WalletAccount | undefined>()
-  const adapter = (): Adapter | undefined => {
-    const _name = name()
-    if (!_name) {
-      return
-    }
-    const _adapter = walletsByName()[_name]
-    return _adapter
-  }
+
+  const [adapter, setAdapter] = createSignal<Adapter | undefined>()
+  const name = createMemo<WalletName | undefined>(() => {
+    return adapter()?.name
+  })
 
   // Selected wallet connection state
   const [env] = createSignal<Cluster>(props.env ?? "mainnet-beta")
@@ -148,16 +144,44 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     updateWallet(undefined)
   }
 
-  function updateWallet(name: WalletName | undefined) {
-    setLocalStorage(props.localStorageKey, name)
-    setName(name)
+  async function updateWallet(newAdapter: Adapter | undefined) {
+    setLocalStorage(props.localStorageKey, newAdapter?.name)
+
+    if (!newAdapter) {
+      batch(() => {
+        setReady(WalletReadyState.NotDetected)
+        setPublicKey()
+        setAdapter()
+      })
+      return
+    }
+
+    /**
+     * Update connect/disconnect event listeners
+     * to track newly connected wallet
+     */
+    removeAdapterEventListeners()
+    newAdapter.on("connect", onConnect)
+    newAdapter.on("disconnect", onDisconnect)
+
+    batch(() => {
+      setReady(WalletReadyState.Loadable)
+      setAdapter(newAdapter)
+    })
+
+    const autoConnect = shouldAutoConnect()
+    console.log({ autoConnect })
+    if (autoConnect) {
+      await connect(newAdapter)
+    }
   }
 
-  async function select(walletName: WalletName): Promise<void> {
-    console.log("selecting wallet: ", { walletName })
-    const _name = name()
-    if (_name === walletName && _name != null) {
-      console.error(" already connected: ", { _name })
+  async function select(newAdapter: Adapter): Promise<void> {
+    const newName = newAdapter.name
+    const existingName = name()
+
+    if (existingName === newName) {
+      console.error("adapter already connected")
       return
     }
 
@@ -167,7 +191,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       await disconnect()
     }
 
-    updateWallet(walletName)
+    updateWallet(newAdapter)
   }
 
   type StandardWalletConnectResult =
@@ -278,36 +302,13 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
       await _adapter.disconnect()
     } finally {
       console.log("adapter, pubkey after disconnect: ", { adapter: adapter(), pubKey: publicKey() })
-      setDisconnecting(false)
-      setPublicKey()
+      batch(() => {
+        setDisconnecting(false)
+        setPublicKey()
+        resetWallet()
+      })
     }
   }
-
-  createEffect(
-    on(adapter, async adapter => {
-      console.log("adapter updated to: ", { adapter })
-      if (!adapter) {
-        setReady(WalletReadyState.NotDetected)
-        setPublicKey()
-        return
-      }
-
-      /**
-       * Update connect/disconnect event listeners
-       * to track newly connected wallet
-       */
-      removeAdapterEventListeners(adapter)
-      adapter.on("connect", onConnect)
-      adapter.on("disconnect", onDisconnect)
-
-      setReady(WalletReadyState.Loadable)
-
-      const autoConnect = shouldAutoConnect()
-      if (autoConnect) {
-        await connect(adapter)
-      }
-    }),
-  )
 
   async function signTransaction<T extends Transaction | VersionedTransaction>(tx: T) {
     const _pubKey = publicKey()
@@ -541,7 +542,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
   /** Get installed wallets compatible with the standard
    * and adds them to pre-added list of wallets
    */
-  function updateWallets(ws: StandardWallet[]) {
+  async function updateWallets(ws: StandardWallet[]) {
     const standards: WalletAdapter[] = ws
       .map(w => ({
         name: w.name,
@@ -594,6 +595,20 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     const mobileWallet = getMobileWallet(allWallets)
     if (mobileWallet) {
       allWallets.unshift(mobileWallet)
+    }
+
+    if (isIosAndWebView() && !adapter()) {
+      const first = standards[0]
+      if (first) {
+        await select(first)
+      }
+      alert(`coinbaseSolana: ${JSON.stringify((window as any).coinbaseSolana)}`)
+      if ("coinbaseSolana" in window) {
+        const coinbaseAdapter = allWallets.find(w => w.name === "Coinbase Wallet")
+        if (coinbaseAdapter) {
+          await select(coinbaseAdapter)
+        }
+      }
     }
 
     // sort 'Installed' wallets first and 'Loadable' next
@@ -662,7 +677,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     setWallets(ws => ws.adapter.name === this.name, { adapter: this, readyState })
   }
 
-  onMount(() => {
+  onMount(async () => {
     const { on } = getWallets()
 
     const initializedWallets = get().map((w, i) => {
@@ -700,7 +715,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
   })
 
   createEffect(
-    on(standardWallets, ws => {
+    on(standardWallets, async ws => {
       const filtered: StandardWallet[] = ws
         .filter(w => !!w.features)
         .filter(w =>
@@ -721,6 +736,7 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
             })),
           }),
         )
+
       updateWallets(filtered)
     }),
   )
@@ -744,9 +760,14 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
    */
   onMount(async () => {
     const walletName = getLocalStorage<WalletName>(props.localStorageKey)
-    if (walletName) {
-      await select(walletName)
+    if (!walletName) {
+      return
     }
+    const adapter = walletsByName()[walletName]
+    if (!adapter) {
+      return
+    }
+    await select(adapter)
   })
 
   return {

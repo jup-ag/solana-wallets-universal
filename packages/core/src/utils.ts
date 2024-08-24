@@ -11,12 +11,6 @@ type Config = Readonly<{
   userAgentString: string | null
 }>
 
-function isWebView(userAgentString: string) {
-  return /(WebView|Version\/.+(Chrome)\/(\d+)\.(\d+)\.(\d+)\.(\d+)|; wv\).+(Chrome)\/(\d+)\.(\d+)\.(\d+)\.(\d+))/i.test(
-    userAgentString,
-  )
-}
-
 export function isOnAndroid(ua: string) {
   return /android/i.test(ua)
 }
@@ -26,6 +20,8 @@ export function isInWebView(ua: string) {
     ua,
   )
 }
+
+export const isMobile = () => typeof window !== "undefined" && screen && screen.width <= 480
 
 export function getEnvironment({ adapters, userAgentString }: Config): Environment {
   if (
@@ -50,12 +46,28 @@ export function getEnvironment({ adapters, userAgentString }: Config): Environme
     // Step 1: Check whether we're on a platform that supports MWA at all.
     /android/i.test(userAgentString) &&
     // Step 2: Determine that we are *not* running in a WebView.
-    !isWebView(userAgentString)
+    !isInWebView(userAgentString)
   ) {
     return Environment.MOBILE_WEB
   } else {
     return Environment.DESKTOP_WEB
   }
+}
+
+export function isIos(ua: string) {
+  return ua.includes("iphone") || ua.includes("ipad")
+}
+
+export function isSafari(ua: string) {
+  return ua.includes("safari")
+}
+
+export function isIosAndWebView() {
+  if (typeof window === "undefined" || !navigator) {
+    return false
+  }
+  const ua = navigator.userAgent.toLowerCase()
+  return isIos(ua) && !isSafari(ua)
 }
 
 /**
@@ -72,19 +84,14 @@ export function isIosAndRedirectable() {
   if (typeof window === "undefined" || !navigator) {
     return false
   }
-
-  const userAgent = navigator.userAgent.toLowerCase()
-
+  const ua = navigator.userAgent.toLowerCase()
   // if on iOS the user agent will contain either iPhone or iPad
   // caveat: if requesting desktop site then this won't work
-  const isIos = userAgent.includes("iphone") || userAgent.includes("ipad")
 
   // if in a webview then it will not include Safari
   // note that other iOS browsers also include Safari
   // so we will redirect only if Safari is also included
-  const isSafari = userAgent.includes("safari")
-
-  return isIos && isSafari
+  return isIos(ua) && isSafari(ua)
 }
 
 export function detectedFirst(state: WalletReadyState, a: Adapter, b: Adapter) {
