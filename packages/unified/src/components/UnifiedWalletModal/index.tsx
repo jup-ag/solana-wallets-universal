@@ -1,5 +1,5 @@
 import {
-  batch,
+  Accessor,
   Component,
   createEffect,
   createMemo,
@@ -9,30 +9,33 @@ import {
   Match,
   on,
   onCleanup,
+  Setter,
   Show,
   Switch,
 } from "solid-js"
 import Dialog from "@corvu/dialog"
 import {
-  Adapter,
-  isIosAndRedirectable,
+  WalletAdapterCompatibleStandardWallet,
   WalletName,
   WalletReadyState,
 } from "@solana/wallet-adapter-base"
-import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
+// import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
 import { isMobile } from "@solana-wallets-solid/core"
 import { Dynamic } from "solid-js/web"
 
 import { useUnifiedWallet } from "../../contexts"
 import CloseIcon from "../../icons/CloseIcon"
 import { OnboardingFlow } from "./Onboarding"
-import { NotInstalled } from "./NotInstalled"
 import { WalletIcon, WalletListItem } from "./WalletListItem"
 import ChevronUpIcon from "../../icons/ChevronUpIcon"
 import ChevronDownIcon from "../../icons/ChevronDownIcon"
 import { Collapse } from "../Collapse"
 import { WalletInfo } from "./types"
-import { HARDCODED_WALLET_STANDARDS } from "../../constants"
+// import { HARDCODED_WALLET_STANDARDS } from "../../constants"
+
+function createStandardWalletInfo(wallet: WalletAdapterCompatibleStandardWallet): WalletInfo {
+  return { type: "standard-wallet", wallet }
+}
 
 type HeaderProps = {
   onClose: () => void
@@ -81,19 +84,19 @@ type ListOfWalletsProps = {
 export const ListOfWallets: Component<ListOfWalletsProps> = props => {
   const { t, walletlistExplanation, walletAttachments, handleConnectClick } = useUnifiedWallet()
   const [showOnboarding, setShowOnboarding] = createSignal(false)
-  const [showNotInstalled, setShowNotInstalled] = createSignal<Adapter | false>(false)
+  // const [showNotInstalled, setShowNotInstalled] = createSignal<false>(false)
 
   const list = createMemo(() => props.list)
   const hasNoWallets = createMemo(() => {
     return list().highlight.length + list().others.length === 0
   })
 
-  async function onWalletClick(adapter: Adapter) {
-    if (adapter.readyState === WalletReadyState.NotDetected) {
-      setShowNotInstalled(adapter)
-      return
-    }
-    await handleConnectClick(adapter)
+  async function onWalletClick(wallet: WalletAdapterCompatibleStandardWallet) {
+    // if (adapter.readyState === WalletReadyState.NotDetected) {
+    //   setShowNotInstalled(adapter)
+    //   return
+    // }
+    await handleConnectClick(wallet)
   }
 
   let othersListEl: HTMLDivElement | undefined
@@ -123,6 +126,8 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
           <OnboardingFlow showBack={!hasNoWallets} onClose={() => setShowOnboarding(false)} />
         </Match>
 
+        {/*
+
         <Match when={showNotInstalled()}>
           {notInstalled => (
             <NotInstalled
@@ -138,7 +143,12 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
           )}
         </Match>
 
-        <Match when={!showOnboarding() && !showNotInstalled()}>
+				*/}
+
+        {/*
+<Match when={!showOnboarding() && !showNotInstalled()}>
+				*/}
+        <Match when={!showOnboarding()}>
           <div class="hideScrollbar h-full overflow-y-scroll pt-2 pb-8 px-5 relative">
             <span class="text-xs font-semibold">
               <Switch>
@@ -154,11 +164,11 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
               <For each={list().highlight}>
                 {info => {
                   const walletName = createMemo<string>(() => {
-                    if (info.type === "adapter") {
-                      if (info.adapter.name === SolanaMobileWalletAdapterWalletName) {
-                        return t(`Mobile`) as string
-                      }
-                      return info.adapter.name
+                    if (info.type === "standard-wallet") {
+                      // if (info.adapter.name === SolanaMobileWalletAdapterWalletName) {
+                      //   return t(`Mobile`) as string
+                      // }
+                      return info.wallet.name
                     }
                     return info.name
                   })
@@ -167,17 +177,19 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                     : null
                   return (
                     <Dynamic
-                      component={info.type === "adapter" ? "button" : "a"}
+                      component={info.type === "standard-wallet" ? "button" : "a"}
                       type="button"
                       class="py-4 px-4 border border-white/10 rounded-lg flex items-center cursor-pointer flex-1 hover:backdrop-blur-xl transition-all hover:shadow-2xl hover:bg-white/10 bg-jupiter-bg"
                       onClick={
-                        info.type === "adapter" ? () => onWalletClick(info.adapter) : undefined
+                        info.type === "standard-wallet"
+                          ? () => onWalletClick(info.wallet)
+                          : undefined
                       }
                       href={info.type === "mobile-deeplink" ? info.deeplink : undefined}
                     >
                       <WalletIcon
-                        name={info.type === "adapter" ? info.adapter.name : info.name}
-                        icon={info.type === "adapter" ? info.adapter.icon : info.icon}
+                        name={info.type === "standard-wallet" ? info.wallet.name : info.name}
+                        icon={info.type === "standard-wallet" ? info.wallet.icon : info.icon}
                         width={isMobile() ? 24 : 30}
                         height={isMobile() ? 24 : 30}
                       />
@@ -229,7 +241,9 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                             <ul>
                               <WalletListItem
                                 handleClick={() =>
-                                  info.type === "adapter" ? onWalletClick(info.adapter) : undefined
+                                  info.type === "standard-wallet"
+                                    ? onWalletClick(info.wallet)
+                                    : undefined
                                 }
                                 info={info}
                               />
@@ -319,24 +333,26 @@ export const TOP_WALLETS: WalletName[] = [
   "Backpack" as WalletName<"Backpack">,
 ]
 
-export const sortByPrecedence = (walletPrecedence: WalletName[]) => (a: Adapter, b: Adapter) => {
-  if (!walletPrecedence) return 0
+export const sortByPrecedence =
+  (walletPrecedence: WalletName[]) =>
+  (a: WalletAdapterCompatibleStandardWallet, b: WalletAdapterCompatibleStandardWallet) => {
+    if (!walletPrecedence) return 0
 
-  const aIndex = walletPrecedence.indexOf(a.name)
-  const bIndex = walletPrecedence.indexOf(b.name)
+    const aIndex = walletPrecedence.indexOf(a.name as WalletName)
+    const bIndex = walletPrecedence.indexOf(b.name as WalletName)
 
-  if (aIndex === -1 && bIndex === -1) return 0
-  if (aIndex >= 0) {
-    if (bIndex === -1) return -1
-    return aIndex - bIndex
+    if (aIndex === -1 && bIndex === -1) return 0
+    if (aIndex >= 0) {
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    }
+
+    if (bIndex >= 0) {
+      if (aIndex === -1) return 1
+      return bIndex - aIndex
+    }
+    return 0
   }
-
-  if (bIndex >= 0) {
-    if (aIndex === -1) return 1
-    return bIndex - aIndex
-  }
-  return 0
-}
 
 export function clickOutside(el: Element, handler: () => void) {
   const onClick = (e: MouseEvent & { target: any }) => !el.contains(e.target) && handler()
@@ -346,15 +362,21 @@ export function clickOutside(el: Element, handler: () => void) {
 }
 
 export type UnifiedWalletModalProps = {
+  isOpen?: boolean
   onClose: () => void
+  wallets: WalletAdapterCompatibleStandardWallet[]
+  getPreviouslyConnected: () => string[]
+  walletPrecedence: WalletName[] | undefined
+  showModal: Accessor<boolean>
+  setShowModal: Setter<boolean>
 }
 
 type FilteredAdapters = {
-  previouslyConnected: Adapter[]
-  installed: Adapter[]
-  top3: Adapter[]
-  loadable: Adapter[]
-  notDetected: Adapter[]
+  previouslyConnected: WalletAdapterCompatibleStandardWallet[]
+  installed: WalletAdapterCompatibleStandardWallet[]
+  top3: WalletAdapterCompatibleStandardWallet[]
+  loadable: WalletAdapterCompatibleStandardWallet[]
+  notDetected: WalletAdapterCompatibleStandardWallet[]
 }
 
 type WalletList = {
@@ -363,44 +385,46 @@ type WalletList = {
   others: WalletInfo[]
 }
 
-const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
-  const { t, wallets, getPreviouslyConnected, walletPrecedence, showModal, setShowModal } =
-    useUnifiedWallet()
-  const [isOpen, setIsOpen] = createSignal(false)
+const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
+  // const { t, wallets, getPreviouslyConnected, walletPrecedence, showModal, setShowModal } =
+  //   useUnifiedWallet()
+  const [isOpen, setIsOpen] = createSignal(props.isOpen ?? true)
 
-  const filteredAdapters = createMemo(() =>
-    wallets.reduce<FilteredAdapters>(
+  const filteredAdapters = createMemo(() => {
+    console.log("props wallets: ", { wallets: props.wallets })
+
+    return props.wallets.reduce<FilteredAdapters>(
       (acc, wallet) => {
-        const adapterName = wallet.adapter.name
+        const walletName = wallet.name
 
         // Previously connected takes highest
-        const previouslyConnectedIndex = getPreviouslyConnected().indexOf(adapterName)
+        const previouslyConnectedIndex = props.getPreviouslyConnected().indexOf(walletName)
         if (previouslyConnectedIndex >= 0) {
-          acc.previouslyConnected[previouslyConnectedIndex] = wallet.adapter
+          acc.previouslyConnected[previouslyConnectedIndex] = wallet
           return acc
         }
         // Then Installed
-        if (wallet.readyState === WalletReadyState.Installed) {
-          acc.installed.push(wallet.adapter)
-          return acc
-        }
+        // if (wallet.readyState === WalletReadyState.Installed) {
+        //   acc.installed.push(wallet)
+        //   return acc
+        // }
         // Top 3
-        const topWalletsIndex = TOP_WALLETS.indexOf(adapterName)
+        const topWalletsIndex = TOP_WALLETS.indexOf(walletName as WalletName)
         if (topWalletsIndex >= 0) {
-          acc.top3[topWalletsIndex] = wallet.adapter
+          acc.top3[topWalletsIndex] = wallet
           return acc
         }
         // Loadable
-        if (wallet.readyState === WalletReadyState.Loadable) {
-          acc.loadable.push(wallet.adapter)
-          return acc
-        }
-        // NotDetected
-        if (wallet.readyState === WalletReadyState.NotDetected) {
-          acc.notDetected.push(wallet.adapter)
-          return acc
-        }
+        // if (wallet.readyState === WalletReadyState.Loadable) {
+        acc.loadable.push(wallet)
         return acc
+        // }
+        // // NotDetected
+        // if (wallet.readyState === WalletReadyState.NotDetected) {
+        //   acc.notDetected.push(wallet.adapter)
+        //   return acc
+        // }
+        // return acc
       },
       {
         previouslyConnected: [],
@@ -409,8 +433,8 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
         loadable: [],
         notDetected: [],
       },
-    ),
-  )
+    )
+  })
 
   const list = createMemo<WalletList>(() => {
     // Then, Installed, Top 3, Loadable, NotDetected
@@ -419,32 +443,31 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
     if (filtered.previouslyConnected.length > 0) {
       const { previouslyConnected, ...rest } = filtered
 
-      const previouslyConnectedInfos: WalletInfo[] = previouslyConnected.map(a => ({
-        type: "adapter",
-        adapter: a,
-      }))
+      const previouslyConnectedInfos: WalletInfo[] = previouslyConnected.map(a =>
+        createStandardWalletInfo(a),
+      )
 
       const highlight: WalletInfo[] = previouslyConnectedInfos.slice(0, 3)
 
       let others: WalletInfo[] = Object.values(rest)
         .flat()
-        .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
-        .sort(sortByPrecedence(walletPrecedence || []))
-        .map(a => ({ type: "adapter", adapter: a }))
+        // .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
+        .sort(sortByPrecedence(props.walletPrecedence || []))
+        .map(a => createStandardWalletInfo(a))
       others.unshift(...previouslyConnectedInfos.slice(3, previouslyConnectedInfos.length))
       others = others.filter(Boolean)
 
-      if (isIosAndRedirectable()) {
-        const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
-          w => !!w.deepUrl,
-        ).map(w => ({
-          type: "mobile-deeplink",
-          name: w.name,
-          icon: w.icon,
-          deeplink: w.deepUrl!(location),
-        }))
-        others.push(...redirectableWalletInfos)
-      }
+      // if (isIosAndRedirectable()) {
+      //   const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
+      //     w => !!w.deepUrl,
+      //   ).map(w => ({
+      //     type: "mobile-deeplink",
+      //     name: w.name,
+      //     icon: w.icon,
+      //     deeplink: w.deepUrl!(location),
+      //   }))
+      //   others.push(...redirectableWalletInfos)
+      // }
 
       return {
         highlightedBy: "PreviouslyConnected",
@@ -457,22 +480,22 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
       const { installed, top3, ...rest } = filtered
 
       const installedWalletInfos: WalletInfo[] = installed.map(i => ({
-        type: "adapter",
-        adapter: i,
+        type: "standard-wallet",
+        wallet: i,
       }))
-      const topWalletInfos: WalletInfo[] = top3.map(a => ({ type: "adapter", adapter: a }))
+      const topWalletInfos: WalletInfo[] = top3.map(a => createStandardWalletInfo(a))
 
-      if (isIosAndRedirectable()) {
-        const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
-          w => !!w.deepUrl,
-        ).map(w => ({
-          type: "mobile-deeplink",
-          name: w.name,
-          icon: w.icon,
-          deeplink: w.deepUrl!(location),
-        }))
-        topWalletInfos.push(...redirectableWalletInfos)
-      }
+      // if (isIosAndRedirectable()) {
+      //   const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
+      //     w => !!w.deepUrl,
+      //   ).map(w => ({
+      //     type: "mobile-deeplink",
+      //     name: w.name,
+      //     icon: w.icon,
+      //     deeplink: w.deepUrl!(location),
+      //   }))
+      //   topWalletInfos.push(...redirectableWalletInfos)
+      // }
 
       const highlight: WalletInfo[] = [
         ...installedWalletInfos.slice(0, 3),
@@ -481,9 +504,9 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
 
       const others: WalletInfo[] = Object.values(rest)
         .flat()
-        .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
-        .sort(sortByPrecedence(walletPrecedence || []))
-        .map(a => ({ type: "adapter", adapter: a }))
+        // .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
+        .sort(sortByPrecedence(props.walletPrecedence || []))
+        .map(a => createStandardWalletInfo(a))
       others.unshift(...installedWalletInfos.slice(3, installed.length))
 
       return { highlightedBy: "TopAndRecommended", highlight, others }
@@ -494,24 +517,24 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
     }
 
     const { top3, ...rest } = filtered
-    const topWalletInfos: WalletInfo[] = top3.map(a => ({ type: "adapter", adapter: a }))
-    if (isIosAndRedirectable()) {
-      const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
-        w => !!w.deepUrl,
-      ).map(w => ({
-        type: "mobile-deeplink",
-        name: w.name,
-        icon: w.icon,
-        deeplink: w.deepUrl!(location),
-      }))
-      topWalletInfos.push(...redirectableWalletInfos)
-    }
+    const topWalletInfos: WalletInfo[] = top3.map(a => createStandardWalletInfo(a))
+    // if (isIosAndRedirectable()) {
+    // const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
+    //   w => !!w.deepUrl,
+    // ).map(w => ({
+    //   type: "mobile-deeplink",
+    //   name: w.name,
+    //   icon: w.icon,
+    //   deeplink: w.deepUrl!(location),
+    // }))
+    // topWalletInfos.push(...redirectableWalletInfos)
+    // }
 
     const others: WalletInfo[] = Object.values(rest)
       .flat()
-      .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
-      .sort(sortByPrecedence(walletPrecedence || []))
-      .map(a => ({ type: "adapter", adapter: a }))
+      // .sort((a, b) => PRIORITISE[a.readyState] - PRIORITISE[b.readyState])
+      .sort(sortByPrecedence(props.walletPrecedence || []))
+      .map(a => createStandardWalletInfo(a))
 
     return { highlightedBy: "TopWallet", highlight: topWalletInfos, others }
   })
@@ -519,7 +542,7 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
   // <Show when={walletModalAttachments?.footer}>{walletModalAttachments?.footer}</Show>
 
   return (
-    <Dialog open={showModal()} onOpenChange={setShowModal}>
+    <Dialog open={props.showModal()} onOpenChange={props.setShowModal}>
       <Dialog.Portal>
         <Dialog.Overlay class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" />
 
@@ -529,12 +552,18 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = () => {
               <div>
                 <div>
                   <Dialog.Label as="span" class="text-sm font-semibold h-min">
+                    {/*
                     {t(`Connect Wallet`)}
+										*/}
+                    {`Connect Wallet`}
                   </Dialog.Label>
                 </div>
                 <div>
                   <Dialog.Description as="span" class="text-xs text-white/50 h-min">
+                    {/*
                     {t(`You need to connect a Solana wallet.`)}
+									*/}
+                    {`You need to connect a Solana wallet.`}
                   </Dialog.Description>
                 </div>
               </div>

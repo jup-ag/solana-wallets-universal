@@ -11,14 +11,12 @@
 	},
 	"dependencies": {
 		"@solana-wallets-solid/unified": "workspace:*",
-		"@solana/wallet-adapter-coinbase": "^0.1.19",
-		"@solana/wallet-adapter-ledger": "^0.9.25",
-		"@solana/wallet-adapter-trezor": "^0.1.2",
-		"@solana/web3.js": "^1.95.2",
 		"@solidjs/router": "^0.14.1",
 		"@solidjs/start": "^1.0.6",
 		"solid-js": "^1.8.18",
-		"vinxi": "^0.4.1"
+		"vinxi": "^0.4.1",
+		"@nanostores/solid": "^0.4.2",
+		"nanostores": "^0.11.3"
 	},
 	"engines": {
 		"node": ">=18"

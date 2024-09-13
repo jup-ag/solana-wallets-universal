@@ -1,8 +1,8 @@
-import { Adapter } from "@solana/wallet-adapter-base"
+import { WalletAdapterCompatibleStandardWallet } from "@solana/wallet-adapter-base"
 
-type AdapterWalletInfo = {
-  type: "adapter"
-  adapter: Adapter
+type StandardWalletInfo = {
+  type: "standard-wallet"
+  wallet: WalletAdapterCompatibleStandardWallet
 }
 
 type DeeplinkWalletInfo = {
@@ -12,4 +12,4 @@ type DeeplinkWalletInfo = {
   deeplink: string
 }
 
-export type WalletInfo = AdapterWalletInfo | DeeplinkWalletInfo
+export type WalletInfo = StandardWalletInfo | DeeplinkWalletInfo

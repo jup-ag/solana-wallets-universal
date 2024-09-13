@@ -82,6 +82,8 @@ export const OnboardingGetWallets: Component<OnboardingGetWalletsProps> = props 
     <div class="flex flex-col justify-center py-3 px-10">
       <span class="text-base font-semibold">{t(`Popular wallets to get started`)}</span>
       <div class="mt-4 w-full space-y-2">
+        {/*
+
         <For each={HARDCODED_WALLET_STANDARDS}>
           {item => (
             <a
@@ -100,6 +102,8 @@ export const OnboardingGetWallets: Component<OnboardingGetWalletsProps> = props 
             </a>
           )}
         </For>
+
+				*/}
 
         <a
           href={"https://station.jup.ag/partners?category=Wallets"}

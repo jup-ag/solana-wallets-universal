@@ -1,5 +1,6 @@
 import { Component, JSXElement, Match, Show, Switch } from "solid-js"
-import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
+// import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
+import { connect, disconnect } from "@solana-wallets-solid/core"
 
 import { MWA_NOT_FOUND_ERROR, useUnifiedWallet } from "../contexts"
 import { shortenAddress } from "../utils"
@@ -11,30 +12,30 @@ type Props = {
 }
 
 export const UnifiedWalletButton: Component<Props> = props => {
-  const { t, setShowModal, connect, connecting, disconnect, adapter, publicKey } =
-    useUnifiedWallet()
+  const { t, setShowModal, connecting, wallet, publicKey } = useUnifiedWallet()
 
   /**
    * Only attempt to connect if mobile wallet adapter already connected,
    * otherwise prompt user to select a wallet to connect to
    */
   async function handleConnect() {
-    const _adapter = adapter()
+    const _wallet = wallet()
 
-    if (!_adapter || _adapter.name !== SolanaMobileWalletAdapterWalletName) {
+    // if (!_adapter || _adapter.name !== SolanaMobileWalletAdapterWalletName) {
+    if (!_wallet) {
       setShowModal(true)
       return
     }
 
     try {
-      await connect(_adapter)
+      await connect(_wallet)
     } catch (err) {
       if (err instanceof Error && err.message === MWA_NOT_FOUND_ERROR) {
         setShowModal(true)
       } else {
-        console.error("unknown error trying to connect to mobile wallet adapter: ", {
+        console.error("unknown error trying to connect to wallet: ", {
           err,
-          _adapter,
+          _wallet,
         })
       }
     }
@@ -43,7 +44,7 @@ export const UnifiedWalletButton: Component<Props> = props => {
   return (
     <>
       <Switch>
-        <Match when={adapter() && publicKey()}>
+        <Match when={wallet() && publicKey()}>
           <button
             type="button"
             class="flex items-center py-2 px-3 rounded-2xl h-7 cursor-pointer bg-v3-bg text-white w-auto"
@@ -55,7 +56,7 @@ export const UnifiedWalletButton: Component<Props> = props => {
               style={{ position: "relative" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="Wallet logo" width={16} height={16} src={adapter()?.icon} />
+              <img alt="Wallet logo" width={16} height={16} src={wallet()?.icon} />
             </span>
 
             <span class="ml-2 text-xs text-white">{shortenAddress(`${publicKey()}`)}</span>

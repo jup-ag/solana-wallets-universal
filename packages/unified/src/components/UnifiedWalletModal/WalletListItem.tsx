@@ -1,5 +1,5 @@
 import { Component, ComponentProps, createMemo, createSignal, mergeProps, Show } from "solid-js"
-import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
+// import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
 import { isMobile } from "@solana-wallets-solid/core"
 import { Dynamic } from "solid-js/web"
 
@@ -47,13 +47,13 @@ export type WalletListItemProps = {
 
 export const WalletListItem: Component<WalletListItemProps> = props => {
   // const { theme } = useUnifiedWallet()
-  const { t } = useTranslation()
+  useTranslation()
   const adapterName = createMemo(() => {
-    if (props.info.type === "adapter") {
-      if (props.info.adapter.name === SolanaMobileWalletAdapterWalletName) {
-        return t(`Mobile`)
-      }
-      return props.info.adapter.name
+    if (props.info.type === "standard-wallet") {
+      // if (props.info.adapter.name === SolanaMobileWalletAdapterWalletName) {
+      //   return t(`Mobile`)
+      // }
+      return props.info.wallet.name
     }
     return props.info.name
   })
@@ -61,16 +61,16 @@ export const WalletListItem: Component<WalletListItemProps> = props => {
   return (
     <li>
       <Dynamic
-        component={props.info.type === "adapter" ? "button" : "a"}
+        component={props.info.type === "standard-wallet" ? "button" : "a"}
         type="button"
         class="flex items-center w-full px-5 py-4 space-x-5 transition-all border rounded-lg cursor-pointer border-white/10 hover:bg-white/10 hover:backdrop-blur-xl hover:shadow-2xl bg-jupiter-bg text-white"
-        onClick={props.info.type === "adapter" ? props.handleClick : undefined}
+        onClick={props.info.type === "standard-wallet" ? props.handleClick : undefined}
         href={props.info.type === "mobile-deeplink" ? props.info.deeplink : undefined}
         target={props.info.type === "mobile-deeplink" ? "_blank" : undefined}
       >
         <WalletIcon
-          name={props.info.type === "adapter" ? props.info.adapter.name : props.info.name}
-          icon={props.info.type === "adapter" ? props.info.adapter.icon : props.info.icon}
+          name={props.info.type === "standard-wallet" ? props.info.wallet.name : props.info.name}
+          icon={props.info.type === "standard-wallet" ? props.info.wallet.icon : props.info.icon}
           width={isMobile() ? 24 : 30}
           height={isMobile() ? 24 : 30}
         />

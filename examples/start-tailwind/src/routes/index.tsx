@@ -3,15 +3,15 @@ import { UnifiedWalletButton, useUnifiedWallet } from "@solana-wallets-solid/uni
 import { A } from "@solidjs/router"
 
 import Counter from "~/components/Counter"
-import {
-  Connection,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js"
+// import {
+//   Connection,
+//   LAMPORTS_PER_SOL,
+//   PublicKey,
+//   SystemProgram,
+//   Transaction,
+// } from "@solana/web3.js"
 
-const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
+// const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
 export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
   ? "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
   : "https://jupiter-frontend.rpcpool.com"
@@ -21,46 +21,46 @@ export default function Home() {
     select,
     wallets,
     name,
-    adapter,
+    wallet,
     publicKey,
-    disconnect,
-    signMessage,
+    // disconnect,
+    // signMessage,
     // signAllTransactions,
-    sendTransaction,
+    // sendTransaction,
     showModal,
   } = useUnifiedWallet()
 
   async function signArbitary() {
-    try {
-      const res = await signMessage(SIGN_ARBITRARY_MSG)
-      console.log(res)
-      alert("Sign success! Check console logs for details.")
-    } catch (err) {
-      console.error(err)
-      alert((err as Error).message)
-    }
+    // try {
+    //   const res = await signMessage(SIGN_ARBITRARY_MSG)
+    //   console.log(res)
+    //   alert("Sign success! Check console logs for details.")
+    // } catch (err) {
+    //   console.error(err)
+    //   alert((err as Error).message)
+    // }
   }
 
   async function sendTx() {
-    const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
-    const APPEAL_WALLET_PUBKEY = new PublicKey("Hm9YjuVadcekDPbLeCSFE83r1QLpS2ksmKk7Sn5BCpfL")
-    const pubKey = publicKey()
-    if (!pubKey) {
-      console.error("cannot sign tx, no pub key: ", { pubKey })
-      return
-    }
-    const connection = new Connection(DEVNET_RPC_ENDPOINT, "confirmed")
-    const lamportsToSend = 0.1 * LAMPORTS_PER_SOL
-    const transferTransaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: pubKey,
-        toPubkey: APPEAL_WALLET_PUBKEY,
-        lamports: lamportsToSend,
-      }),
-    )
-    const res = await sendTransaction(transferTransaction, connection)
-    console.log("successful tx: ", { res })
-    // signTransaction
+    //   const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
+    //   const APPEAL_WALLET_PUBKEY = new PublicKey("Hm9YjuVadcekDPbLeCSFE83r1QLpS2ksmKk7Sn5BCpfL")
+    //   const pubKey = publicKey()
+    //   if (!pubKey) {
+    //     console.error("cannot sign tx, no pub key: ", { pubKey })
+    //     return
+    //   }
+    //   const connection = new Connection(DEVNET_RPC_ENDPOINT, "confirmed")
+    //   const lamportsToSend = 0.1 * LAMPORTS_PER_SOL
+    //   const transferTransaction = new Transaction().add(
+    //     SystemProgram.transfer({
+    //       fromPubkey: pubKey,
+    //       toPubkey: APPEAL_WALLET_PUBKEY,
+    //       lamports: lamportsToSend,
+    //     }),
+    //   )
+    //   const res = await sendTransaction(transferTransaction, connection)
+    //   console.log("successful tx: ", { res })
+    //   // signTransaction
   }
 
   createEffect(() => {
@@ -77,16 +77,16 @@ export default function Home() {
             <button
               class="rounded-lg px-3 py-1.5 text-lg bg-blue-300 w-fit"
               onClick={async () => {
-                const _adapter = adapter()
+                const _adapter = wallet()
                 if (!_adapter) {
                   await select(w.adapter.name)
                 } else if (_adapter.name === w.adapter.name) {
-                  await disconnect()
+                  // await disconnect()
                 }
               }}
             >
               <Show
-                when={!adapter() || name() !== w.adapter.name}
+                when={!wallet() || name() !== w.adapter.name}
                 fallback={`disconnect from ${w.adapter.name}`}
               >
                 connect to {w.adapter.name}
