@@ -1,10 +1,7 @@
-import { Fragment } from "react";
-import { Outlet, ScrollRestoration } from "react-router-dom";
-import {
-  UnifiedWalletButtonProps,
-  UnifiedWalletProviderProps,
-} from "@solana-wallets-solid/unified";
-import { WalletProvider } from "@solana-wallets-solid/react";
+import { Fragment } from "react"
+import { Outlet, ScrollRestoration } from "react-router-dom"
+import { UnifiedWalletButtonProps, UnifiedWalletProviderProps } from "@solana-wallets-solid/unified"
+import { WalletProvider } from "@solana-wallets-solid/react"
 
 declare global {
   namespace JSX {
@@ -13,14 +10,14 @@ declare global {
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > &
-        UnifiedWalletProviderProps;
+        UnifiedWalletProviderProps
     }
     interface IntrinsicElements {
       "unified-wallet-modal-button": React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > &
-        UnifiedWalletButtonProps;
+        UnifiedWalletButtonProps
     }
   }
 }
@@ -56,5 +53,5 @@ export default function App() {
         </Fragment>
       </WalletProvider>
     </Fragment>
-  );
+  )
 }

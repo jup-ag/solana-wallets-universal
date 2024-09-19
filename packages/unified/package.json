@@ -1,82 +1,82 @@
 {
-	"name": "@solana-wallets-solid/unified",
-	"version": "0.0.1",
-	"description": "Example hello world package in the solana-wallets-solid repository.",
-	"license": "MIT",
-	"author": "aidanaden",
-	"contributors": [],
-	"homepage": "https://github.com/aidanaden/solana-wallets-solid#readme",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/aidanaden/solana-wallets-solid.git"
-	},
-	"bugs": {
-		"url": "https://github.com/aidanaden/solana-wallets-solid/issues"
-	},
-	"keywords": [
-		"solid"
-	],
-	"sideEffects": false,
-	"publishConfig": {
-		"access": "public"
-	},
-	"files": [
-		"dist"
-	],
-	"type": "module",
-	"main": "./dist/index.js",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"solid": {
-				"development": "./dist/dev.jsx",
-				"import": "./dist/index.jsx"
-			},
-			"development": {
-				"import": {
-					"types": "./dist/index.d.ts",
-					"default": "./dist/dev.js"
-				}
-			},
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
-		},
-		"./index.css": {
-			"development": {
-				"import": "./dist/dev.css"
-			},
-			"import": "./dist/index.css"
-		}
-	},
-	"browser": {},
-	"typesVersions": {},
-	"scripts": {
-		"dev": "tsup --watch",
-		"build": "tsup",
-		"test": "concurrently pnpm:test:*",
-		"test:client": "vitest -c ../../configs/vitest.config.ts",
-		"test:ssr": "pnpm run test:client --mode ssr",
-		"typecheck": "tsc --noEmit"
-	},
-	"devDependencies": {
-		"@corvu/dialog": "^0.2.3",
-		"@nanostores/solid": "^0.4.2",
-		"@solana-wallets-solid/core": "workspace:*",
-		"@solana/wallet-adapter-base": "^0.9.23",
-		"@solana/wallet-standard-core": "1.1.1",
-		"@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
-		"@solid-primitives/context": "^0.2.3",
-		"autoprefixer": "^10.4.19",
-		"nanostores": "^0.11.3",
-		"postcss": "^8.4.38",
-		"solid-element": "^1.8.1",
-		"solid-js": "^1.8.18",
-		"tailwindcss": "^3.4.3"
-	},
-	"peerDependencies": {
-		"solid-js": "^1.8.18"
-	}
+  "name": "@solana-wallets-solid/unified",
+  "version": "0.0.1",
+  "description": "Example hello world package in the solana-wallets-solid repository.",
+  "license": "MIT",
+  "author": "aidanaden",
+  "contributors": [],
+  "homepage": "https://github.com/aidanaden/solana-wallets-solid#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aidanaden/solana-wallets-solid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aidanaden/solana-wallets-solid/issues"
+  },
+  "keywords": [
+    "solid"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "solid": {
+        "development": "./dist/dev.jsx",
+        "import": "./dist/index.jsx"
+      },
+      "development": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/dev.js"
+        }
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./index.css": {
+      "development": {
+        "import": "./dist/dev.css"
+      },
+      "import": "./dist/index.css"
+    }
+  },
+  "browser": {},
+  "typesVersions": {},
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "concurrently pnpm:test:*",
+    "test:client": "vitest -c ../../configs/vitest.config.ts",
+    "test:ssr": "pnpm run test:client --mode ssr",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@corvu/dialog": "^0.2.3",
+    "@nanostores/solid": "^0.4.2",
+    "@solana-wallets-solid/core": "workspace:*",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-standard-core": "1.1.1",
+    "@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
+    "@solid-primitives/context": "^0.2.3",
+    "autoprefixer": "^10.4.19",
+    "nanostores": "^0.11.3",
+    "postcss": "^8.4.38",
+    "solid-element": "^1.8.1",
+    "solid-js": "^1.8.18",
+    "tailwindcss": "^3.4.3"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.8.18"
+  }
 }

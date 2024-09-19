@@ -120,28 +120,28 @@ To bundle CSS files with your package that you intend on users to import within 
 2. Modify `tsup.config.ts` file to include your CSS file as an entry point. For example:
 
 ```ts
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsup"
 
 export default defineConfig({
-	entry: ["src/index.ts", "src/styles.css"],
-	// ...
-});
+  entry: ["src/index.ts", "src/styles.css"],
+  // ...
+})
 ```
 
 3. Modify `package.json` to include the CSS file as an `exports` entry. For example:
 
 ```json
 {
-	"exports": {
-		"./styles.css": "./dist/styles.css"
-	}
+  "exports": {
+    "./styles.css": "./dist/styles.css"
+  }
 }
 ```
 
 4. Now consumers of your package can import your CSS file anywhere in their project. For example:
 
 ```ts
-import "your-package/styles.css";
+import "your-package/styles.css"
 ```
 
 Alternatively, if your package has a hard dependency on a CSS file and you want it to always be loaded when your package is imported, you can import it anywhere within your package's code and it will be bundled with-in your package.
