@@ -1,5 +1,5 @@
 {
-	"name": "@solana-wallets-solid/core",
+	"name": "@solana-wallets-solid/solid",
 	"version": "0.3.0",
 	"description": "Example hello world package in the solana-wallets-solid repository.",
 	"license": "MIT",
@@ -50,18 +50,17 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@scure/base": "^1.1.9",
+		"@nanostores/solid": "^0.4.2",
 		"@solana-mobile/wallet-adapter-mobile": "^2.1.3",
 		"@solana/wallet-adapter-base": "^0.9.23",
-		"@solana/wallet-standard-features": "^1.2.0",
-		"@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
-		"@wallet-standard/app": "1.0.1",
-		"@wallet-standard/base": "1.0.1",
-		"@wallet-standard/core": "1.0.1",
-		"@wallet-standard/features": "1.0.1",
-		"nanostores": "^0.11.3"
+		"@solana-wallets-solid/core": "workspace:*",
+		"@solid-primitives/context": "^0.2.3",
+		"nanostores": "^0.11.3",
+		"solid-js": "^1.8.18"
 	},
 	"peerDependencies": {
-		"nanostores": "^0.11.3"
+		"@nanostores/solid": "^0.4.2",
+		"nanostores": "^0.11.3",
+		"solid-js": "^1.8.18"
 	}
 }

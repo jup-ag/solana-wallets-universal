@@ -1,0 +1,52 @@
+{
+	"name": "@solana-wallets-solid/react",
+	"description": "",
+	"version": "0.0.0",
+	"author": "",
+	"license": "",
+	"keywords": [],
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"scripts": {
+		"dev": "pnpm build --watch",
+		"build": "tsup"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"devDependencies": {
+		"@solana-wallets-solid/core": "workspace:*",
+		"@nanostores/react": "^0.7.3",
+		"nanostores": "^0.11.3",
+		"@types/node": "22.1.0",
+		"@types/react": "18.3.3",
+		"@types/react-dom": "18.3.0",
+		"react": "18.3.1",
+		"react-dom": "18.3.1",
+		"tsconfig-paths": "4.2.0",
+		"tsup": "8.2.4",
+		"tsx": "4.16.5",
+		"typescript": "5.5.4"
+	},
+	"peerDependencies": {
+		"react": ">=17",
+		"react-dom": ">=17",
+		"nanostores": "^0.11.3",
+		"@nanostores/react": "^0.7.3"
+	}
+}

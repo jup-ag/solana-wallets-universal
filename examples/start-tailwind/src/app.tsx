@@ -4,9 +4,9 @@ import "./app.css"
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
-import { UnifiedWalletProvider } from "@solana-wallets-solid/unified"
 
 import Nav from "~/components/Nav"
+import { WalletProvider } from "@solana-wallets-solid/solid"
 
 export default function App() {
   // const adapters = [
@@ -33,11 +33,14 @@ export default function App() {
   return (
     <Router
       root={props => (
-        <>
-          <UnifiedWalletProvider
+        <WalletProvider
+          autoConnect={true}
+          disconnectOnAccountChange={true}
+          localStorageKey="unified:wallet-stoarge-key"
+        >
+          <unified-wallet-modal
             autoConnect={true}
             disconnectOnAccountChange={false}
-            wallets={[]}
             config={{
               env: "mainnet-beta",
               theme: "jupiter",
@@ -51,11 +54,10 @@ export default function App() {
                 href: "https://station.jup.ag/docs/additional-topics/wallet-list",
               },
             }}
-          >
-            <Nav />
-            <Suspense>{props.children}</Suspense>
-          </UnifiedWalletProvider>
-        </>
+          />
+          <Nav />
+          <Suspense>{props.children}</Suspense>
+        </WalletProvider>
       )}
     >
       <FileRoutes />

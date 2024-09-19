@@ -1,19 +1,15 @@
 import { customElement, noShadowDOM } from "solid-element"
-import UnifiedWalletModal, { UnifiedWalletModalProps } from "./components/UnifiedWalletModal/index"
+
+import { UnifiedWalletModalProvider, UnifiedWalletProviderProps } from "./contexts"
+import { UnifiedWalletButton, UnifiedWalletButtonProps } from "./components"
 
 export function loadCustomElements() {
-  customElement("unified-wallet-modal", (props: UnifiedWalletModalProps, {}) => {
+  customElement("unified-wallet-modal", (props: UnifiedWalletProviderProps, {}) => {
     noShadowDOM() // ... Solid code
-    return (
-      <UnifiedWalletModal
-        showModal={props.showModal}
-        setShowModal={props.setShowModal}
-        walletPrecedence={props.walletPrecedence}
-        getPreviouslyConnected={props.getPreviouslyConnected}
-        wallets={props.wallets}
-        onClose={props.onClose}
-        isOpen={props.isOpen}
-      />
-    )
+    return <UnifiedWalletModalProvider {...props} />
+  })
+  customElement("unified-wallet-modal-button", (props: UnifiedWalletButtonProps, {}) => {
+    noShadowDOM()
+    return <UnifiedWalletButton {...props} />
   })
 }

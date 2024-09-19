@@ -1,11 +1,11 @@
-import { Adapter } from "@solana/wallet-adapter-base"
+import { WalletAdapterCompatibleStandardWallet } from "@solana/wallet-adapter-base"
 import { Component } from "solid-js"
 
 import { useUnifiedWallet } from "../../contexts"
 import ExternalIcon from "../../icons/ExternalIcon"
 
 type NotInstalledProps = {
-  adapter: Adapter
+  wallet: WalletAdapterCompatibleStandardWallet
   onClose: () => void
   onGoOnboarding: () => void
 }
@@ -15,21 +15,21 @@ export const NotInstalled: Component<NotInstalledProps> = props => {
   return (
     <div class="hideScrollbar duration-500 animate-fade-in overflow-y-scroll">
       <div class="flex flex-col justify-center items-center p-5">
-        <img src={props.adapter.icon} width={100} height={100} />
+        <img src={props.wallet.icon} width={100} height={100} />
       </div>
 
       <div class="flex flex-col justify-center items-center text-center">
         <span class="text-base font-semibold">
-          {t(`Have you installed`) + ` ${props.adapter.name}?`}
+          {t(`Have you installed`) + ` ${props.wallet.name}?`}
         </span>
         <a
-          href={props.adapter.url}
+          // href={props.wallet.url}
           rel="noopener noreferrer"
           target="_blank"
           class="text-xs flex my-3 items-center space-x-2 underline"
         >
           <span>
-            {t(`Install`)} {props.adapter.name}
+            {t(`Install`)} {props.wallet.name}
           </span>
 
           <ExternalIcon />

@@ -3,23 +3,31 @@ import {
   WalletAdapterCompatibleStandardWallet,
   WalletName,
 } from "@solana/wallet-adapter-base"
-import { createEffect, createSignal, JSXElement, on, ParentComponent, splitProps } from "solid-js"
+import {
+  batch,
+  Component,
+  createMemo,
+  createSignal,
+  JSXElement,
+  onCleanup,
+  onMount,
+} from "solid-js"
 import { createContextProvider } from "@solid-primitives/context"
 import {
+  AvailableWalletsChangedEvent,
   Cluster,
-  select,
-  useWallet,
-  WalletProvider,
-  WalletProviderProps,
+  ConnectingEvent,
+  StandardWalletConnectResult,
+  WalletChangedEvent,
+  WalletEvent,
 } from "@solana-wallets-solid/core"
 
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
 import { TranslationProvider, useTranslation } from "../translation/useTranslation"
 // import { THardcodedWalletStandardAdapter } from "./HardcodedWalletStandardAdapter"
-// import { UnifiedWalletModal } from "../../components/UnifiedWalletModal"
 
-import { UnifiedWalletModalProps } from "../../components"
 import UnifiedWalletModal from "../../components/UnifiedWalletModal"
+import { UnifiedWalletButtonProps } from "../../components"
 
 export const MWA_NOT_FOUND_ERROR = "MWA_NOT_FOUND_ERROR"
 export type UnifiedTheme = "light" | "dark" | "jupiter"
@@ -63,7 +71,7 @@ export type UnifiedWalletConfig = {
 export type UnifiedWalletProviderProps = {
   autoConnect: boolean
   disconnectOnAccountChange: boolean
-  wallets: WalletProviderProps["wallets"]
+  // wallets: WalletProviderProps["wallets"]
   config: UnifiedWalletConfig
   locale?: Locale
 }
@@ -76,25 +84,32 @@ export type UnifiedWalletMetadata = {
   additionalInfo?: string
 }
 
+/**
+ * Modal event to allow custom element
+ * modal button to trigger custom element modal
+ */
+export const ModalEvent = {
+  UPDATE_MODAL: "unified:update-modal",
+} as const
+
+export type UpdateModalEvent = CustomEvent<{ open: boolean }>
+export function dispatchUpdateModal(open: boolean) {
+  const toggleModalEvent = new CustomEvent(ModalEvent.UPDATE_MODAL, {
+    detail: { open }, // Optional additional data
+  })
+  window.dispatchEvent(toggleModalEvent)
+}
+
 const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
   (props: UnifiedWalletConfig) => {
     const { t, locale, setLocale } = useTranslation()
-    const {
-      wallets,
-      // select,
-      name,
-      wallet,
-      publicKey,
-      // signTransaction,
-      // sendTransaction,
-      // signMessage,
-      // signAllTransactions,
-      // connect,
-      connected,
-      connecting,
-      // disconnect,
-    } = useWallet()
-    const [showModal, setShowModal] = createSignal<boolean>(false)
+    const [wallets, setWallets] = createSignal<WalletAdapterCompatibleStandardWallet[]>([])
+    const [isModalOpen, setIsModalOpen] = createSignal<boolean>(false)
+
+    const [wallet, setWallet] = createSignal<StandardWalletConnectResult>()
+    const [connecting, setConnecting] = createSignal<boolean>(false)
+    const name = createMemo(() => wallet()?.name)
+    const publicKey = createMemo(() => wallet()?.pubKey)
 
     function getPreviouslyConnected() {
       try {
@@ -115,102 +130,100 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       localStorage.setItem("unified-wallet-previously-connected", JSON.stringify(connected))
     }
 
-    createEffect(
-      on([wallet, publicKey], ([wallet, pubKey]) => {
-        if (!pubKey || !wallet) {
-          return
-        }
-        const prevConnected = getPreviouslyConnected()
-
-        // make sure the most recently connected wallet is first
-        const combined = new Set([wallet.name, ...prevConnected])
-        setPreviouslyConnected([...combined])
-      }),
-    )
-
-    async function handleConnectClick(wallet: WalletAdapterCompatibleStandardWallet) {
-      try {
-        setShowModal(false)
-
-        // Connecting
-        // props.notificationCallback?.onConnecting({
-        //   publicKey: "",
-        //   shortAddress: "",
-        //   walletName: adapter.name,
-        //   metadata: {
-        //     name: adapter.name,
-        //     url: adapter.name,
-        //     icon: adapter.icon,
-        //     supportedTransactionVersions: adapter.supportedTransactionVersions,
-        //   },
-        // })
-
-        // Might throw WalletReadyState.WalletNotReady
-        await select(wallet)
-
-        // Weird quirks for autoConnect to require select and connect
-        // if (!props.autoConnect) {
-        //   setNonAutoConnectAttempt(true);
-        // }
-
-        // if (adapter.readyState === WalletReadyState.NotDetected) {
-        //   throw WalletReadyState.NotDetected
-        // }
-      } catch (error) {
-        console.error(error)
-
-        // Not Installed
-        // props.notificationCallback?.onNotInstalled({
-        //   publicKey: "",
-        //   shortAddress: "",
-        //   walletName: adapter.name,
-        //   metadata: {
-        //     name: adapter.name,
-        //     url: adapter.url,
-        //     icon: adapter.icon,
-        //     supportedTransactionVersions: adapter.supportedTransactionVersions,
-        //   },
-        // })
-      }
+    function onWalletChangedHandler(event: Event) {
+      const walletChangedEvent = event as WalletChangedEvent
+      console.log("wallet changed event: ", { new_wallet: walletChangedEvent.detail.wallet })
+      batch(() => {
+        setIsModalOpen(false)
+        setWallet(walletChangedEvent.detail.wallet)
+      })
     }
 
-    createEffect(
-      on([wallet, publicKey], ([wallet, pubKey], prev) => {
-        if (wallet && pubKey) {
-          // props.notificationCallback?.onConnect({
-          //   publicKey: publicKey.toString(),
-          //   shortAddress: shortenAddress(publicKey.toString()),
-          //   walletName: adapter.name,
-          //   metadata: {
-          //     name: adapter.name,
-          //     url: adapter.url,
-          //     icon: adapter.icon,
-          //     supportedTransactionVersions: adapter.supportedTransactionVersions,
-          //   },
-          // })
-          return
-        }
+    function onWalletConnectingHandler(event: Event) {
+      const walletConnectingEvent = event as ConnectingEvent
+      setConnecting(walletConnectingEvent.detail.connecting)
+    }
 
-        if (!prev) {
-          return
-        }
+    function onUpdateModalHandler(event: Event) {
+      const updateModalEvent = event as UpdateModalEvent
+      console.log({ updateModalEvent })
+      setIsModalOpen(updateModalEvent.detail.open)
+    }
 
-        const [prevAdapter] = prev
-        if (prevAdapter && !wallet) {
-          // props.notificationCallback?.onDisconnect({
-          //   publicKey: prevPubKey?.toString() || "",
-          //   shortAddress: shortenAddress(prevPubKey?.toString() || ""),
-          //   walletName: prevAdapter.name || "",
-          //   metadata: {
-          //     name: prevAdapter.name,
-          //     url: prevAdapter.url,
-          //     icon: prevAdapter.icon,
-          //     supportedTransactionVersions: prevAdapter.supportedTransactionVersions,
-          //   },
-          // })
-        }
-      }),
-    )
+    function onAvailableWalletsChangedHandler(event: Event) {
+      const availableWalletsChangedEvent = event as AvailableWalletsChangedEvent
+      setWallets(availableWalletsChangedEvent.detail.wallets)
+    }
+
+    onMount(() => {
+      window.addEventListener(WalletEvent.WALLET_CHANGED, onWalletChangedHandler)
+      window.addEventListener(WalletEvent.CONNECTING, onWalletConnectingHandler)
+      window.addEventListener(ModalEvent.UPDATE_MODAL, onUpdateModalHandler)
+      window.addEventListener(
+        WalletEvent.AVAILABLE_WALLETS_CHANGED,
+        onAvailableWalletsChangedHandler,
+      )
+      onCleanup(() => {
+        window.removeEventListener(WalletEvent.WALLET_CHANGED, onWalletChangedHandler)
+        window.removeEventListener(WalletEvent.CONNECTING, onWalletConnectingHandler)
+        window.removeEventListener(ModalEvent.UPDATE_MODAL, onUpdateModalHandler)
+        window.removeEventListener(
+          WalletEvent.AVAILABLE_WALLETS_CHANGED,
+          onAvailableWalletsChangedHandler,
+        )
+      })
+    })
+
+    // createEffect(
+    //   on([wallet, publicKey], ([wallet, pubKey]) => {
+    //     if (!pubKey || !wallet) {
+    //       return
+    //     }
+    //     const prevConnected = getPreviouslyConnected()
+    //
+    //     // make sure the most recently connected wallet is first
+    //     const combined = new Set([wallet.name, ...prevConnected])
+    //     setPreviouslyConnected([...combined])
+    //   }),
+    // )
+    //
+    // createEffect(
+    //   on([wallet, publicKey], ([wallet, pubKey], prev) => {
+    //     if (wallet && pubKey) {
+    //       // props.notificationCallback?.onConnect({
+    //       //   publicKey: publicKey.toString(),
+    //       //   shortAddress: shortenAddress(publicKey.toString()),
+    //       //   walletName: adapter.name,
+    //       //   metadata: {
+    //       //     name: adapter.name,
+    //       //     url: adapter.url,
+    //       //     icon: adapter.icon,
+    //       //     supportedTransactionVersions: adapter.supportedTransactionVersions,
+    //       //   },
+    //       // })
+    //       return
+    //     }
+    //
+    //     if (!prev) {
+    //       return
+    //     }
+    //
+    //     const [prevAdapter] = prev
+    //     if (prevAdapter && !wallet) {
+    //       // props.notificationCallback?.onDisconnect({
+    //       //   publicKey: prevPubKey?.toString() || "",
+    //       //   shortAddress: shortenAddress(prevPubKey?.toString() || ""),
+    //       //   walletName: prevAdapter.name || "",
+    //       //   metadata: {
+    //       //     name: prevAdapter.name,
+    //       //     url: prevAdapter.url,
+    //       //     icon: prevAdapter.icon,
+    //       //     supportedTransactionVersions: prevAdapter.supportedTransactionVersions,
+    //       //   },
+    //       // })
+    //     }
+    //   }),
+    // )
 
     return {
       t,
@@ -220,25 +233,18 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       env: props.env,
       metadata: props.metadata,
 
-      wallets,
-      wallet,
+      getPreviouslyConnected,
+      setPreviouslyConnected,
+
       name,
       publicKey,
-      select,
-      // connect,
-      connected,
+      wallet,
       connecting,
-      // disconnect,
-      // signMessage,
-      // signTransaction,
-      // signAllTransactions,
-      // sendTransaction,
+      wallets,
 
-      getPreviouslyConnected,
+      isModalOpen,
+      setIsModalOpen,
 
-      showModal,
-      setShowModal,
-      handleConnectClick,
       walletAttachments: props.walletAttachments,
       walletlistExplanation: props.walletlistExplanation,
       walletPrecedence: props.walletPrecedence,
@@ -249,40 +255,28 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
 
 // const UnifiedWalletModal = lazy(() => import("../../components/UnifiedWalletModal"))
 
+export type UnifiedWalletModalProps = {
+  isExpanded?: boolean
+}
 declare module "solid-js" {
   namespace JSX {
     interface IntrinsicElements {
-      "unified-wallet-modal": UnifiedWalletModalProps
+      "unified-wallet-modal": UnifiedWalletProviderProps
+    }
+    interface IntrinsicElements {
+      "unified-wallet-modal-button": UnifiedWalletButtonProps
     }
   }
 }
 
-export const UnifiedWalletModalProvider: ParentComponent = props => {
-  const { showModal, setShowModal, wallets, getPreviouslyConnected, walletPrecedence } =
-    useUnifiedWallet()
-  function onClose() {
-    console.log("onClose!")
-    setShowModal(false)
-  }
+const UnifiedWalletModalProvider: Component<UnifiedWalletProviderProps> = props => {
   return (
     <>
-      <unified-wallet-modal
-        wallets={wallets()}
-        onClose={onClose}
-        getPreviouslyConnected={getPreviouslyConnected}
-        walletPrecedence={walletPrecedence}
-        showModal={showModal}
-        setShowModal={setShowModal}
-      />
-      <UnifiedWalletModal
-        wallets={wallets()}
-        onClose={onClose}
-        getPreviouslyConnected={getPreviouslyConnected}
-        walletPrecedence={walletPrecedence}
-        showModal={showModal}
-        setShowModal={setShowModal}
-      />
-      {props.children}
+      <TranslationProvider locale={props.locale ?? DEFAULT_LOCALE}>
+        <_UnifiedWalletProvider {...props.config}>
+          <UnifiedWalletModal />
+        </_UnifiedWalletProvider>
+      </TranslationProvider>
     </>
   )
 }
@@ -295,23 +289,4 @@ const useUnifiedWallet = () => {
   return context
 }
 
-const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> = _props => {
-  const [local, rest] = splitProps(_props, ["children"])
-  return (
-    <TranslationProvider locale={rest.locale ?? DEFAULT_LOCALE}>
-      <WalletProvider
-        wallets={rest.wallets}
-        autoConnect={rest.autoConnect}
-        disconnectOnAccountChange={rest.disconnectOnAccountChange}
-        localStorageKey="walletAdapter"
-      >
-        <_UnifiedWalletProvider {...rest.config}>
-          <UnifiedWalletModalProvider>{local.children}</UnifiedWalletModalProvider>
-        </_UnifiedWalletProvider>
-      </WalletProvider>
-    </TranslationProvider>
-  )
-}
-
-export type { Wallet } from "@solana-wallets-solid/core"
-export { UnifiedWalletProvider, useUnifiedWallet }
+export { UnifiedWalletModalProvider, useUnifiedWallet }
