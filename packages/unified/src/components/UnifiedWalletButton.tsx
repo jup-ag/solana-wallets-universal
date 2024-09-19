@@ -19,7 +19,7 @@ import {
   WalletEvent,
 } from "@solana-wallets-solid/core"
 
-import { dispatchUpdateModal, MWA_NOT_FOUND_ERROR, useUnifiedWallet } from "../contexts"
+import { dispatchUpdateModal, MWA_NOT_FOUND_ERROR } from "../contexts"
 import { shortenAddress } from "../utils"
 
 export type UnifiedWalletButtonProps = {
@@ -29,8 +29,6 @@ export type UnifiedWalletButtonProps = {
 }
 
 export const UnifiedWalletButton: Component<UnifiedWalletButtonProps> = props => {
-  // const { t, setOpen, wallet, name, publicKey, connecting } = useUnifiedWallet()
-
   const [wallet, setWallet] = createSignal<StandardWalletConnectResult>()
   const [connecting, setConnecting] = createSignal<boolean>(false)
   const name = createMemo(() => wallet()?.name)

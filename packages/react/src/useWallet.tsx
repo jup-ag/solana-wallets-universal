@@ -10,24 +10,39 @@ export type WalletProviderProps = {
   children?: React.ReactNode
 }
 
-const WalletContext = createContext({})
+export type WalletContext = {
+  wallets: ReturnType<ReturnType<typeof initStore>["$wallets"]["get"]>
+  walletsByName: ReturnType<ReturnType<typeof initStore>["$walletsMap"]["get"]>
+  connectedAccount: ReturnType<ReturnType<typeof initStore>["$connectedAccount"]["get"]>
+  connected: ReturnType<ReturnType<typeof initStore>["$isConnected"]["get"]>
+  wallet: ReturnType<ReturnType<typeof initStore>["$wallet"]["get"]>
+  env: ReturnType<ReturnType<typeof initStore>["$env"]["get"]>
+  connecting: ReturnType<ReturnType<typeof initStore>["$connecting"]["get"]>
+  disconnecting: ReturnType<ReturnType<typeof initStore>["$disconnecting"]["get"]>
+  signMessage: ReturnType<typeof initStore>["signMessage"]
+  signTransaction: ReturnType<typeof initStore>["signTransaction"]
+  signAllTransactions: ReturnType<typeof initStore>["signAllTransactions"]
+  sendTransaction: ReturnType<typeof initStore>["sendTransaction"]
+}
+const WalletContext = createContext<WalletContext>({} as WalletContext)
+
+const {
+  $wallet,
+  $connectedAccount,
+  $connecting,
+  $disconnecting,
+  $isConnected,
+  initOnMount,
+  $env,
+  $wallets,
+  $walletsMap,
+  signMessage,
+  sendTransaction,
+  signTransaction,
+  signAllTransactions,
+} = initStore()
 
 const WalletProvider: React.FC<WalletProviderProps> = ({ children, ...config }) => {
-  const {
-    $wallet,
-    $connectedAccount,
-    $connecting,
-    $disconnecting,
-    $isConnected,
-    initOnMount,
-    $env,
-    $wallets,
-    $walletsMap,
-    signMessage,
-    sendTransaction,
-    signTransaction,
-    signAllTransactions,
-  } = initStore()
   const wallets = useStore($wallets)
   const walletsByName = useStore($walletsMap)
   const connectedAccount = useStore($connectedAccount)
@@ -36,8 +51,6 @@ const WalletProvider: React.FC<WalletProviderProps> = ({ children, ...config }) 
   const env = useStore($env)
   const connecting = useStore($connecting)
   const disconnecting = useStore($disconnecting)
-
-  // Selected wallet connection state
 
   useEffect(() => {
     const cleanup = initOnMount()

@@ -92,7 +92,6 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
   })
 
   async function onWalletClick(wallet: string) {
-    console.log("dispatching connect to: ", wallet)
     dispatchConnect(wallet)
   }
 

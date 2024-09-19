@@ -26,7 +26,7 @@ import {
   StandardEvent,
   WalletEvent,
 } from "./events"
-import { getLocalStorage, setLocalStorage } from "./localstorage"
+import { getLocalStorage, KEYS, setLocalStorage } from "./localstorage"
 // import { detectedFirst, isInWebView, isIosAndWebView, isOnAndroid } from "./utils"
 
 export type Cluster = "devnet" | "testnet" | "mainnet-beta"
@@ -181,7 +181,7 @@ export function initStore() {
   }
 
   async function updateWallet(name?: string | undefined) {
-    setLocalStorage("unified:wallet", name)
+    setLocalStorage(KEYS.WALLET_NAME, name)
 
     if (!name) {
       // $ready.set(WalletReadyState.NotDetected)
@@ -292,10 +292,12 @@ export function initStore() {
 
   async function connectHandler(_event: Event) {
     const event = _event as ConnectEvent
+    console.log("detected connect event to wallet: ", event.detail.wallet)
     await select(event.detail.wallet)
   }
 
   async function disconnectHandler(_event: Event) {
+    console.log("detected disconnect event ")
     await disconnect()
   }
 
@@ -379,9 +381,10 @@ export function initStore() {
    * Automatically connect to most recently connected wallet
    */
   async function onMountAutoConnect() {
-    const walletName = getLocalStorage<WalletName>("adapter-name")
+    const walletName = getLocalStorage<WalletName>(KEYS.WALLET_NAME)
     console.log("onMountAutoConnect: ", { walletName })
     if (!walletName) {
+      console.log("onMountAutoConnect: skipping since no previous wallet found")
       return
     }
     await select(walletName)

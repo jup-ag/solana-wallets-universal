@@ -1,3 +1,7 @@
+export const KEYS = {
+  WALLET_NAME: "unified:connected_wallet_name",
+} as const
+export type Keys = (typeof KEYS)[keyof typeof KEYS]
 export function getLocalStorage<T>(
   key: string,
   defaultValue: T | undefined = undefined,
