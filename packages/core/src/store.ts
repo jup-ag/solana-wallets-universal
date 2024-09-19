@@ -483,11 +483,6 @@ export function initStore() {
       throw new Error("solana:signAndSendTransaction NOT found in standard wallet features")
     }
 
-    // const latestHash = await connection.getLatestBlockhash("finalized")
-    // if (transaction instanceof Transaction) {
-    //   transaction.recentBlockhash = latestHash.blockhash
-    //   transaction.feePayer = new PublicKey(acc.publicKey)
-    // }
     const acc = connectedAccount.account
     const input: SolanaSignAndSendTransactionInput = {
       account: acc,
