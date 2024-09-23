@@ -45,9 +45,11 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
 
   onMount(() => {
     const cleanup = initOnMount()
-    onCleanup(() => {
-      cleanup()
-    })
+    if (cleanup) {
+      onCleanup(() => {
+        cleanup()
+      })
+    }
   })
 
   return {

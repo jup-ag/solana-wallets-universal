@@ -1,17 +1,6 @@
-import {
-  batch,
-  Component,
-  createEffect,
-  createSignal,
-  For,
-  Match,
-  on,
-  Show,
-  Switch,
-} from "solid-js"
+import { batch, Component, createEffect, createSignal, Match, on, Show, Switch } from "solid-js"
 
 import { useUnifiedWallet } from "../../contexts"
-import { HARDCODED_WALLET_STANDARDS } from "../../constants"
 import ExternalIcon from "../../icons/ExternalIcon"
 
 export type OnboardingFlow = "Onboarding" | "Get Wallet"

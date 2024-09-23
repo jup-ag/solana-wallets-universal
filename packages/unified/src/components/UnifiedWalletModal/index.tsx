@@ -20,7 +20,12 @@ import {
   WalletReadyState,
 } from "@solana/wallet-adapter-base"
 // import { SolanaMobileWalletAdapterWalletName } from "@solana-mobile/wallet-adapter-mobile"
-import { dispatchConnect, isMobile } from "@solana-wallets-solid/core"
+import {
+  dispatchConnect,
+  isMobile,
+  SolanaMobileWalletAdapterWalletName,
+  WalletInfo,
+} from "@solana-wallets-solid/core"
 import { Dynamic } from "solid-js/web"
 
 import { UnifiedWalletModalProps, useUnifiedWallet } from "../../contexts"
@@ -30,13 +35,7 @@ import { WalletIcon, WalletListItem } from "./WalletListItem"
 import ChevronUpIcon from "../../icons/ChevronUpIcon"
 import ChevronDownIcon from "../../icons/ChevronDownIcon"
 import { Collapse } from "../Collapse"
-import { WalletInfo } from "./types"
 import { NotInstalled } from "./NotInstalled"
-// import { HARDCODED_WALLET_STANDARDS } from "../../constants"
-
-function createStandardWalletInfo(wallet: WalletAdapterCompatibleStandardWallet): WalletInfo {
-  return { type: "standard-wallet", wallet }
-}
 
 export const Header: VoidComponent = () => {
   const { setIsModalOpen, t } = useUnifiedWallet()
@@ -160,32 +159,31 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
               <For each={list().highlight}>
                 {info => {
                   const walletName = createMemo<string>(() => {
-                    if (info.type === "standard-wallet") {
-                      // if (info.adapter.name === SolanaMobileWalletAdapterWalletName) {
-                      //   return t(`Mobile`) as string
-                      // }
-                      return info.wallet.name
+                    if (info.wallet.name === SolanaMobileWalletAdapterWalletName) {
+                      return t(`Mobile`) as string
                     }
-                    return info.name
+                    return info.wallet.name
                   })
                   const attachment = walletAttachments
                     ? walletAttachments[walletName()]?.attachment
                     : null
                   return (
                     <Dynamic
-                      component={info.type === "standard-wallet" ? "button" : "a"}
+                      component={info.type === "standard" ? "button" : "a"}
                       type="button"
                       class="py-4 px-4 border border-white/10 rounded-lg flex items-center cursor-pointer flex-1 hover:backdrop-blur-xl transition-all hover:shadow-2xl hover:bg-white/10 bg-jupiter-bg"
                       onClick={
-                        info.type === "standard-wallet"
-                          ? () => onWalletClick(info.wallet.name)
+                        info.type === "standard" ? () => onWalletClick(info.wallet.name) : undefined
+                      }
+                      href={
+                        info.type === "ios-webview"
+                          ? info.wallet.deepUrl?.(window.location)
                           : undefined
                       }
-                      href={info.type === "mobile-deeplink" ? info.deeplink : undefined}
                     >
                       <WalletIcon
-                        name={info.type === "standard-wallet" ? info.wallet.name : info.name}
-                        icon={info.type === "standard-wallet" ? info.wallet.icon : info.icon}
+                        name={info.wallet.name}
+                        icon={info.wallet.icon}
                         width={isMobile() ? 24 : 30}
                         height={isMobile() ? 24 : 30}
                       />
@@ -237,7 +235,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                             <ul>
                               <WalletListItem
                                 handleClick={() =>
-                                  info.type === "standard-wallet"
+                                  info.type === "standard"
                                     ? onWalletClick(info.wallet.name)
                                     : undefined
                                 }
@@ -330,12 +328,11 @@ export const TOP_WALLETS: WalletName[] = [
 ]
 
 export const sortByPrecedence =
-  (walletPrecedence: WalletName[]) =>
-  (a: WalletAdapterCompatibleStandardWallet, b: WalletAdapterCompatibleStandardWallet) => {
+  (walletPrecedence: WalletName[]) => (a: WalletInfo, b: WalletInfo) => {
     if (!walletPrecedence) return 0
 
-    const aIndex = walletPrecedence.indexOf(a.name as WalletName)
-    const bIndex = walletPrecedence.indexOf(b.name as WalletName)
+    const aIndex = walletPrecedence.indexOf(a.wallet.name as WalletName)
+    const bIndex = walletPrecedence.indexOf(b.wallet.name as WalletName)
 
     if (aIndex === -1 && bIndex === -1) return 0
     if (aIndex >= 0) {
@@ -358,11 +355,11 @@ export function clickOutside(el: Element, handler: () => void) {
 }
 
 type FilteredAdapters = {
-  previouslyConnected: WalletAdapterCompatibleStandardWallet[]
-  installed: WalletAdapterCompatibleStandardWallet[]
-  top3: WalletAdapterCompatibleStandardWallet[]
-  loadable: WalletAdapterCompatibleStandardWallet[]
-  notDetected: WalletAdapterCompatibleStandardWallet[]
+  previouslyConnected: WalletInfo[]
+  installed: WalletInfo[]
+  top3: WalletInfo[]
+  loadable: WalletInfo[]
+  notDetected: WalletInfo[]
 }
 
 type WalletList = {
@@ -377,33 +374,34 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
   const [isExpanded, setIsExpanded] = createSignal(props.isExpanded ?? true)
 
   const filteredAdapters = createMemo(() => {
-    console.log("filtered adapter props.wallets: ", { wallets: wallets() })
-
-    return wallets().reduce<FilteredAdapters>(
-      (acc, wallet) => {
+    const _wallets = wallets()
+    if (!_wallets) {
+      return {
+        previouslyConnected: [],
+        installed: [],
+        top3: [],
+        loadable: [],
+        notDetected: [],
+      }
+    }
+    return _wallets.reduce<FilteredAdapters>(
+      (acc, walletInfo) => {
+        const wallet = walletInfo.wallet
         const walletName = wallet.name
-        console.log({ walletName })
         // Previously connected takes highest
         const previouslyConnectedIndex = getPreviouslyConnected().indexOf(walletName)
         if (previouslyConnectedIndex >= 0) {
-          acc.previouslyConnected[previouslyConnectedIndex] = wallet
+          acc.previouslyConnected.push(walletInfo)
           return acc
         }
-        // Then Installed
-        // if (wallet.readyState === WalletReadyState.Installed) {
-        //   acc.installed.push(wallet)
-        //   return acc
-        // }
         // Top 3
         const topWalletsIndex = TOP_WALLETS.indexOf(walletName as WalletName)
         if (topWalletsIndex >= 0) {
-          console.log(`adding ${walletName} to top 3 wallets`)
-          acc.top3[topWalletsIndex] = wallet
+          acc.top3.push(walletInfo)
           return acc
         }
-        // Loadable
-        console.log(`adding ${walletName} to loadable wallets`)
-        acc.loadable.push(wallet)
+
+        acc.loadable.push(walletInfo)
         return acc
       },
       {
@@ -418,22 +416,28 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
 
   const list = createMemo<WalletList>(() => {
     // Then, Installed, Top 3, Loadable, NotDetected
-
     const filtered = filteredAdapters()
+
     if (filtered.previouslyConnected.length > 0) {
       const { previouslyConnected, ...rest } = filtered
 
-      const previouslyConnectedInfos: WalletInfo[] = previouslyConnected.map(a =>
-        createStandardWalletInfo(a),
-      )
+      // const previouslyConnectedInfos: WalletInfo[] = previouslyConnected.wallets.map(a =>
+      //   isWalletAdapterCompatibleStandardWallet(a)
+      //     ? createStandardWalletInfo(a)
+      //     : {
+      //         type: "mobile-deeplink",
+      //         icon: a.icon,
+      //         name: a.name,
+      //         deeplink: a.deepUrl?.(window.location) ?? "",
+      //       },
+      // )
 
-      const highlight: WalletInfo[] = previouslyConnectedInfos.slice(0, 3)
+      const highlight = previouslyConnected.slice(0, 3)
 
-      let others: WalletInfo[] = Object.values(rest)
+      let others = Object.values(rest)
         .flat()
         .sort(sortByPrecedence(walletPrecedence || []))
-        .map(a => createStandardWalletInfo(a))
-      others.unshift(...previouslyConnectedInfos.slice(3, previouslyConnectedInfos.length))
+      others.unshift(...previouslyConnected.slice(3, previouslyConnected.length))
       others = others.filter(Boolean)
 
       // if (isIosAndRedirectable()) {
@@ -458,12 +462,6 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
     if (filtered.installed.length > 0) {
       const { installed, top3, ...rest } = filtered
 
-      const installedWalletInfos: WalletInfo[] = installed.map(i => ({
-        type: "standard-wallet",
-        wallet: i,
-      }))
-      const topWalletInfos: WalletInfo[] = top3.map(a => createStandardWalletInfo(a))
-
       // if (isIosAndRedirectable()) {
       //   const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
       //     w => !!w.deepUrl,
@@ -476,16 +474,14 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
       //   topWalletInfos.push(...redirectableWalletInfos)
       // }
 
-      const highlight: WalletInfo[] = [
-        ...installedWalletInfos.slice(0, 3),
-        ...topWalletInfos.filter(Boolean),
-      ].filter(Boolean)
+      const highlight: WalletInfo[] = [...installed.slice(0, 3), ...top3.filter(Boolean)].filter(
+        Boolean,
+      )
 
       const others: WalletInfo[] = Object.values(rest)
         .flat()
         .sort(sortByPrecedence(walletPrecedence || []))
-        .map(a => createStandardWalletInfo(a))
-      others.unshift(...installedWalletInfos.slice(3, installed.length))
+      others.unshift(...installed.slice(3, installed.length))
 
       return { highlightedBy: "TopAndRecommended", highlight, others }
     }
@@ -499,7 +495,6 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
     }
 
     const { top3, ...rest } = filtered
-    const topWalletInfos: WalletInfo[] = top3.map(a => createStandardWalletInfo(a))
     // if (isIosAndRedirectable()) {
     // const redirectableWalletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.filter(
     //   w => !!w.deepUrl,
@@ -515,9 +510,8 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
     const others: WalletInfo[] = Object.values(rest)
       .flat()
       .sort(sortByPrecedence(walletPrecedence || []))
-      .map(a => createStandardWalletInfo(a))
 
-    return { highlightedBy: "TopWallet", highlight: topWalletInfos, others }
+    return { highlightedBy: "TopWallet", highlight: top3, others }
   })
 
   // <Show when={walletModalAttachments?.footer}>{walletModalAttachments?.footer}</Show>

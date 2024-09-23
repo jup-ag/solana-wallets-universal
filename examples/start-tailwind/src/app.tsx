@@ -5,8 +5,20 @@ import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
 import { WalletProvider } from "@solana-wallets-solid/solid"
+import { UnifiedWalletProviderProps, UnifiedWalletButtonProps } from "@solana-wallets-solid/unified"
 
 import Nav from "~/components/Nav"
+
+declare module "solid-js" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "unified-wallet-modal": UnifiedWalletProviderProps
+    }
+    interface IntrinsicElements {
+      "unified-wallet-modal-button": UnifiedWalletButtonProps
+    }
+  }
+}
 
 export default function App() {
   // const adapters = [
@@ -39,23 +51,7 @@ export default function App() {
           localStorageKey="unified:wallet-stoarge-key"
           env="devnet"
         >
-          <unified-wallet-modal
-            autoConnect={true}
-            disconnectOnAccountChange={false}
-            config={{
-              env: "mainnet-beta",
-              theme: "jupiter",
-              metadata: {
-                name: "UnifiedWallet",
-                description: "UnifiedWallet",
-                url: "https://jup.ag",
-                iconUrls: ["https://jup.ag/favicon.ico"],
-              },
-              walletlistExplanation: {
-                href: "https://station.jup.ag/docs/additional-topics/wallet-list",
-              },
-            }}
-          />
+          <unified-wallet-modal />
           <Nav />
           <Suspense>{props.children}</Suspense>
         </WalletProvider>

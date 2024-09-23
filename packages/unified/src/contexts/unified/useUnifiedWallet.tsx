@@ -1,33 +1,29 @@
-import {
-  SupportedTransactionVersions,
-  WalletAdapterCompatibleStandardWallet,
-  WalletName,
-} from "@solana/wallet-adapter-base"
+import { SupportedTransactionVersions, WalletName } from "@solana/wallet-adapter-base"
 import {
   batch,
   Component,
+  createEffect,
   createMemo,
   createSignal,
   JSXElement,
+  on,
   onCleanup,
   onMount,
 } from "solid-js"
 import { createContextProvider } from "@solid-primitives/context"
 import {
   AvailableWalletsChangedEvent,
-  Cluster,
   ConnectingEvent,
   StandardWalletConnectResult,
   WalletChangedEvent,
   WalletEvent,
+  WalletInfo,
 } from "@solana-wallets-solid/core"
 
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
 import { TranslationProvider, useTranslation } from "../translation/useTranslation"
-// import { THardcodedWalletStandardAdapter } from "./HardcodedWalletStandardAdapter"
-
 import UnifiedWalletModal from "../../components/UnifiedWalletModal"
-import { UnifiedWalletButtonProps } from "../../components"
+import { KEY } from "./localstorage"
 
 export const MWA_NOT_FOUND_ERROR = "MWA_NOT_FOUND_ERROR"
 export type UnifiedTheme = "light" | "dark" | "jupiter"
@@ -45,8 +41,7 @@ export type WalletNotification = {
 }
 
 export type UnifiedWalletConfig = {
-  metadata: UnifiedWalletMetadata
-  env: Cluster
+  // metadata: UnifiedWalletMetadata
   walletPrecedence?: WalletName[]
   // hardcodedWallets?: THardcodedWalletStandardAdapter[]
   notificationCallback?: {
@@ -69,10 +64,6 @@ export type UnifiedWalletConfig = {
 }
 
 export type UnifiedWalletProviderProps = {
-  autoConnect: boolean
-  disconnectOnAccountChange: boolean
-  // wallets: WalletProviderProps["wallets"]
-  config: UnifiedWalletConfig
   locale?: Locale
 }
 
@@ -102,18 +93,22 @@ export function dispatchUpdateModal(open: boolean) {
 
 const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
   (props: UnifiedWalletConfig) => {
+    // Locale info
     const { t, locale, setLocale } = useTranslation()
-    const [wallets, setWallets] = createSignal<WalletAdapterCompatibleStandardWallet[]>([])
-    const [isModalOpen, setIsModalOpen] = createSignal<boolean>(false)
 
+    // Wallet info
+    const [wallets, setWallets] = createSignal<WalletInfo[]>()
     const [wallet, setWallet] = createSignal<StandardWalletConnectResult>()
     const [connecting, setConnecting] = createSignal<boolean>(false)
     const name = createMemo(() => wallet()?.name)
     const publicKey = createMemo(() => wallet()?.pubKey)
 
+    // Modal state
+    const [isModalOpen, setIsModalOpen] = createSignal<boolean>(false)
+
     function getPreviouslyConnected() {
       try {
-        const value = localStorage.getItem("unified-wallet-previously-connected")
+        const value = localStorage.getItem(KEY.PREVIOUSLY_CONNECTED)
         if (!value) {
           return []
         }
@@ -127,7 +122,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
     }
 
     function setPreviouslyConnected(connected: string[]) {
-      localStorage.setItem("unified-wallet-previously-connected", JSON.stringify(connected))
+      localStorage.setItem(KEY.PREVIOUSLY_CONNECTED, JSON.stringify(connected))
     }
 
     function onWalletChangedHandler(event: Event) {
@@ -174,64 +169,29 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       })
     })
 
-    // createEffect(
-    //   on([wallet, publicKey], ([wallet, pubKey]) => {
-    //     if (!pubKey || !wallet) {
-    //       return
-    //     }
-    //     const prevConnected = getPreviouslyConnected()
-    //
-    //     // make sure the most recently connected wallet is first
-    //     const combined = new Set([wallet.name, ...prevConnected])
-    //     setPreviouslyConnected([...combined])
-    //   }),
-    // )
-    //
-    // createEffect(
-    //   on([wallet, publicKey], ([wallet, pubKey], prev) => {
-    //     if (wallet && pubKey) {
-    //       // props.notificationCallback?.onConnect({
-    //       //   publicKey: publicKey.toString(),
-    //       //   shortAddress: shortenAddress(publicKey.toString()),
-    //       //   walletName: adapter.name,
-    //       //   metadata: {
-    //       //     name: adapter.name,
-    //       //     url: adapter.url,
-    //       //     icon: adapter.icon,
-    //       //     supportedTransactionVersions: adapter.supportedTransactionVersions,
-    //       //   },
-    //       // })
-    //       return
-    //     }
-    //
-    //     if (!prev) {
-    //       return
-    //     }
-    //
-    //     const [prevAdapter] = prev
-    //     if (prevAdapter && !wallet) {
-    //       // props.notificationCallback?.onDisconnect({
-    //       //   publicKey: prevPubKey?.toString() || "",
-    //       //   shortAddress: shortenAddress(prevPubKey?.toString() || ""),
-    //       //   walletName: prevAdapter.name || "",
-    //       //   metadata: {
-    //       //     name: prevAdapter.name,
-    //       //     url: prevAdapter.url,
-    //       //     icon: prevAdapter.icon,
-    //       //     supportedTransactionVersions: prevAdapter.supportedTransactionVersions,
-    //       //   },
-    //       // })
-    //     }
-    //   }),
-    // )
+    createEffect(() => {
+      console.log("unified modal wallet store changed: ", { wallets: wallets() })
+    })
+
+    createEffect(
+      on([wallet, publicKey], ([wallet, pubKey]) => {
+        if (!pubKey || !wallet) {
+          return
+        }
+        const prevConnected = getPreviouslyConnected()
+
+        // make sure the most recently connected wallet is first
+        const combined = new Set([wallet.name, ...prevConnected])
+        setPreviouslyConnected([...combined])
+      }),
+    )
 
     return {
       t,
       locale,
       setLocale,
       theme: props.theme,
-      env: props.env,
-      metadata: props.metadata,
+      // metadata: props.metadata,
 
       getPreviouslyConnected,
       setPreviouslyConnected,
@@ -258,22 +218,12 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
 export type UnifiedWalletModalProps = {
   isExpanded?: boolean
 }
-declare module "solid-js" {
-  namespace JSX {
-    interface IntrinsicElements {
-      "unified-wallet-modal": UnifiedWalletProviderProps
-    }
-    interface IntrinsicElements {
-      "unified-wallet-modal-button": UnifiedWalletButtonProps
-    }
-  }
-}
 
 const UnifiedWalletModalProvider: Component<UnifiedWalletProviderProps> = props => {
   return (
     <>
       <TranslationProvider locale={props.locale ?? DEFAULT_LOCALE}>
-        <_UnifiedWalletProvider {...props.config}>
+        <_UnifiedWalletProvider>
           <UnifiedWalletModal />
         </_UnifiedWalletProvider>
       </TranslationProvider>

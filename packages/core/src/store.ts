@@ -4,6 +4,7 @@ import {
   isWalletAdapterCompatibleStandardWallet,
   WalletName,
   WalletAdapterCompatibleStandardWallet,
+  isIosAndRedirectable,
 } from "@solana/wallet-adapter-base"
 import {
   SolanaSignAndSendTransaction,
@@ -33,6 +34,9 @@ import {
   WalletEvent,
 } from "./events"
 import { getLocalStorage, KEYS, setLocalStorage } from "./localstorage"
+import { THardcodedWalletStandardAdapter } from "./hardcoded-wallet-adapter"
+import { isIos } from "./environment"
+import { HARDCODED_WALLET_STANDARDS } from "./constants"
 
 export type Cluster = "devnet" | "testnet" | "mainnet-beta"
 
@@ -42,26 +46,31 @@ type StoreProps = {
   disconnectOnAccountChange: boolean
   // localStorageKey: string
 }
+
+export type WalletInfo =
+  | { type: "ios-webview"; wallet: THardcodedWalletStandardAdapter }
+  | { type: "standard"; wallet: WalletAdapterCompatibleStandardWallet }
+
 export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
-  const $wallets = atom<WalletAdapterCompatibleStandardWallet[]>([])
+  const $wallets = atom<WalletInfo[]>([])
   onSet($wallets, ({ newValue }) => {
     dispatchAvailableWalletsChanged(newValue)
   })
 
   const $walletsMap = computed($wallets, wallets => {
-    return wallets.reduce<Record<string, WalletAdapterCompatibleStandardWallet>>(
-      (_walletsByName, newWallet) => {
-        const name = newWallet.name
-        const existing = _walletsByName[name]
-        // Add wallet adapter if not yet added
-        if (!existing) {
-          _walletsByName[name] = newWallet
-          return _walletsByName
-        }
+    if (!wallets) {
+      return
+    }
+    return wallets.reduce<Record<string, WalletInfo>>((_walletsByName, newWallet) => {
+      const name = newWallet.wallet.name
+      const existing = _walletsByName[name]
+      // Add wallet adapter if not yet added
+      if (!existing) {
+        _walletsByName[name] = newWallet
         return _walletsByName
-      },
-      {},
-    )
+      }
+      return _walletsByName
+    }, {})
   })
 
   const $connectedAccount = atom<StandardWalletConnectResult>()
@@ -74,7 +83,7 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
     if (!acc) {
       return
     }
-    return walletsMap[acc.name]
+    return walletsMap?.[acc.name]
   })
 
   const $env = atom<Cluster>(env ?? "mainnet-beta")
@@ -118,12 +127,12 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
     updateWallet()
   }
 
-  function removeAdapterEventListeners(
-    _wallet?: WalletAdapterCompatibleStandardWallet | undefined,
-  ): void {
-    _wallet = _wallet ? _wallet : $wallet.get()
-    if (_wallet) {
-      _wallet.features["standard:events"].on("change", e => onChangeEvent(e, _wallet))
+  function removeAdapterEventListeners(walletInfo?: WalletInfo): void {
+    walletInfo = walletInfo ? walletInfo : $wallet.get()
+    if (walletInfo && walletInfo.type === "standard") {
+      walletInfo.wallet.features["standard:events"].on("change", e =>
+        onChangeEvent(e, walletInfo.wallet),
+      )
     }
   }
 
@@ -131,16 +140,19 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
    * @throws Error
    */
   async function connectStandardWallet(name: string): Promise<StandardWalletConnectResult> {
-    const wallet = $walletsMap.get()[name]
-    if (!wallet) {
+    const walletInfo = $walletsMap.get()?.[name]
+    if (!walletInfo) {
       throw new Error(`connectStandardWallet: wallet with name: ${name} does not exist!`)
     }
-    if (!("standard:connect" in wallet.features)) {
+    if (walletInfo.type !== "standard") {
+      throw new Error("`connectStandardWallet: cannot connect to non-standard wallet")
+    }
+    if (!("standard:connect" in walletInfo.wallet.features)) {
       throw new Error(
         `connectStandardWallet: standard wallet does NOT have standard:connect feature enabled!`,
       )
     }
-    const res = await wallet.features["standard:connect"].connect()
+    const res = await walletInfo.wallet.features["standard:connect"].connect()
     if (res.accounts.length === 0) {
       throw new Error(`connectStandardWallet: no accounts available!`)
     }
@@ -150,7 +162,7 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
     }
     return {
       name,
-      icon: wallet.icon,
+      icon: walletInfo.wallet.icon,
       type: "standard",
       pubKey: base58.encode(acc.publicKey),
       account: acc,
@@ -163,6 +175,31 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
   async function connectWallet(name: string): Promise<void> {
     if ($connecting.get() || $disconnecting.get()) {
       throw new Error("connect: failed to connect, already connecting/disconnecting")
+    }
+
+    const wallets = $wallets.get()
+
+    if (wallets.some(w => w.type === "ios-webview")) {
+      const walletInfo = wallets.find(w => w.wallet.name === name)
+
+      if (!walletInfo || walletInfo.type !== "ios-webview") {
+        throw new Error(
+          `connect: failed to connect, requested wallet ${name} has not been hardcoded!`,
+        )
+      }
+
+      const wallet = walletInfo.wallet
+      if (!wallet.deepUrl) {
+        window.open(wallet.url, "_blank")
+        return
+        // throw new Error(
+        //   `connect: failed to connect, requested wallet ${name} does NOT have deeplink enabled!`,
+        // )
+      }
+
+      const url = wallet.deepUrl(window.location)
+      window.location.href = url
+      return
     }
 
     // if (!(_ready === WalletReadyState.Installed || _ready === WalletReadyState.Loadable)) {
@@ -214,19 +251,20 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
     if ($disconnecting.get()) {
       return
     }
-    const _adapter = $wallet.get()
-    if (!_adapter) {
+    const walletInfo = $wallet.get()
+    if (!walletInfo || walletInfo.type === "ios-webview") {
       console.error(
         "disconnect: resetting wallet since cannot disconnect from nonexistent adapter: ",
-        _adapter,
+        walletInfo,
       )
       updateWallet()
       return
     }
     try {
       $disconnecting.set(true)
-      if ("standard:disconnect" in _adapter.features) {
-        await _adapter.features["standard:disconnect"].disconnect()
+      const wallet = walletInfo.wallet
+      if ("standard:disconnect" in wallet.features) {
+        await wallet.features["standard:disconnect"].disconnect()
       }
     } finally {
       $disconnecting.set(false)
@@ -243,7 +281,7 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
       name: w.name,
       accounts: changes.accounts,
     })
-    const connectedWalletName = $wallet.get()?.name
+    const connectedWalletName = $wallet.get()?.wallet.name
     if (connectedWalletName && connectedWalletName === w.name) {
       /**
        * w.accounts is empty ONLY IF
@@ -275,7 +313,11 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
       // }
     }
 
-    $wallets.set(getStandardWallets())
+    const walletInfos: WalletInfo[] = getStandardWallets().map(w => ({
+      type: "standard",
+      wallet: w,
+    }))
+    $wallets.set(walletInfos)
   }
 
   function onChangeEvent(
@@ -337,16 +379,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
     return get().filter(w => isWalletAdapterCompatibleStandardWallet(w))
   }
 
-  function onMountLoadWallets() {
+  function onMountLoadStandardWallets() {
     console.log("onMountLoadWallets")
 
     const { on } = getWallets()
-    const initializedWallets = getStandardWallets().map(w => {
+    const initializedWallets: WalletInfo[] = getStandardWallets().map(w => {
       w.features["standard:events"].on("change", async x => {
         console.log({ x })
         await onChange(w, x)
       })
-      return w
+      return { type: "standard", wallet: w }
     })
 
     console.log({ initializedWallets })
@@ -356,7 +398,11 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
      */
     $wallets.set(initializedWallets)
     const addWallet = () => {
-      $wallets.set(getStandardWallets())
+      const walletInfos: WalletInfo[] = getStandardWallets().map(w => ({
+        type: "standard",
+        wallet: w,
+      }))
+      $wallets.set(walletInfos)
     }
 
     /**
@@ -371,8 +417,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
     }
   }
 
+  function onMountLoadHardcodedMobileWallets() {
+    const walletInfos: WalletInfo[] = HARDCODED_WALLET_STANDARDS.map(w => ({
+      type: "ios-webview",
+      wallet: w,
+    }))
+    $wallets.set(walletInfos)
+  }
+
   async function select(name: string): Promise<void> {
-    const existingName = $wallet.get()?.name
+    const existingName = $wallet.get()?.wallet.name
 
     if (existingName === name) {
       console.error("adapter already connected")
@@ -401,10 +455,23 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
     await select(walletName)
   }
 
-  function initOnMount(): () => void {
+  function initOnMount(): (() => void) | undefined {
+    if (isIosAndRedirectable()) {
+      alert("is ios!")
+      onMountLoadHardcodedMobileWallets()
+      return
+    }
+
+    // if (isIosAndWebView()) {
+    //   alert("ios and web view found!")
+    //   return
+    // }
+
+    // alert("init on mount!")
+
     const cleanup = onMountClearAdapterEventListeners()
     loadConnectHandlers()
-    const cleanup2 = onMountLoadWallets()
+    const cleanup2 = onMountLoadStandardWallets()
     onMountAutoConnect()
     return () => {
       cleanup()
@@ -420,11 +487,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
    */
   async function signTransactionV1(txBytes: Uint8Array) {
     const connectedAccount = $connectedAccount.get()
-    const wallet = $wallet.get()
-    if (!connectedAccount || !wallet) {
+    const walletInfo = $wallet.get()
+    if (!connectedAccount || !walletInfo) {
       throw new Error("signTransaction failed, missing adapter/public key!")
     }
 
+    if (walletInfo.type !== "standard") {
+      throw new Error("solana:signTransaction NOT found since wallet is not standard wallet")
+    }
+
+    const wallet = walletInfo.wallet
     if (!(SolanaSignTransaction in wallet.features)) {
       throw new Error("solana:signTransaction NOT found in standard wallet features")
     }
@@ -450,11 +522,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
    */
   async function signAllTransactionsV1(txs: Uint8Array[]) {
     const connectedAccount = $connectedAccount.get()
-    const wallet = $wallet.get()
-    if (!connectedAccount || !wallet) {
+    const walletInfo = $wallet.get()
+    if (!connectedAccount || !walletInfo) {
       throw new Error("signAllTransactions failed, missing adapter/public key!")
     }
 
+    if (walletInfo.type !== "standard") {
+      throw new Error("solana:signTransaction NOT found since wallet is not standard wallet")
+    }
+
+    const wallet = walletInfo.wallet
     if (!(SolanaSignTransaction in wallet.features)) {
       throw new Error("solana:signTransaction NOT found in standard wallet features")
     }
@@ -479,11 +556,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
    */
   async function signMessage(tx: Uint8Array): Promise<Uint8Array> {
     const connectedAccount = $connectedAccount.get()
-    const wallet = $wallet.get()
-    if (!connectedAccount || !wallet) {
+    const walletInfo = $wallet.get()
+    if (!connectedAccount || !walletInfo) {
       throw new Error("signMessage failed, missing adapter/public key!")
     }
 
+    if (walletInfo.type !== "standard") {
+      throw new Error("solana:signTransaction NOT found since wallet is not standard wallet")
+    }
+
+    const wallet = walletInfo.wallet
     if (!(SolanaSignMessage in wallet.features)) {
       throw new Error("solana:signMessage NOT found in standard wallet features")
     }
@@ -506,11 +588,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
    */
   async function sendTransactionV1(txBytes: Uint8Array) {
     const connectedAccount = $connectedAccount.get()
-    const wallet = $wallet.get()
-    if (!connectedAccount || !wallet) {
+    const walletInfo = $wallet.get()
+    if (!connectedAccount || !walletInfo) {
       throw new Error("sendTransaction failed: missing adapter / public key!")
     }
 
+    if (walletInfo.type !== "standard") {
+      throw new Error("solana:signAndSendTransaction NOT found since wallet is not standard wallet")
+    }
+
+    const wallet = walletInfo.wallet
     if (!(SolanaSignAndSendTransaction in wallet.features)) {
       throw new Error("solana:signAndSendTransaction NOT found in standard wallet features")
     }
@@ -550,12 +637,20 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
         const { abortSignal, minContextSlot } = config
         abortSignal?.throwIfAborted()
 
-        const wallet = $wallet.get()
-        if (!wallet) {
+        const walletInfo = $wallet.get()
+        if (!walletInfo) {
           throw new Error("solana:signAndSendTransaction wallet not connected!")
         }
+
+        if (walletInfo.type !== "standard") {
+          throw new Error(
+            "getTransactionSendingSigner NOT found since wallet is not standard wallet",
+          )
+        }
+
+        const wallet = walletInfo.wallet
         if (!(SolanaSignAndSendTransaction in wallet.features)) {
-          throw new Error("solana:signAndSendTransaction NOT found in standard wallet features")
+          throw new Error("getTransactionSendingSigner NOT found in standard wallet features")
         }
 
         const [tx] = txs

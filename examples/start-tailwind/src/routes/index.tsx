@@ -70,36 +70,6 @@ export default function Home() {
     console.log({ res })
   }
 
-  // async function sendTxV1() {
-  // const APPEAL_WALLET_PUBKEY = new PublicKey("Hm9YjuVadcekDPbLeCSFE83r1QLpS2ksmKk7Sn5BCpfL")
-  // const rawPubKey = publicKey()
-  // if (!rawPubKey) {
-  //   console.error("cannot sign tx, no pub key: ", { rawPubKey })
-  //   return
-  // }
-  // const pubKey = new PublicKey(rawPubKey)
-  // const lamportsToSend = 0.1 * LAMPORTS_PER_SOL
-  // const transaction = new Transaction().add(
-  //   SystemProgram.transfer({
-  //     fromPubkey: pubKey,
-  //     toPubkey: APPEAL_WALLET_PUBKEY,
-  //     lamports: lamportsToSend,
-  //   }),
-  // )
-  //
-  // const connection = new Connection(DEVNET_RPC_ENDPOINT, "confirmed")
-  // const latestHash = await connection.getLatestBlockhash("finalized")
-  // if (transaction instanceof Transaction) {
-  //   transaction.recentBlockhash = latestHash.blockhash
-  //   transaction.feePayer = pubKey
-  // }
-  // const tx = new Uint8Array(
-  //   transaction.serialize({ verifySignatures: false, requireAllSignatures: false }),
-  // )
-  // const res = await sendTransaction(tx)
-  // console.log("successful tx: ", { res })
-  // }
-
   return (
     <main class="text-center mx-auto text-gray-700 p-4 space-y-8">
       <h1 class="max-6-xs text-6xl text-sky-700 font-thin uppercase my-16">Hello world!</h1>

@@ -1,5 +1,5 @@
-import { WalletAdapterCompatibleStandardWallet } from "@solana/wallet-adapter-base"
 import { Wallet, WalletAccount } from "@wallet-standard/base"
+import { WalletInfo } from "./store"
 
 export type StandardEventChangeProperties = {
   readonly chains?: Wallet["chains"]
@@ -72,9 +72,9 @@ export function dispatchWalletChanged(wallet?: StandardWalletConnectResult | und
 }
 
 export type AvailableWalletsChangedEvent = CustomEvent<{
-  wallets: WalletAdapterCompatibleStandardWallet[]
+  wallets: WalletInfo[]
 }>
-export function dispatchAvailableWalletsChanged(wallets: WalletAdapterCompatibleStandardWallet[]) {
+export function dispatchAvailableWalletsChanged(wallets: WalletInfo[]) {
   const getAvailableWalletsChangedEvent = new CustomEvent(WalletEvent.AVAILABLE_WALLETS_CHANGED, {
     detail: { wallets },
   })

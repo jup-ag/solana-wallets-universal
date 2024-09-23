@@ -62,14 +62,6 @@ export function isSafari(ua: string) {
   return ua.includes("safari")
 }
 
-export function isIosAndWebView() {
-  if (typeof window === "undefined" || !navigator) {
-    return false
-  }
-  const ua = navigator.userAgent.toLowerCase()
-  return isIos(ua) && !isSafari(ua)
-}
-
 /**
  * Users on iOS can be redirected into a wallet's in-app browser automatically,
  * if that wallet has a universal link configured to do so

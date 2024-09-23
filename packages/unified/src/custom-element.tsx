@@ -3,7 +3,7 @@ import { customElement, noShadowDOM } from "solid-element"
 import { UnifiedWalletModalProvider, UnifiedWalletProviderProps } from "./contexts"
 import { UnifiedWalletButton, UnifiedWalletButtonProps } from "./components"
 
-export function loadCustomElements() {
+function loadCustomElements() {
   customElement("unified-wallet-modal", (props: UnifiedWalletProviderProps, {}) => {
     noShadowDOM() // ... Solid code
     return <UnifiedWalletModalProvider {...props} />
@@ -13,3 +13,6 @@ export function loadCustomElements() {
     return <UnifiedWalletButton {...props} />
   })
 }
+
+export { loadCustomElements }
+export type { UnifiedWalletButtonProps, UnifiedWalletProviderProps }
