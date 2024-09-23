@@ -4,9 +4,9 @@ import "./app.css"
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
+import { WalletProvider } from "@solana-wallets-solid/solid"
 
 import Nav from "~/components/Nav"
-import { WalletProvider } from "@solana-wallets-solid/solid"
 
 export default function App() {
   // const adapters = [
@@ -37,6 +37,7 @@ export default function App() {
           autoConnect={true}
           disconnectOnAccountChange={true}
           localStorageKey="unified:wallet-stoarge-key"
+          env="devnet"
         >
           <unified-wallet-modal
             autoConnect={true}

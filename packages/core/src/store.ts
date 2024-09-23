@@ -14,6 +14,12 @@ import {
 } from "@solana/wallet-standard-features"
 import { getWallets } from "@wallet-standard/app"
 import { base58 } from "@scure/base"
+import {
+  address,
+  getTransactionEncoder,
+  SignatureBytes,
+  TransactionSendingSigner,
+} from "@solana/web3.js"
 
 import {
   dispatchAvailableWalletsChanged,
@@ -27,11 +33,16 @@ import {
   WalletEvent,
 } from "./events"
 import { getLocalStorage, KEYS, setLocalStorage } from "./localstorage"
-// import { detectedFirst, isInWebView, isIosAndWebView, isOnAndroid } from "./utils"
 
 export type Cluster = "devnet" | "testnet" | "mainnet-beta"
 
-export function initStore() {
+type StoreProps = {
+  env?: Cluster
+  autoConnect: boolean
+  disconnectOnAccountChange: boolean
+  // localStorageKey: string
+}
+export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
   const $wallets = atom<WalletAdapterCompatibleStandardWallet[]>([])
   onSet($wallets, ({ newValue }) => {
     dispatchAvailableWalletsChanged(newValue)
@@ -66,7 +77,7 @@ export function initStore() {
     return walletsMap[acc.name]
   })
 
-  const $env = atom<Cluster>("mainnet-beta")
+  const $env = atom<Cluster>(env ?? "mainnet-beta")
   const $connecting = atom<boolean>(false)
   onSet($connecting, ({ newValue }) => {
     dispatchConnecting(newValue)
@@ -256,7 +267,7 @@ export function initStore() {
           version: w.version,
           features: w.features as any,
         })
-      } else {
+      } else if (disconnectOnAccountChange) {
         onDisconnect(changes)
       }
       // } else if (props.disconnectOnAccountChange) {
@@ -402,7 +413,12 @@ export function initStore() {
     }
   }
 
-  async function signTransaction(txBytes: Uint8Array) {
+  /**
+   * Sign single transaction
+   *
+   * Only compatible with `@solana/web3.js@v1`
+   */
+  async function signTransactionV1(txBytes: Uint8Array) {
     const connectedAccount = $connectedAccount.get()
     const wallet = $wallet.get()
     if (!connectedAccount || !wallet) {
@@ -427,7 +443,12 @@ export function initStore() {
     return res[0].signedTransaction
   }
 
-  async function signAllTransactions(txs: Uint8Array[]) {
+  /**
+   * Sign multiple transactions
+   *
+   * Only compatible with `@solana/web3.js@v1`
+   */
+  async function signAllTransactionsV1(txs: Uint8Array[]) {
     const connectedAccount = $connectedAccount.get()
     const wallet = $wallet.get()
     if (!connectedAccount || !wallet) {
@@ -451,6 +472,11 @@ export function initStore() {
     return res[0].signedTransaction
   }
 
+  /**
+   * Sign arbitrary message
+   *
+   * Compatible with both `@solana/web3.js@v2` and `@solana/web3.js@v1`
+   */
   async function signMessage(tx: Uint8Array): Promise<Uint8Array> {
     const connectedAccount = $connectedAccount.get()
     const wallet = $wallet.get()
@@ -475,7 +501,10 @@ export function initStore() {
     return firstRes.signature
   }
 
-  async function sendTransaction(txBytes: Uint8Array) {
+  /*
+   * Send transactions via `@solana/web3` v1 package
+   */
+  async function sendTransactionV1(txBytes: Uint8Array) {
     const connectedAccount = $connectedAccount.get()
     const wallet = $wallet.get()
     if (!connectedAccount || !wallet) {
@@ -490,7 +519,7 @@ export function initStore() {
     const input: SolanaSignAndSendTransactionInput = {
       account: acc,
       transaction: txBytes,
-      chain: "solana:devnet",
+      chain: `solana:${$env.get()}`,
     }
 
     const feature = wallet.features[SolanaSignAndSendTransaction]
@@ -500,6 +529,65 @@ export function initStore() {
       throw new Error("Missing tx output from signAndSendTx from connected standard wallet!")
     }
     return res[0].signature
+  }
+
+  /**
+   * Get a `TransactionSendingSigner` for signing transactions
+   *
+   * Only compatible with `@solana/web3.js@v2`
+   *
+   * @see https://github.com/solana-labs/solana-web3.js/blob/855c4e0998c58f500c7c950d51017fdccf8b61d6/packages/react/src/useSignAndSendTransaction.ts
+   */
+  function getTransactionSendingSigner(): TransactionSendingSigner | undefined {
+    const connectedAccount = $connectedAccount.get()
+    if (!connectedAccount) {
+      return
+    }
+
+    const transactionSendingSigner: TransactionSendingSigner = {
+      address: address(connectedAccount.pubKey),
+      signAndSendTransactions: async (txs, config = {}) => {
+        const { abortSignal, minContextSlot } = config
+        abortSignal?.throwIfAborted()
+
+        const wallet = $wallet.get()
+        if (!wallet) {
+          throw new Error("solana:signAndSendTransaction wallet not connected!")
+        }
+        if (!(SolanaSignAndSendTransaction in wallet.features)) {
+          throw new Error("solana:signAndSendTransaction NOT found in standard wallet features")
+        }
+
+        const [tx] = txs
+        if (txs.length === 0) {
+          throw new Error("No transactions found for signing")
+        }
+        if (!tx) {
+          throw new Error("No transactions found for signing")
+        }
+
+        const acc = connectedAccount.account
+        const transactionEncoder = getTransactionEncoder()
+        const wireTxBytes = transactionEncoder.encode(tx)
+        const input: SolanaSignAndSendTransactionInput = {
+          account: acc,
+          transaction: wireTxBytes as Uint8Array,
+          chain: `solana:${$env.get()}`,
+          ...(minContextSlot != null
+            ? {
+                options: {
+                  minContextSlot: Number(minContextSlot),
+                },
+              }
+            : null),
+        }
+        const feature = wallet.features[SolanaSignAndSendTransaction]
+        const res = await feature.signAndSendTransaction(input)
+        return res.map(s => s.signature as SignatureBytes)
+      },
+    }
+
+    return transactionSendingSigner
   }
 
   return {
@@ -515,9 +603,10 @@ export function initStore() {
 
     initOnMount,
     signMessage,
-    signTransaction,
-    signAllTransactions,
-    sendTransaction,
+    signTransactionV1,
+    signAllTransactionsV1,
+    sendTransactionV1,
+    getTransactionSendingSigner,
   }
 }
 

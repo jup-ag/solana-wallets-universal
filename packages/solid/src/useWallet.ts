@@ -23,10 +23,15 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     $wallets,
     $walletsMap,
     signMessage,
-    sendTransaction,
-    signTransaction,
-    signAllTransactions,
-  } = initStore()
+    signTransactionV1,
+    signAllTransactionsV1,
+    sendTransactionV1,
+    getTransactionSendingSigner,
+  } = initStore({
+    env: props.env,
+    autoConnect: props.autoConnect,
+    disconnectOnAccountChange: props.disconnectOnAccountChange,
+  })
   const wallets = useStore($wallets)
   const walletsByName = useStore($walletsMap)
   const connectedAccount = useStore($connectedAccount)
@@ -60,9 +65,10 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     disconnect: dispatchDisconnect,
 
     signMessage,
-    signTransaction,
-    signAllTransactions,
-    sendTransaction,
+    signTransactionV1,
+    signAllTransactionsV1,
+    sendTransactionV1,
+    getTransactionSendingSigner,
     // signTransaction,
     // signMessage,
     // signAllTransactions,

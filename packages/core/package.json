@@ -52,6 +52,7 @@
   "devDependencies": {
     "@scure/base": "^1.1.9",
     "@solana-mobile/wallet-adapter-mobile": "^2.1.3",
+    "@solana/transactions": "2.0.0-experimental.743e0a6",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-standard-features": "^1.2.0",
     "@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
@@ -59,7 +60,9 @@
     "@wallet-standard/base": "1.0.1",
     "@wallet-standard/core": "1.0.1",
     "@wallet-standard/features": "1.0.1",
-    "nanostores": "^0.11.3"
+    "@solana/web3.js": "^2.0.0-rc.1",
+    "nanostores": "^0.11.3",
+    "@solana-program/system": "0.5.1"
   },
   "peerDependencies": {
     "nanostores": "^0.11.3"

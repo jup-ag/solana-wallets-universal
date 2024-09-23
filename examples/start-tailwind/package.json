@@ -10,11 +10,10 @@
     "deploy": "vinxi build && wrangler pages deploy dist"
   },
   "dependencies": {
+    "@solana/web3.js": "^2.0.0-rc.1",
     "@nanostores/solid": "^0.4.2",
     "@solana-wallets-solid/solid": "workspace:*",
     "@solana-wallets-solid/unified": "workspace:*",
-    "@solana/spl-token": "^0.4.8",
-    "@solana/web3.js": "^1.95.3",
     "@solidjs/router": "^0.14.1",
     "@solidjs/start": "^1.0.6",
     "nanostores": "^0.11.3",
