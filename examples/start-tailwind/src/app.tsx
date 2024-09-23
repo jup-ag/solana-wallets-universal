@@ -49,7 +49,7 @@ export default function App() {
           autoConnect={true}
           disconnectOnAccountChange={true}
           localStorageKey="unified:wallet-stoarge-key"
-          env="devnet"
+          env={"devnet"}
         >
           <unified-wallet-modal />
           <Nav />

@@ -44,7 +44,7 @@ export default function Home() {
     }
 
     // Create an HTTP transport or any custom transport of your choice.
-    const transport = createDefaultRpcTransport({ url: "https://api.devnet.solana.com" })
+    const transport = createDefaultRpcTransport({ url: DEVNET_RPC_ENDPOINT })
     // Create an RPC client using that transport.
     const rpc = createSolanaRpcFromTransport(transport)
     const recentBlockhashRes = await rpc.getLatestBlockhash().send()

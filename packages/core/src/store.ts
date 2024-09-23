@@ -4,7 +4,6 @@ import {
   isWalletAdapterCompatibleStandardWallet,
   WalletName,
   WalletAdapterCompatibleStandardWallet,
-  isIosAndRedirectable,
 } from "@solana/wallet-adapter-base"
 import {
   SolanaSignAndSendTransaction,
@@ -35,8 +34,8 @@ import {
 } from "./events"
 import { getLocalStorage, KEYS, setLocalStorage } from "./localstorage"
 import { THardcodedWalletStandardAdapter } from "./hardcoded-wallet-adapter"
-import { isIos } from "./environment"
 import { HARDCODED_WALLET_STANDARDS } from "./constants"
+import { isIosAndRedirectable, isIosAndWalletApp } from "./environment"
 
 export type Cluster = "devnet" | "testnet" | "mainnet-beta"
 
@@ -376,7 +375,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
 
   function getStandardWallets(): WalletAdapterCompatibleStandardWallet[] {
     const { get } = getWallets()
-    return get().filter(w => isWalletAdapterCompatibleStandardWallet(w))
+    const _wallets = [...get()]
+    if (isIosAndWalletApp()) {
+      if ("coinbaseSolana" in window) {
+        const isCompatible = isWalletAdapterCompatibleStandardWallet(window.coinbaseSolana as any)
+        alert(`coinbase solana compatible: ${isCompatible}`)
+        _wallets.push(window.coinbaseSolana as any)
+      }
+    }
+    const available = get().filter(w => isWalletAdapterCompatibleStandardWallet(w))
+    return available
   }
 
   function onMountLoadStandardWallets() {
@@ -447,12 +455,23 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
    */
   async function onMountAutoConnect() {
     const walletName = getLocalStorage<WalletName>(KEYS.WALLET_NAME)
-    console.log("onMountAutoConnect: ", { walletName })
-    if (!walletName) {
-      console.log("onMountAutoConnect: skipping since no previous wallet found")
-      return
+    if (walletName) {
+      await select(walletName)
     }
-    await select(walletName)
+    // If IOS and within a wallet app
+    // we automatically connect to the
+    // first standard wallet
+    if (isIosAndWalletApp()) {
+      const wallets = $wallets.get()
+      if (wallets.length == 0) {
+        return
+      }
+      const first = $wallets.get()[0]
+      if (!first) {
+        return
+      }
+      await select(first.wallet.name)
+    }
   }
 
   function initOnMount(): (() => void) | undefined {
