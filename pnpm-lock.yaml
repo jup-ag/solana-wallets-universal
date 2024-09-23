@@ -204,13 +204,14 @@ importers:
         version: 3.72.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
 
   examples/sveltekit:
-    devDependencies:
+    dependencies:
       '@solana-wallets-solid/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@solana-wallets-solid/unified':
         specifier: workspace:*
         version: link:../../packages/unified
+    devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.0.0
         version: 3.2.5(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))

@@ -20,9 +20,10 @@ export type WalletContext = {
   connecting: ReturnType<ReturnType<typeof initStore>["$connecting"]["get"]>
   disconnecting: ReturnType<ReturnType<typeof initStore>["$disconnecting"]["get"]>
   signMessage: ReturnType<typeof initStore>["signMessage"]
-  signTransaction: ReturnType<typeof initStore>["signTransaction"]
-  signAllTransactions: ReturnType<typeof initStore>["signAllTransactions"]
-  sendTransaction: ReturnType<typeof initStore>["sendTransaction"]
+  signTransactionV1: ReturnType<typeof initStore>["signTransactionV1"]
+  signAllTransactionsV1: ReturnType<typeof initStore>["signAllTransactionsV1"]
+  sendTransactionV1: ReturnType<typeof initStore>["sendTransactionV1"]
+  getTransactionSendingSigner: ReturnType<typeof initStore>["getTransactionSendingSigner"]
 }
 const WalletContext = createContext<WalletContext>({} as WalletContext)
 
@@ -37,10 +38,11 @@ const {
   $wallets,
   $walletsMap,
   signMessage,
-  sendTransaction,
-  signTransaction,
-  signAllTransactions,
-} = initStore()
+  signTransactionV1,
+  signAllTransactionsV1,
+  sendTransactionV1,
+  getTransactionSendingSigner,
+} = initStore({ autoConnect: true, disconnectOnAccountChange: true })
 
 const WalletProvider: React.FC<WalletProviderProps> = ({ children, ...config }) => {
   const wallets = useStore($wallets)
@@ -69,9 +71,10 @@ const WalletProvider: React.FC<WalletProviderProps> = ({ children, ...config }) 
         connecting,
         disconnecting,
         signMessage,
-        signTransaction,
-        signAllTransactions,
-        sendTransaction,
+        signTransactionV1,
+        signAllTransactionsV1,
+        sendTransactionV1,
+        getTransactionSendingSigner,
       }}
     >
       {children}
