@@ -1,4 +1,4 @@
-# @your-repository-name/hello
+# @solana-wallets-solid/react
 
 ## 0.1.0
 
