@@ -51,7 +51,21 @@ export default function App() {
           localStorageKey="unified:wallet-stoarge-key"
           env={"devnet"}
         >
-          <unified-wallet-modal />
+          <unified-wallet-modal
+          // config={{
+          //   env: "mainnet-beta",
+          //   theme: "jupiter",
+          //   metadata: {
+          //     name: "UnifiedWallet69",
+          //     description: "UnifiedWallet69",
+          //     url: "https://jup.ag69",
+          //     iconUrls: ["https://jup.ag/favicon.ico/69"],
+          //   },
+          //   walletlistExplanation: {
+          //     href: "https://station.jup.ag/docs/additional-topics/wallet-list",
+          //   },
+          // }}
+          />
           <Nav />
           <Suspense>{props.children}</Suspense>
         </WalletProvider>

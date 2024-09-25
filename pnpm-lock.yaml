@@ -201,7 +201,7 @@ importers:
         version: 3.4.10(ts-node@10.9.2(@swc/core@1.7.26(@swc/helpers@0.5.12))(@types/node@22.5.0)(typescript@5.6.2))
       wrangler:
         specifier: ^3.70.0
-        version: 3.72.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 3.72.2(@cloudflare/workers-types@4.20240924.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)
 
   examples/sveltekit:
     dependencies:
@@ -212,9 +212,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/unified
     devDependencies:
-      '@sveltejs/adapter-auto':
-        specifier: ^3.0.0
-        version: 3.2.5(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))
+      '@sveltejs/adapter-cloudflare':
+        specifier: ^4.7.2
+        version: 4.7.2(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(wrangler@3.72.2(@cloudflare/workers-types@4.20240924.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10))
       '@sveltejs/kit':
         specifier: ^2.0.0
         version: 2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6))
@@ -329,9 +329,6 @@ importers:
       '@solana-wallets-solid/core':
         specifier: workspace:*
         version: link:../core
-      '@solana/wallet-adapter-base':
-        specifier: ^0.9.23
-        version: 0.9.23(@solana/web3.js@2.0.0-rc.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.6.2)(ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)))
       '@solana/web3.js':
         specifier: ^2.0.0-rc.1
         version: 2.0.0-rc.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.6.2)(ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))
@@ -1182,6 +1179,9 @@ packages:
   '@cloudflare/workers-shared@0.3.0':
     resolution: {integrity: sha512-cqtLW1QiBC/ABaZIhAdyGCsnHHY6pAb6hsVUZg82Co2gQtf/faxRYV1FgpCwUYroTdk6A66xUMSTmFqreKCJow==}
     engines: {node: '>=16.7.0'}
+
+  '@cloudflare/workers-types@4.20240924.0':
+    resolution: {integrity: sha512-AnoHY0B5rgMv4Lg34mdwfp4+Z9ZZRli8AFO7uY8Q9UchR+HPEMEdaAQ0EswTYQqcVBdarRuYyM0Oeo4hM8Jqog==}
 
   '@corvu/dialog@0.2.3':
     resolution: {integrity: sha512-1p1lG2Pdu7CtDYw0FP+gdU0Db4zsB2ljOP7UxszZIQpvVvnrAYhNPfu/8IpscB38c0hZCodEnv5hR0NaEEA/Ag==}
@@ -2672,10 +2672,11 @@ packages:
   '@solidjs/start@1.0.6':
     resolution: {integrity: sha512-O5knaeqDBx+nKLJRm5ZJurnXZtIYBOwOreQ10APaVtVjKIKKRC5HxJ1Kwqg7atOQNNDgsF0pzhW218KseaZ1UA==}
 
-  '@sveltejs/adapter-auto@3.2.5':
-    resolution: {integrity: sha512-27LR+uKccZ62lgq4N/hvyU2G+hTP9fxWEAfnZcl70HnyfAjMSsGk1z/SjAPXNCD1mVJIE7IFu3TQ8cQ/UH3c0A==}
+  '@sveltejs/adapter-cloudflare@4.7.2':
+    resolution: {integrity: sha512-zdFtQ2nzVHvc3OweA3zF2+WgSRUW536kKGPzfdRmWo/+UbvwAXB3c3pB66/JaypkxWTIhxz1umshtw5eHWyx/w==}
     peerDependencies:
       '@sveltejs/kit': ^2.0.0
+      wrangler: ^3.28.4
 
   '@sveltejs/kit@2.5.28':
     resolution: {integrity: sha512-/O7pvFGBsQPcFa9UrW8eUC5uHTOXLsUp3SN0dY6YmRAL9nfPSrJsSJk//j5vMpinSshzUjteAFcfQTU+04Ka1w==}
@@ -5850,6 +5851,10 @@ packages:
   regenerator-transform@0.15.2:
     resolution: {integrity: sha512-hfMp2BoF0qOk3uc5V20ALGDS2ddjQaLrdl7xrGXvAIow7qeWRM2VA2HuCHkUKk9slq3VwEwLNK3DFBqDfPGYtg==}
 
+  regexparam@3.0.0:
+    resolution: {integrity: sha512-RSYAtP31mvYLkAHrOlh25pCNQ5hWnT106VukGaaFfuJrZFkGRX5GhUAdPqpSDXxOhA2c4akmRuplv1mRqnBn6Q==}
+    engines: {node: '>=8'}
+
   regexpu-core@5.3.2:
     resolution: {integrity: sha512-RAM5FlZz+Lhmo7db9L298p2vHP5ZywrVXmVXpmAD9GuL5MPH6t9ROw1iA/wfHkQ76Qe7AaPF0nGuim96/IrQMQ==}
     engines: {node: '>=4'}
@@ -7036,6 +7041,10 @@ packages:
     resolution: {integrity: sha512-y4phjCnEG96u8ZkgkkHB+gSw0i6uMNo23rBmixylWpjxDklB+LWD8dztasvsu7xGaZbLoTxQESdEw956F7VJDA==}
     engines: {node: '>=16'}
     hasBin: true
+
+  worktop@0.8.0-next.18:
+    resolution: {integrity: sha512-+TvsA6VAVoMC3XDKR5MoC/qlLqDixEfOBysDEKnPIPou/NvoPWCAuXHXMsswwlvmEuvX56lQjvELLyLuzTKvRw==}
+    engines: {node: '>=12'}
 
   wrangler@3.72.2:
     resolution: {integrity: sha512-7nxkJ4md+KtESNJ/0DwTM7bHZP+uNRpJT5gMDT9WllP9UVzYdtXCTF+p4CHtxIReUpe6pOi7tb05hK9/Q6WaiA==}
@@ -8255,6 +8264,8 @@ snapshots:
     optional: true
 
   '@cloudflare/workers-shared@0.3.0': {}
+
+  '@cloudflare/workers-types@4.20240924.0': {}
 
   '@corvu/dialog@0.2.3(solid-js@1.8.21)':
     dependencies:
@@ -9912,10 +9923,13 @@ snapshots:
       - vinxi
       - vite
 
-  '@sveltejs/adapter-auto@3.2.5(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))':
+  '@sveltejs/adapter-cloudflare@4.7.2(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(wrangler@3.72.2(@cloudflare/workers-types@4.20240924.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10))':
     dependencies:
+      '@cloudflare/workers-types': 4.20240924.0
       '@sveltejs/kit': 2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6))
-      import-meta-resolve: 4.1.0
+      esbuild: 0.21.5
+      worktop: 0.8.0-next.18
+      wrangler: 3.72.2(@cloudflare/workers-types@4.20240924.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)
 
   '@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6)))(svelte@4.2.19)(vite@5.4.6(@types/node@22.5.0)(lightningcss@1.27.0)(terser@5.31.6))':
     dependencies:
@@ -13633,6 +13647,8 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.4
 
+  regexparam@3.0.0: {}
+
   regexpu-core@5.3.2:
     dependencies:
       '@babel/regjsgen': 0.8.0
@@ -15010,7 +15026,12 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20240821.1
       '@cloudflare/workerd-windows-64': 1.20240821.1
 
-  wrangler@3.72.2(bufferutil@4.0.8)(utf-8-validate@5.0.10):
+  worktop@0.8.0-next.18:
+    dependencies:
+      mrmime: 2.0.0
+      regexparam: 3.0.0
+
+  wrangler@3.72.2(@cloudflare/workers-types@4.20240924.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.3.4
       '@cloudflare/workers-shared': 0.3.0
@@ -15031,6 +15052,7 @@ snapshots:
       workerd: 1.20240821.1
       xxhash-wasm: 1.0.2
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20240924.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil

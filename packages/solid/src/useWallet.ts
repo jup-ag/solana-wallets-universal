@@ -1,8 +1,7 @@
 import { useStore } from "@nanostores/solid"
 import { createContextProvider } from "@solid-primitives/context"
-import { onCleanup, onMount } from "solid-js"
+import { createEffect, onCleanup, onMount } from "solid-js"
 import { Cluster, initStore, dispatchConnect, dispatchDisconnect } from "@solana-wallets-solid/core"
-import {} from "@solana/wallet-adapter-base"
 
 export type WalletProviderProps = {
   autoConnect: boolean
@@ -41,8 +40,6 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
   const connecting = useStore($connecting)
   const disconnecting = useStore($disconnecting)
 
-  // Selected wallet connection state
-
   onMount(() => {
     const cleanup = initOnMount()
     if (cleanup) {
@@ -50,6 +47,10 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
         cleanup()
       })
     }
+  })
+
+  createEffect(() => {
+    console.log("env value: ", { env: env() })
   })
 
   return {
@@ -71,18 +72,13 @@ const [WalletProvider, _useWallet] = createContextProvider((props: WalletProvide
     signAllTransactionsV1,
     sendTransactionV1,
     getTransactionSendingSigner,
-    // signTransaction,
-    // signMessage,
-    // signAllTransactions,
-    // sendTransaction,
-    //
   }
 })
 
 const useWallet = () => {
   const context = _useWallet()
   if (!context) {
-    throw new Error("useWalelt must be used within a WalletProvider")
+    throw new Error("useWallet must be used within a WalletProvider")
   }
   return context
 }

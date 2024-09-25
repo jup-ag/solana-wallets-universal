@@ -76,8 +76,8 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
   onSet($connectedAccount, ({ newValue }) => {
     dispatchWalletChanged(newValue)
   })
-
   const $isConnected = computed($connectedAccount, acc => !!acc)
+
   const $wallet = computed([$connectedAccount, $walletsMap], (acc, walletsMap) => {
     if (!acc) {
       return
@@ -86,13 +86,16 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
   })
 
   const $env = atom<Cluster>(env ?? "mainnet-beta")
+  onSet($env, ({ newValue }) => {
+    console.log("new env value: ", { newValue })
+  })
+
   const $connecting = atom<boolean>(false)
   onSet($connecting, ({ newValue }) => {
     dispatchConnecting(newValue)
   })
+
   const $disconnecting = atom<boolean>(false)
-  // Selected wallet connection state
-  // export const $ready = atom<WalletReadyState>(WalletReadyState.Unsupported)
 
   function onConnect(
     event: StandardEventChangeProperties,
@@ -725,6 +728,8 @@ export function initStore({ env, disconnectOnAccountChange }: StoreProps) {
 }
 
 export type Store = ReturnType<typeof initStore>
+// re-export types
+export type { WalletName, WalletAdapterCompatibleStandardWallet }
 
 // function getMobileWallet(wallets: WalletAdapterCompatibleStandardWallet[]) {
 //   /**
