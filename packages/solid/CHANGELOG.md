@@ -1,5 +1,11 @@
 # @your-repository-name/hello
 
+## 0.4.1
+
+### Patch Changes
+
+- remove solid-context dep
+
 ## 0.4.0
 
 ### Minor Changes
