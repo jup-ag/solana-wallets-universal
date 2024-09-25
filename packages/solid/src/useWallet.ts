@@ -1,7 +1,7 @@
 import { useStore } from "@nanostores/solid"
-import { createContextProvider } from "@solid-primitives/context"
 import { createEffect, onCleanup, onMount } from "solid-js"
 import { Cluster, initStore, dispatchConnect, dispatchDisconnect } from "@solana-wallets-solid/core"
+import { createContextProvider } from "./context"
 
 export type WalletProviderProps = {
   autoConnect: boolean
