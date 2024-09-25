@@ -1,7 +1,7 @@
 {
   "name": "@solana-wallets-solid/react-vite",
-  "version": "0.0.0",
   "type": "module",
+  "private": true,
   "scripts": {
     "typecheck": "tsc",
     "build": "vite build",
