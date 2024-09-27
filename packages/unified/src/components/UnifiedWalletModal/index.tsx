@@ -25,7 +25,7 @@ import {
   isMobile,
   SolanaMobileWalletAdapterWalletName,
   WalletInfo,
-} from "@solana-wallets-solid/core"
+} from "@solana-wallets-solid/core-2.0"
 import { Dynamic } from "solid-js/web"
 
 import { UnifiedWalletModalProps, useUnifiedWallet } from "../../contexts"
@@ -91,7 +91,8 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
   })
 
   async function onWalletClick(wallet: string) {
-    dispatchConnect(wallet)
+    console.log("onWalletClick: ", { wallet })
+    dispatchConnect({ wallet })
   }
 
   let othersListEl: HTMLDivElement | undefined
@@ -169,11 +170,13 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                     : null
                   return (
                     <Dynamic
-                      component={info.type === "standard" ? "button" : "a"}
+                      component={info.type !== "ios-webview" ? "button" : "a"}
                       type="button"
                       class="py-4 px-4 border border-white/10 rounded-lg flex items-center cursor-pointer flex-1 hover:backdrop-blur-xl transition-all hover:shadow-2xl hover:bg-white/10 bg-jupiter-bg"
                       onClick={
-                        info.type === "standard" ? () => onWalletClick(info.wallet.name) : undefined
+                        info.type !== "ios-webview"
+                          ? () => onWalletClick(info.wallet.name)
+                          : undefined
                       }
                       href={
                         info.type === "ios-webview"
@@ -235,7 +238,7 @@ export const ListOfWallets: Component<ListOfWalletsProps> = props => {
                             <ul>
                               <WalletListItem
                                 handleClick={() =>
-                                  info.type === "standard"
+                                  info.type !== "ios-webview"
                                     ? onWalletClick(info.wallet.name)
                                     : undefined
                                 }

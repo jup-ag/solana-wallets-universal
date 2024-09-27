@@ -12,13 +12,13 @@ import {
 } from "solid-js"
 import { createContextProvider } from "@solid-primitives/context"
 import {
+  AccountInfo,
   AvailableWalletsChangedEvent,
   ConnectingEvent,
-  StandardWalletConnectResult,
   WalletChangedEvent,
   WalletEvent,
   WalletInfo,
-} from "@solana-wallets-solid/core"
+} from "@solana-wallets-solid/core-2.0"
 
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
 import { TranslationProvider, useTranslation } from "../translation/useTranslation"
@@ -98,10 +98,18 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
 
     // Wallet info
     const [wallets, setWallets] = createSignal<WalletInfo[]>()
-    const [wallet, setWallet] = createSignal<StandardWalletConnectResult>()
+    const [account, setAccount] = createSignal<AccountInfo>()
     const [connecting, setConnecting] = createSignal<boolean>(false)
-    const name = createMemo(() => wallet()?.name)
-    const publicKey = createMemo(() => wallet()?.pubKey)
+    const name = createMemo(() => account()?.info?.name)
+    const publicKey = createMemo(() => {
+      const acc = account()
+      if (!acc) {
+        return
+      }
+      return acc.type === "custom"
+        ? (acc.info.publicKey?.toString() ?? undefined)
+        : acc.info?.pubKey
+    })
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = createSignal<boolean>(false)
@@ -130,7 +138,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
       console.log("wallet changed event: ", { new_wallet: walletChangedEvent.detail.wallet })
       batch(() => {
         setIsModalOpen(false)
-        setWallet(walletChangedEvent.detail.wallet)
+        setAccount(walletChangedEvent.detail.wallet)
       })
     }
 
@@ -151,6 +159,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
     }
 
     onMount(() => {
+      console.log("UnifiedWalletProvider: onMount!")
       window.addEventListener(WalletEvent.WALLET_CHANGED, onWalletChangedHandler)
       window.addEventListener(WalletEvent.CONNECTING, onWalletConnectingHandler)
       window.addEventListener(ModalEvent.UPDATE_MODAL, onUpdateModalHandler)
@@ -174,15 +183,18 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
     })
 
     createEffect(
-      on([wallet, publicKey], ([wallet, pubKey]) => {
-        if (!pubKey || !wallet) {
+      on([account, publicKey], ([account, pubKey]) => {
+        if (!pubKey || !account) {
           return
         }
         const prevConnected = getPreviouslyConnected()
-
+        const combined = [...prevConnected]
         // make sure the most recently connected wallet is first
-        const combined = new Set([wallet.name, ...prevConnected])
-        setPreviouslyConnected([...combined])
+        if (account.info?.name) {
+          combined.unshift(account.info.name)
+        }
+        const uniques = new Set(combined)
+        setPreviouslyConnected([...uniques])
       }),
     )
 
@@ -198,7 +210,7 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
 
       name,
       publicKey,
-      wallet,
+      account,
       connecting,
       wallets,
 

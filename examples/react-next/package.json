@@ -13,7 +13,7 @@
     "react-dom": "^18",
     "next": "14.2.12",
     "@nanostores/react": "^0.7.3",
-    "@solana-wallets-solid/react": "workspace:*",
+    "@solana-wallets-solid/react-2.0": "workspace:*",
     "@solana-wallets-solid/unified": "workspace:*"
   },
   "devDependencies": {

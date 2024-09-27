@@ -13,11 +13,11 @@ import {
 import {
   dispatchConnect,
   dispatchDisconnect,
-  StandardWalletConnectResult,
   WalletChangedEvent,
   ConnectingEvent,
   WalletEvent,
-} from "@solana-wallets-solid/core"
+  AccountInfo,
+} from "@solana-wallets-solid/core-2.0"
 
 import { dispatchUpdateModal, MWA_NOT_FOUND_ERROR } from "../contexts"
 import { shortenAddress } from "../utils"
@@ -29,10 +29,16 @@ export type UnifiedWalletButtonProps = {
 }
 
 export const UnifiedWalletButton: Component<UnifiedWalletButtonProps> = props => {
-  const [wallet, setWallet] = createSignal<StandardWalletConnectResult>()
+  const [account, setAccount] = createSignal<AccountInfo>()
   const [connecting, setConnecting] = createSignal<boolean>(false)
-  const name = createMemo(() => wallet()?.name)
-  const publicKey = createMemo(() => wallet()?.pubKey)
+  const name = createMemo(() => account()?.info?.name)
+  const publicKey = createMemo(() => {
+    const acc = account()
+    if (!acc) {
+      return
+    }
+    return acc.type === "custom" ? (acc.info.publicKey?.toString() ?? undefined) : acc.info?.pubKey
+  })
 
   /**
    * Only attempt to connect if mobile wallet adapter already connected,
@@ -41,14 +47,17 @@ export const UnifiedWalletButton: Component<UnifiedWalletButtonProps> = props =>
   async function handleConnect() {
     const walletName = name()
 
+    console.log("handleConnect: ", { walletName })
+
     // if (!_adapter || _adapter.name !== SolanaMobileWalletAdapterWalletName) {
     if (!walletName) {
+      console.log("handleConnect: dispatching modal open!")
       dispatchUpdateModal(true)
       return
     }
 
     try {
-      dispatchConnect(walletName)
+      dispatchConnect({ wallet: walletName })
     } catch (err) {
       if (err instanceof Error && err.message === MWA_NOT_FOUND_ERROR) {
         dispatchUpdateModal(true)
@@ -65,7 +74,7 @@ export const UnifiedWalletButton: Component<UnifiedWalletButtonProps> = props =>
 
   function onWalletChangedHandler(event: Event) {
     const walletChangedEvent = event as WalletChangedEvent
-    setWallet(walletChangedEvent.detail.wallet)
+    setAccount(walletChangedEvent.detail.wallet)
   }
 
   function onWalletConnectingHandler(event: Event) {
@@ -97,7 +106,7 @@ export const UnifiedWalletButton: Component<UnifiedWalletButtonProps> = props =>
               style={{ position: "relative" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="Wallet logo" width={16} height={16} src={wallet()?.icon} />
+              <img alt="Wallet logo" width={16} height={16} src={account()?.info?.icon} />
             </span>
 
             <span class="ml-2 text-xs text-white">{shortenAddress(`${publicKey()}`)}</span>

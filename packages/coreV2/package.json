@@ -1,6 +1,6 @@
 {
-  "name": "@solana-wallets-solid/unified",
-  "version": "0.1.0",
+  "name": "@solana-wallets-solid/core-2.0",
+  "version": "0.4.0",
   "description": "Example hello world package in the solana-wallets-solid repository.",
   "license": "MIT",
   "author": "aidanaden",
@@ -28,27 +28,15 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "solid": {
-        "development": "./dist/dev.jsx",
-        "import": "./dist/index.jsx"
-      },
-      "development": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/dev.js"
-        }
-      },
+    "development": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "default": "./dist/dev.js"
       }
     },
-    "./index.css": {
-      "development": {
-        "import": "./dist/dev.css"
-      },
-      "import": "./dist/index.css"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "browser": {},
@@ -62,21 +50,21 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@corvu/dialog": "^0.2.3",
-    "@nanostores/solid": "^0.4.2",
-    "@solana-wallets-solid/core-2.0": "workspace:*",
+    "@scure/base": "^1.1.9",
+    "@solana-mobile/wallet-adapter-mobile": "^2.1.3",
+    "@solana/transactions": "2.0.0-experimental.743e0a6",
     "@solana/wallet-adapter-base": "^0.9.23",
-    "@solana/wallet-standard-core": "1.1.1",
+    "@solana/wallet-standard-features": "^1.2.0",
     "@solana/wallet-standard-wallet-adapter-base": "^1.1.2",
-    "@solid-primitives/context": "^0.2.3",
-    "autoprefixer": "^10.4.19",
+    "@wallet-standard/app": "1.0.1",
+    "@wallet-standard/base": "1.0.1",
+    "@wallet-standard/core": "1.0.1",
+    "@wallet-standard/features": "1.0.1",
+    "@solana/web3.js": "^2.0.0-rc.1",
     "nanostores": "^0.11.3",
-    "postcss": "^8.4.38",
-    "solid-element": "^1.8.1",
-    "solid-js": "^1.8.18",
-    "tailwindcss": "^3.4.3"
+    "@solana-program/system": "0.5.1"
   },
   "peerDependencies": {
-    "solid-js": "^1.8.18"
+    "nanostores": "^0.11.3"
   }
 }

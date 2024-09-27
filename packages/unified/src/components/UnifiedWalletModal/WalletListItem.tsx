@@ -3,7 +3,7 @@ import {
   isMobile,
   SolanaMobileWalletAdapterWalletName,
   WalletInfo,
-} from "@solana-wallets-solid/core"
+} from "@solana-wallets-solid/core-2.0"
 import { Dynamic } from "solid-js/web"
 
 import UnknownIconSVG from "../../icons/UnknownWalletSVG"
@@ -60,10 +60,10 @@ export const WalletListItem: Component<WalletListItemProps> = props => {
   return (
     <li>
       <Dynamic
-        component={props.info.type === "standard" ? "button" : "a"}
+        component={props.info.type !== "ios-webview" ? "button" : "a"}
         type="button"
         class="flex items-center w-full px-5 py-4 space-x-5 transition-all border rounded-lg cursor-pointer border-white/10 hover:bg-white/10 hover:backdrop-blur-xl hover:shadow-2xl bg-jupiter-bg text-white"
-        onClick={props.info.type === "standard" ? props.handleClick : undefined}
+        onClick={props.info.type !== "ios-webview" ? props.handleClick : undefined}
         href={
           props.info.type === "ios-webview"
             ? props.info.wallet.deepUrl?.(window.location)
