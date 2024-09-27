@@ -1,5 +1,11 @@
 # @your-repository-name/hello
 
+## 0.5.0
+
+### Minor Changes
+
+- f134731: separate web3js version releases
+
 ## 0.4.0
 
 ### Minor Changes
