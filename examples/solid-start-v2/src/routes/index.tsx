@@ -23,7 +23,7 @@ const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
 
 export default function Home() {
   const { signMessage, getTransactionSendingSigner, connectedAccount } = useWallet()
-  const publicKey = createMemo(() => {
+  const publicKey = createMemo<string | undefined>(() => {
     const accInfo = connectedAccount()
     if (!accInfo) {
       return

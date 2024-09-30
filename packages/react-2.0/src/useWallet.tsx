@@ -1,6 +1,6 @@
 import { useStore } from "@nanostores/react"
 import { Cluster, initStore } from "@solana-wallets-solid/core-2.0"
-import { createContext, useContext, useEffect } from "react"
+import { createContext, useContext, useEffect, useRef } from "react"
 
 export type WalletProviderProps = {
   autoConnect: boolean
@@ -24,32 +24,20 @@ export type WalletContext = {
 }
 const WalletContext = createContext<WalletContext>({} as WalletContext)
 
-const {
-  $wallet,
-  $connectedAccount,
-  $connecting,
-  $disconnecting,
-  $isConnected,
-  initOnMount,
-  $env,
-  $wallets,
-  $walletsMap,
-  signMessage,
-  getTransactionSendingSigner,
-} = initStore({ autoConnect: true, disconnectOnAccountChange: true })
-
 const WalletProvider: React.FC<WalletProviderProps> = ({ children, ...config }) => {
-  const wallets = useStore($wallets)
-  const walletsByName = useStore($walletsMap)
-  const connectedAccount = useStore($connectedAccount)
-  const connected = useStore($isConnected)
-  const wallet = useStore($wallet)
-  const env = useStore($env)
-  const connecting = useStore($connecting)
-  const disconnecting = useStore($disconnecting)
+  const store = useRef<ReturnType<typeof initStore>>(initStore(config))
+
+  const wallets = useStore(store.current.$wallets)
+  const walletsByName = useStore(store.current.$walletsMap)
+  const connectedAccount = useStore(store.current.$connectedAccount)
+  const connected = useStore(store.current.$isConnected)
+  const wallet = useStore(store.current.$wallet)
+  const env = useStore(store.current.$env)
+  const connecting = useStore(store.current.$connecting)
+  const disconnecting = useStore(store.current.$disconnecting)
 
   useEffect(() => {
-    const cleanup = initOnMount()
+    const cleanup = store.current.initOnMount()
     return cleanup
   }, [])
 
@@ -64,8 +52,8 @@ const WalletProvider: React.FC<WalletProviderProps> = ({ children, ...config }) 
         env,
         connecting,
         disconnecting,
-        signMessage,
-        getTransactionSendingSigner,
+        signMessage: store.current.signMessage,
+        getTransactionSendingSigner: store.current.getTransactionSendingSigner,
       }}
     >
       {children}

@@ -1,10 +1,13 @@
 import { useStore } from "@nanostores/solid"
-import { createEffect, onCleanup, onMount } from "solid-js"
+import { createEffect, onCleanup, onMount, Accessor } from "solid-js"
 import {
   initStore,
   dispatchConnect,
   dispatchDisconnect,
   StoreProps,
+  AccountInfo,
+  WalletInfo,
+  Cluster,
 } from "@solana-wallets-solid/core-2.0"
 
 import { createContextProvider } from "./context"
@@ -29,14 +32,14 @@ const [WalletProvider, _useWallet] = createContextProvider((props: StoreProps) =
     localStorageKey: props.localStorageKey,
     additionalWallets: props.additionalWallets,
   })
-  const wallets = useStore($wallets)
-  const walletsByName = useStore($walletsMap)
-  const connectedAccount = useStore($connectedAccount)
-  const connected = useStore($isConnected)
-  const wallet = useStore($wallet)
-  const env = useStore($env)
-  const connecting = useStore($connecting)
-  const disconnecting = useStore($disconnecting)
+  const wallets: Accessor<WalletInfo[]> = useStore($wallets)
+  const walletsByName: Accessor<Record<string, WalletInfo>> = useStore($walletsMap)
+  const connectedAccount: Accessor<AccountInfo | undefined> = useStore($connectedAccount)
+  const connected: Accessor<boolean> = useStore($isConnected)
+  const wallet: Accessor<WalletInfo | undefined> = useStore($wallet)
+  const env: Accessor<Cluster> = useStore($env)
+  const connecting: Accessor<boolean> = useStore($connecting)
+  const disconnecting: Accessor<boolean> = useStore($disconnecting)
 
   onMount(() => {
     const cleanup = initOnMount()
