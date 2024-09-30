@@ -1,0 +1,58 @@
+{
+  "name": "@solana-wallets-solid/core-1.0",
+  "version": "0.6.0",
+  "description": "Example hello world package in the solana-wallets-solid repository.",
+  "license": "MIT",
+  "author": "aidanaden",
+  "contributors": [],
+  "homepage": "https://github.com/aidanaden/solana-wallets-solid#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aidanaden/solana-wallets-solid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aidanaden/solana-wallets-solid/issues"
+  },
+  "keywords": [
+    "solid"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "development": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/dev.js"
+      }
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "browser": {},
+  "typesVersions": {},
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "concurrently pnpm:test:*",
+    "test:client": "vitest -c ../../configs/vitest.config.ts",
+    "test:ssr": "pnpm run test:client --mode ssr",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@solana-wallets-solid/core": "workspace:*",
+    "@solana/web3.js": "^1.95.3",
+    "@solana/wallet-standard-features": "^1.2.0",
+    "@solana-mobile/wallet-adapter-mobile": "^2.1.3"
+  }
+}

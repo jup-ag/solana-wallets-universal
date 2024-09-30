@@ -1,5 +1,13 @@
 # @solana-wallets-solid/sveltekit
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @solana-wallets-solid/core-2.0@0.6.0
+  - @solana-wallets-solid/unified@0.1.0
+
 ## 0.0.3
 
 ### Patch Changes

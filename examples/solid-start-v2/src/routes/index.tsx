@@ -57,7 +57,7 @@ export default function Home() {
     const rpc = createSolanaRpcFromTransport(transport)
     const recentBlockhashRes = await rpc.getLatestBlockhash().send()
     const recentBlockhash = recentBlockhashRes.value
-    const amount = lamports(1_00_000_000n)
+    const amount = lamports(10000000n)
 
     const message = pipe(
       createTransactionMessage({ version: 0 }),
@@ -67,7 +67,7 @@ export default function Home() {
         appendTransactionMessageInstruction(
           getTransferSolInstruction({
             amount,
-            destination: address("W4jj84Hs5Ts6BFK2nnmwbZYGGXzo5TdHdsLsakZqE5Y"),
+            destination: address("BJm85nAD9ZbBpnTFUfuDHmDhQ2T3QK554ppSVPRY6yC5"),
             source: transactionSendingSigner,
           }),
           m,
@@ -76,7 +76,7 @@ export default function Home() {
 
     try {
       const res = await signAndSendTransactionMessageWithSigners(message)
-      console.log({ res })
+      alert(`sendtx success: ${res}`)
     } catch (e) {
       alert(`sendTxV2 failed: ${JSON.stringify(e)}`)
     }

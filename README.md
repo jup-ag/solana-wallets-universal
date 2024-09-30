@@ -2,12 +2,12 @@
   <img width="100%" src="https://assets.solidjs.com/banner?type=your-repository-name&background=tiles&project=Monorepo" alt="your-repository-name Monorepo">
 </p>
 
-# your-repository-name
+# Solana wallet adapter
 
 [![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
 [![turborepo](https://img.shields.io/badge/built%20with-turborepo-cc00ff.svg?style=for-the-badge&logo=turborepo)](https://turborepo.org/)
 
-your-repository-desc
+All-in-one framework agnostic solana wallet adapter library
 
 > **Note** After using this template, you have to search and replace all `your-repository-name` and similar strings
 > with appropriate texts.

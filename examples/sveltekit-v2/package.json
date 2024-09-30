@@ -1,17 +1,19 @@
 {
-  "name": "@solana-wallets-solid/sveltekit",
-  "version": "0.0.3",
+  "name": "@solana-wallets-solid/sveltekit-2.0",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "deploy": "vite build && wrangler pages deploy .svelte-kit/cloudflare"
   },
   "dependencies": {
     "@solana-wallets-solid/core-2.0": "workspace:*",
-    "@solana-wallets-solid/unified": "workspace:*"
+    "@solana-wallets-solid/unified": "workspace:*",
+    "@solana/web3.js": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^4.7.2",
@@ -21,7 +23,8 @@
     "svelte-check": "^4.0.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.3",
-    "vite-plugin-node-polyfills": "^0.22.0"
+    "vite-plugin-node-polyfills": "0.17.0",
+    "wrangler": "^3.70.0"
   },
   "type": "module"
 }

@@ -1,0 +1,9 @@
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration
+name = "solana-wallets-universal-solidstart-v1"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-07-24"
+compatibility_flags = ["nodejs_compat"]
+
+# https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+[placement]
+mode = "smart"

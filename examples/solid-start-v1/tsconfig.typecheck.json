@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["index.d.ts", "src", "node_modules/@coinhall"],
+  "exclude": ["dist", "node_modules"]
+}

@@ -1,7 +1,8 @@
 <script lang="ts">
+  import "@solana-wallets-solid/unified/index.css"
+
   import { initStore, type Cluster } from "@solana-wallets-solid/core-2.0"
   import { onMount, setContext } from "svelte"
-  import "@solana-wallets-solid/unified/index.css"
 
   export const env: Cluster | undefined = "mainnet-beta"
   export const autoConnect: boolean = true
@@ -18,9 +19,6 @@
     $isConnected: isConnected,
     $disconnecting: disconnecting,
     $connectedAccount: connectedAccount,
-    sendTransactionV1,
-    signTransactionV1,
-    signAllTransactionsV1,
     getTransactionSendingSigner,
   } = initStore({ env, autoConnect, disconnectOnAccountChange })
 
@@ -38,9 +36,6 @@
     connecting,
     disconnecting,
     signMessage,
-    signTransactionV1,
-    signAllTransactionsV1,
-    sendTransactionV1,
     getTransactionSendingSigner,
   })
 
