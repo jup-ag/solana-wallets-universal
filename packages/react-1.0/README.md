@@ -40,7 +40,7 @@ import { LedgerWalletAdapter } from "@solana/wallet-adapter-ledger"
 // Example.tsx
 import { useWallet } from "@your-repository-name/react-1.0"
 
-const Example: Component = () => {
+const Example: React.FC = () => {
   const { connectedAccount, signMessage, sendTransaction } = useWallet()
   const publicKey = useMemo<PublicKey | undefined>(() => {
     if (!connectedAccount || !connectedAccount.info) {

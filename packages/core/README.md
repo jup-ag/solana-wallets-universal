@@ -1,35 +1,12 @@
-<a href="https://github.com/your-author-name/your-repository-name/tree/main/packages/hello#readme">
-<p>
-  <img width="100%" src="https://assets.solidjs.com/banner?type=your-repository-name&background=tiles&project=Hello" alt="your-repository-name Hello">
-</p>
+# Core
 
-# Hello
-
-Example hello world package in the your-repository-name repository.
-
-## Installation
-
-```bash
-npm install @your-repository-name/hello
-# or
-yarn add @your-repository-name/hello
-# or
-pnpm add @your-repository-name/hello
-```
+Internal core package containing wallet state management (via nanostores) + wallet-standard compatible wallet fetching
 
 ## How to use it
 
-```ts
-import { createHello } from "@your-repository-name/hello"
+This package is NOT meant for direct use.
 
-const [hello, setHello] = createHello()
-
-hello() // => "Hello World!"
-
-setHello("Solid")
-
-hello() // => "Hello Solid!"
-```
+Users should install the [core-1.0](../core-1.0) or [core-2.0](../core-2.0) packages based on the `@solana/web3.js` version being used in your project
 
 ## Changelog
 

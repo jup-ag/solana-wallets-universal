@@ -1,6 +1,6 @@
-# SolidStart
+# SolidStart-2.0 (`solid-2.0`)
 
-Everything you need to build a Solid project, powered by [`solid-start`](https://start.solidjs.com);
+[Demo deployment](https://start-tailwind.pages.dev/)
 
 ## Creating a project
 

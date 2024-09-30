@@ -1,6 +1,6 @@
-# React Template（⚡️）
+# React-Vite (`react-1.0`)
 
-⚡️ A minimal React Vite starter template.
+[Demo deployment](https://solana-wallets-universal-reactvite-v1.pages.dev/)
 
 ## Feature
 

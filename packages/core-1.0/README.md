@@ -1,35 +1,22 @@
-<a href="https://github.com/your-author-name/your-repository-name/tree/main/packages/hello#readme">
-<p>
-  <img width="100%" src="https://assets.solidjs.com/banner?type=your-repository-name&background=tiles&project=Hello" alt="your-repository-name Hello">
-</p>
+# Core-1.0
 
-# Hello
-
-Example hello world package in the your-repository-name repository.
+Wrapper package containing `core` package and `@solana.web3.js v1.x.x` specific wallet actions (`signTransaction`, `signAllTransactions`, `sendTransaction`)
 
 ## Installation
 
 ```bash
-npm install @your-repository-name/hello
+npm install @your-repository-name/core-1.0
 # or
-yarn add @your-repository-name/hello
+yarn add @your-repository-name/core-1.0
 # or
-pnpm add @your-repository-name/hello
+pnpm add @your-repository-name/core-1.0
 ```
 
 ## How to use it
 
-```ts
-import { createHello } from "@your-repository-name/hello"
+This package is NOT meant for direct use, it's recommended to wrap this package with a framework-specific adapter.
 
-const [hello, setHello] = createHello()
-
-hello() // => "Hello World!"
-
-setHello("Solid")
-
-hello() // => "Hello Solid!"
-```
+For example, see the [react.js](../react-1.0) and [solid.js](../solid-1.0/) adapters
 
 ## Changelog
 

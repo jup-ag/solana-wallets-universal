@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router"
 import { useWallet } from "@solana-wallets-solid/solid-1.0"
-import { Show, createEffect, createMemo } from "solid-js"
+import { Show, createMemo } from "solid-js"
 import {
   Connection,
   LAMPORTS_PER_SOL,
@@ -16,10 +16,7 @@ export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
 const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
 
 export default function Home() {
-  const { connectedAccount, signMessage, sendTransaction, env } = useWallet()
-  createEffect(() => {
-    alert(`env: ${env()}`)
-  })
+  const { connectedAccount, signMessage, sendTransaction } = useWallet()
   const publicKey = createMemo<PublicKey | undefined>(() => {
     const accInfo = connectedAccount()
     if (!accInfo || !accInfo.info) {
@@ -48,7 +45,6 @@ export default function Home() {
       console.error("cannot sign tx, no pub key: ", { publicKey })
       return
     }
-    alert(`pubkey: ${JSON.stringify(pubKey)}`)
 
     const lamportsToSend = 0.01 * LAMPORTS_PER_SOL
     const transaction = new Transaction().add(

@@ -1,6 +1,6 @@
-# SolidStart
+# SolidStart-1.0 (`solid-1.0`)
 
-Everything you need to build a Solid project, powered by [`solid-start`](https://start.solidjs.com);
+[Demo deployment](https://solana-wallets-universal-solidstart-v1.pages.dev/)
 
 ## Creating a project
 
