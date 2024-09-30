@@ -1,7 +1,3 @@
-<p>
-  <img width="100%" src="https://assets.solidjs.com/banner?type=your-repository-name&background=tiles&project=Monorepo" alt="your-repository-name Monorepo">
-</p>
-
 # Solana wallet adapter
 
 [![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
@@ -9,16 +5,46 @@
 
 All-in-one framework agnostic solana wallet adapter library
 
-> **Note** After using this template, you have to search and replace all `your-repository-name` and similar strings
-> with appropriate texts.
->
-> `your-repository-name` should be a **kebab-case** string representing the name of you monorepo.
->
-> `your-repository-desc` should be a **Normal case** string with the description of the repository.
->
-> `your-nickname` should be a **kebab-case** string from your profile URL.
->
-> `your-author-name` should be a **Normal case** string with your first and last name.
+## Supported Frameworks
+
+- [x] React.js
+  - [x] [Vite (@solana/web3.js v1.x.x)](/examples/react-vite-v1/README.md)
+  - [x] [Vite (@solana/web3.js v2.x.x)](/examples/react-vite-v2/README.md)
+  - [ ] Next.js (App directory)
+  - [ ] Next.js (Pages directory)
+  - [ ] Remix
+  - [ ] Tanstack Start
+- [x] Solid.js
+  - [x] [SolidStart (@solana/web3.js v1.x.x)](/examples/solid-start-v1/README.md)
+  - [x] [SolidStart (@solana/web3.js v2.x.x)](/examples/solid-start-v2/README.md)
+- [x] Svelte
+  - [x] [Sveltekit (@solana/web3.js v1.x.x)](/examples/sveltekit-v1/README.md)
+  - [x] [Sveltekit (@solana/web3.js v2.x.x)](/examples/sveltekit-v2/README.md)
+- [ ] Vue.js
+- [ ] Qwik.js
+
+## Known Issues
+
+- android trezor connection not working
+- android MWA send tx (devnet) not working
+- web3js v1 hardware wallets not tested
+- web3js v2 hardware wallets not working
+- coinbase desktop + mobile send tx not working ("smth went wrong!")
+- wallet account change detection not working properly
+- custom ui component styling incomplete
+
+## Directory Structure
+
+- [`examples`](./examples) - example demo apps demonstrating wallet connection, sign message, send tx
+- [`configs`](./configs) - internal configuration files for this monorepo
+- [`packages`](./packages) - packages that are used within `apps` or `scripts`
+  - [`core`](./packages/core) - internal core package containing wallet state management (via nanostores) + wallet-standard compatible wallet management
+  - [`core-1.0`](./packages/core-1.0) - framework agnostic core package containing the `core` package + `@solana/web3.js` v1.x.x specific wallet actions
+  - [`core-2.0`](./packages/core-2.0) - framework agnostic core package containing the `core` package + `@solana/web3.js` v2.x.x specific wallet actions
+  - [`solid-1.0`](./packages/solid-1.0) - solid.js adapter for `core-1.0` package
+  - [`solid-2.0`](./packages/solid-2.0) - solid.js adapter for `core-2.0` package
+  - [`react-1.0`](./packages/react-1.0) - react.js adapter for `core-1.0` package
+  - [`react-2.0`](./packages/react-2.0) - react.js adapter for `core-2.0` package
 
 ## Project Commands
 
