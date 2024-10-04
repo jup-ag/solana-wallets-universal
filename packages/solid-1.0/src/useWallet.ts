@@ -86,3 +86,4 @@ const useWallet = () => {
 }
 
 export { WalletProvider, useWallet }
+export type { dispatchConnect, dispatchDisconnect, AccountInfo }
