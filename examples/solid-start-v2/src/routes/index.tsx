@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router"
-import { useWallet } from "@solana-wallets-solid/solid-2.0"
+import { useWallet } from "@solana-wallets/solid-2.0"
 import { getTransferSolInstruction } from "@solana-program/system"
 import { Show, createMemo } from "solid-js"
 import {
@@ -16,12 +16,12 @@ import {
 } from "@solana/web3.js"
 
 const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
-export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
-  ? "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
-  : "https://jupiter-frontend.rpcpool.com"
-const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
+// const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
 
 export default function Home() {
+  const MAINNET_RPC_ENDPOINT =
+    "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
+
   const { signMessage, getTransactionSendingSigner, connectedAccount } = useWallet()
   const publicKey = createMemo<string | undefined>(() => {
     const accInfo = connectedAccount()
@@ -52,7 +52,7 @@ export default function Home() {
     }
 
     // Create an HTTP transport or any custom transport of your choice.
-    const transport = createDefaultRpcTransport({ url: DEVNET_RPC_ENDPOINT })
+    const transport = createDefaultRpcTransport({ url: MAINNET_RPC_ENDPOINT })
     // Create an RPC client using that transport.
     const rpc = createSolanaRpcFromTransport(transport)
     const recentBlockhashRes = await rpc.getLatestBlockhash().send()
@@ -67,7 +67,7 @@ export default function Home() {
         appendTransactionMessageInstruction(
           getTransferSolInstruction({
             amount,
-            destination: address("BJm85nAD9ZbBpnTFUfuDHmDhQ2T3QK554ppSVPRY6yC5"),
+            destination: address("W4jj84Hs5Ts6BFK2nnmwbZYGGXzo5TdHdsLsakZqE5Y"),
             source: transactionSendingSigner,
           }),
           m,

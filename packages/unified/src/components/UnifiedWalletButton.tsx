@@ -17,7 +17,7 @@ import {
   ConnectingEvent,
   WalletEvent,
   AccountInfo,
-} from "@solana-wallets-solid/core-2.0"
+} from "@solana-wallets/core-2.0"
 
 import { dispatchUpdateModal, MWA_NOT_FOUND_ERROR } from "../contexts"
 import { shortenAddress } from "../utils"

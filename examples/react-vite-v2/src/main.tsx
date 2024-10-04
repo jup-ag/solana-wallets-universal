@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import routes from "@/routes"
 import App from "@/App"
 import "@/global"
-import { loadCustomElements } from "@solana-wallets-solid/unified"
+import { loadCustomElements } from "@solana-wallets/unified"
 
 loadCustomElements()
 const container = document.getElementById("root") as HTMLElement

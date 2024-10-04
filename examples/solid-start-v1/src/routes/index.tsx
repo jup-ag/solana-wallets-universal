@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router"
-import { useWallet } from "@solana-wallets-solid/solid-1.0"
+import { useWallet } from "@solana-wallets/solid-1.0"
 import { Show, createMemo } from "solid-js"
 import {
   Connection,
@@ -10,19 +10,21 @@ import {
 } from "@solana/web3.js"
 
 const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
-export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
-  ? "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
-  : "https://jupiter-frontend.rpcpool.com"
-const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
+// export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
+//   ? "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
+//   : "https://jupiter-frontend.rpcpool.com"
+// const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
 
 export default function Home() {
+  const MAINNET_RPC_ENDPOINT =
+    "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
   const { connectedAccount, signMessage, sendTransaction } = useWallet()
   const publicKey = createMemo<PublicKey | undefined>(() => {
     const accInfo = connectedAccount()
     if (!accInfo || !accInfo.info) {
       return
     }
-    return accInfo.type === "standard"
+    return accInfo.type === "standard" || accInfo.type === "mwa"
       ? new PublicKey(accInfo.info.account.publicKey)
       : (accInfo.info.publicKey ?? undefined)
   })
@@ -39,15 +41,21 @@ export default function Home() {
   }
 
   async function sendTxV1() {
-    const APPEAL_WALLET_PUBKEY = new PublicKey("BJm85nAD9ZbBpnTFUfuDHmDhQ2T3QK554ppSVPRY6yC5")
+    const APPEAL_WALLET_PUBKEY = new PublicKey("W4jj84Hs5Ts6BFK2nnmwbZYGGXzo5TdHdsLsakZqE5Y")
     const pubKey = publicKey()
     if (!pubKey) {
       console.error("cannot sign tx, no pub key: ", { publicKey })
       return
     }
 
+    const connection = new Connection(MAINNET_RPC_ENDPOINT, "confirmed")
+    const latestHash = await connection.getLatestBlockhash("finalized")
+
     const lamportsToSend = 0.01 * LAMPORTS_PER_SOL
-    const transaction = new Transaction().add(
+    const transaction = new Transaction({
+      feePayer: pubKey,
+      recentBlockhash: latestHash.blockhash,
+    }).add(
       SystemProgram.transfer({
         fromPubkey: pubKey,
         toPubkey: APPEAL_WALLET_PUBKEY,
@@ -55,12 +63,6 @@ export default function Home() {
       }),
     )
 
-    const connection = new Connection(DEVNET_RPC_ENDPOINT, "confirmed")
-    const latestHash = await connection.getLatestBlockhash("finalized")
-    if (transaction instanceof Transaction) {
-      transaction.recentBlockhash = latestHash.blockhash
-      transaction.feePayer = pubKey
-    }
     alert(`sending tx: ${JSON.stringify(transaction)}`)
     try {
       const res = await sendTransaction(transaction, connection, {})

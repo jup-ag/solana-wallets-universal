@@ -1,4 +1,8 @@
-import { initStore as _initStore, StoreProps } from "@solana-wallets-solid/core"
+import {
+  initStore as _initStore,
+  StoreProps,
+  convertToWalletStandardCluster,
+} from "@solana-wallets/core"
 import {
   SolanaSignAndSendTransaction,
   SolanaSignAndSendTransactionInput,
@@ -67,10 +71,9 @@ export function initStore({
       return
     }
     const add =
-      connectedAccount.type === "standard"
+      connectedAccount.type === "standard" || connectedAccount.type === "mwa"
         ? connectedAccount.info.pubKey
         : connectedAccount.info.publicKey
-
     if (!add) {
       return
     }
@@ -141,10 +144,11 @@ export function initStore({
 
         const transactionEncoder = getTransactionEncoder()
         const wireTxBytes = transactionEncoder.encode(tx)
+        const network = convertToWalletStandardCluster($env.get())
         const input: SolanaSignAndSendTransactionInput = {
           account: acc?.account,
           transaction: wireTxBytes as Uint8Array,
-          chain: `solana:${$env.get()}`,
+          chain: `solana:${network}`,
           ...(minContextSlot != null
             ? {
                 options: {
@@ -181,7 +185,7 @@ export function initStore({
 
 // re-export types
 export type Store = ReturnType<typeof initStore>
-export * from "@solana-wallets-solid/core"
+export * from "@solana-wallets/core"
 // export * from "./coinbase"
 
 // function getMobileWallet(wallets: WalletAdapterCompatibleStandardWallet[]) {

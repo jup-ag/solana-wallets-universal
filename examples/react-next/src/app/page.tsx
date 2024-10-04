@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { WalletProvider } from "@solana-wallets-solid/react"
+import { WalletProvider } from "@solana-wallets/react"
 
 import ConnectButton from "./connect"
 import styles from "./page.module.css"

@@ -1,5 +1,5 @@
 {
-  "name": "@solana-wallets-solid/react-2.0",
+  "name": "@solana-wallets/react-2.0",
   "description": "",
   "version": "0.3.0",
   "author": "",
@@ -30,7 +30,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@solana-wallets-solid/core-2.0": "workspace:*",
+    "@solana-wallets/core-2.0": "workspace:*",
     "@nanostores/react": "^0.7.3",
     "nanostores": "^0.11.3",
     "@types/node": "22.1.0",

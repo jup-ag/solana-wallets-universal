@@ -8,7 +8,7 @@ import {
   AccountInfo,
   WalletInfo,
   Cluster,
-} from "@solana-wallets-solid/core-2.0"
+} from "@solana-wallets/core-2.0"
 
 import { createContextProvider } from "./context"
 

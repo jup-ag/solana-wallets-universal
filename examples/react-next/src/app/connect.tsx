@@ -3,11 +3,6 @@
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-// import type {
-//   UnifiedWalletProviderProps,
-//   UnifiedWalletButtonProps,
-// } from "@solana-wallets-solid/unified"
-
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -29,7 +24,7 @@ const ClientConnectButton: React.FC = () => {
   useEffect(() => {
     console.log("running on client!")
     const load = async () => {
-      const { loadCustomElements } = await import("@solana-wallets-solid/unified")
+      const { loadCustomElements } = await import("@solana-wallets/unified")
       loadCustomElements()
     }
     load()

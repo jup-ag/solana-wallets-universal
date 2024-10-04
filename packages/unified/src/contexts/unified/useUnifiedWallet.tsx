@@ -18,7 +18,7 @@ import {
   WalletChangedEvent,
   WalletEvent,
   WalletInfo,
-} from "@solana-wallets-solid/core-2.0"
+} from "@solana-wallets/core-2.0"
 
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
 import { TranslationProvider, useTranslation } from "../translation/useTranslation"

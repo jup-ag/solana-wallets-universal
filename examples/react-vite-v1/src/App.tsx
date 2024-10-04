@@ -1,7 +1,7 @@
 import { Fragment } from "react"
 import { Outlet, ScrollRestoration } from "react-router-dom"
-import { UnifiedWalletButtonProps, UnifiedWalletProviderProps } from "@solana-wallets-solid/unified"
-import { WalletProvider } from "@solana-wallets-solid/react-1.0"
+import { UnifiedWalletButtonProps, UnifiedWalletProviderProps } from "@solana-wallets/unified"
+import { WalletProvider } from "@solana-wallets/react-1.0"
 import { CoinbaseWalletAdapter } from "@solana/wallet-adapter-coinbase"
 import { TrezorWalletAdapter } from "@solana/wallet-adapter-trezor"
 import { LedgerWalletAdapter } from "@solana/wallet-adapter-ledger"
@@ -31,8 +31,8 @@ export default function App() {
       <WalletProvider
         autoConnect={true}
         disconnectOnAccountChange={true}
-        env="devnet"
-        localStorageKey="unified:wallet-stoarge-key"
+        env="mainnet-beta"
+        localStorageKey="unified:wallet-storage-key"
         additionalWallets={[
           new CoinbaseWalletAdapter(),
           new TrezorWalletAdapter(),

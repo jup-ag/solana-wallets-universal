@@ -1,11 +1,11 @@
-import "@solana-wallets-solid/unified/index.css"
+import "@solana-wallets/unified/index.css"
 import "./app.css"
 
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
-import { WalletProvider } from "@solana-wallets-solid/solid-2.0"
-import { UnifiedWalletProviderProps, UnifiedWalletButtonProps } from "@solana-wallets-solid/unified"
+import { WalletProvider } from "@solana-wallets/solid-2.0"
+import { UnifiedWalletProviderProps, UnifiedWalletButtonProps } from "@solana-wallets/unified"
 
 import Nav from "~/components/Nav"
 
@@ -48,8 +48,8 @@ export default function App() {
         <WalletProvider
           autoConnect={true}
           disconnectOnAccountChange={true}
-          localStorageKey="unified:wallet-stoarge-key"
-          env={"devnet"}
+          localStorageKey="unified:wallet-storage-key"
+          env={"mainnet-beta"}
           additionalWallets={[]}
         >
           <Nav />

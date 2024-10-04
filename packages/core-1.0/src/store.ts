@@ -4,7 +4,8 @@ import {
   SendTransactionOptions,
   StoreProps,
   WalletInfo,
-} from "@solana-wallets-solid/core"
+  convertToWalletStandardCluster,
+} from "@solana-wallets/core"
 import {
   SolanaSignTransaction,
   SolanaSignTransactionInput,
@@ -169,8 +170,28 @@ export function initStore({
 
     if (connectedAccount.type === "custom") {
       try {
-        const res = await connectedAccount.info.sendTransaction(tx, connection, options)
+        const res = await connectedAccount.info.sendTransaction(tx, connection, {
+          signers: [],
+          ...options,
+        })
         return res
+      } catch (e) {
+        alert(`sendTransaction: custom wallet error: ${JSON.stringify(e)}`)
+      }
+    }
+
+    if (walletInfo.type === "mwa" && connectedAccount.type === "mwa") {
+      try {
+        alert(`${JSON.stringify(connectedAccount.info?.account)}`)
+        const res = await walletInfo.wallet.sendTransaction(tx, connection, options)
+        alert(`walletInfo.wallet.sendTransaction: ${JSON.stringify(res)}`)
+
+        return res
+        // const res = await acc.features[SolanaSignAndSendTransaction](tx, connection, {
+        //   signers: [],
+        //   ...options,
+        // })
+        // return res
       } catch (e) {
         alert(`sendTransaction: custom wallet error: ${JSON.stringify(e)}`)
       }
@@ -193,10 +214,11 @@ export function initStore({
     }
 
     const txBytes = tx.serialize({ verifySignatures: false })
+    const network = convertToWalletStandardCluster($env.get())
     const input: SolanaSignAndSendTransactionInput = {
       account: acc,
       transaction: txBytes,
-      chain: `solana:${$env.get()}`,
+      chain: `solana:${network}`,
     }
 
     const feature = wallet.features[SolanaSignAndSendTransaction]
@@ -215,9 +237,10 @@ export function initStore({
     const mobile = getMobileWallet(standardWallets, $env.get())
     if (mobile) {
       const mobileInfo: WalletInfo = {
-        type: "custom",
+        type: "mwa",
         wallet: mobile as any,
       }
+      alert(`mwa wallet info: ${JSON.stringify(mobileInfo)}`)
       $walletsMap.set(generateWalletMap([...$wallets.get(), mobileInfo]))
     }
     return cleanup
@@ -245,7 +268,7 @@ export function initStore({
 
 // re-export types
 export type Store = ReturnType<typeof initStore>
-export * from "@solana-wallets-solid/core"
+export * from "@solana-wallets/core"
 export type { Connection, Transaction, VersionedTransaction }
 
 /** Add ready state change listeners for all wallets,

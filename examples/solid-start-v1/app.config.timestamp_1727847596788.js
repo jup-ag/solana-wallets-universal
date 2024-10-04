@@ -1,11 +1,7 @@
+// app.config.ts
 import { defineConfig } from "@solidjs/start/config"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
-
-/**
- * Solid-start specific config file
- * @see https://docs.solidjs.com/solid-start/reference/config/define-config
- */
-export default defineConfig({
+var app_config_default = defineConfig({
   /**
    *	Toggle between client and server rendering.
    *	@default true
@@ -49,7 +45,7 @@ export default defineConfig({
   /**
    * The path to an optional middleware file.
    */
-  middleware: undefined,
+  middleware: void 0,
   /**
    * Toggle the dev overlay.
    *
@@ -99,9 +95,11 @@ export default defineConfig({
         //   // ],
         // Whether to polyfill specific globals.
         globals: {
-          Buffer: true, // can also be 'build', 'dev', or false
+          Buffer: true,
+          // can also be 'build', 'dev', or false
         },
       }),
     ],
   },
 })
+export { app_config_default as default }

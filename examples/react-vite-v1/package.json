@@ -1,5 +1,5 @@
 {
-  "name": "@solana-wallets-solid/react-vite-1.0",
+  "name": "@solana-wallets/react-vite-1.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@nanostores/react": "^0.7.3",
-    "@solana-wallets-solid/react-1.0": "workspace:*",
-    "@solana-wallets-solid/unified": "workspace:*",
+    "@solana-wallets/react-1.0": "workspace:*",
+    "@solana-wallets/unified": "workspace:*",
     "@solana/wallet-adapter-coinbase": "^0.1.19",
     "@solana/wallet-adapter-ledger": "^0.9.25",
     "@solana/wallet-adapter-trezor": "^0.1.2",

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import "@solana-wallets-solid/unified/index.css"
+  import "@solana-wallets/unified/index.css"
 
-  import { initStore, type Cluster } from "@solana-wallets-solid/core-1.0"
+  import { initStore, type Cluster } from "@solana-wallets/core-1.0"
   import { onMount, setContext } from "svelte"
   import { CoinbaseWalletAdapter } from "@solana/wallet-adapter-coinbase"
   import { LedgerWalletAdapter } from "@solana/wallet-adapter-ledger"
@@ -56,7 +56,7 @@
   })
 
   onMount(() => {
-    import("@solana-wallets-solid/unified").then(r => r.loadCustomElements())
+    import("@solana-wallets/unified").then(r => r.loadCustomElements())
   })
 </script>
 

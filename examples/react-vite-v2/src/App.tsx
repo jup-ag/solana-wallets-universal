@@ -1,7 +1,7 @@
 import { Fragment } from "react"
 import { Outlet, ScrollRestoration } from "react-router-dom"
-import { UnifiedWalletButtonProps, UnifiedWalletProviderProps } from "@solana-wallets-solid/unified"
-import { WalletProvider } from "@solana-wallets-solid/react-2.0"
+import { UnifiedWalletButtonProps, UnifiedWalletProviderProps } from "@solana-wallets/unified"
+import { WalletProvider } from "@solana-wallets/react-2.0"
 
 declare global {
   namespace JSX {
@@ -28,7 +28,8 @@ export default function App() {
       <WalletProvider
         autoConnect={true}
         disconnectOnAccountChange={true}
-        localStorageKey="unified:wallet-stoarge-key"
+        env="mainnet-beta"
+        localStorageKey="unified:wallet-storage-key"
       >
         <Fragment>
           <unified-wallet-modal

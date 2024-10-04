@@ -1,5 +1,5 @@
 import { useStore } from "@nanostores/react"
-import { initStore, StoreProps } from "@solana-wallets-solid/core-1.0"
+import { initStore, StoreProps } from "@solana-wallets/core-1.0"
 import { createContext, useContext, useEffect, useRef } from "react"
 
 export type WalletProviderProps = StoreProps & {

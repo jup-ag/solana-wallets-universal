@@ -12,6 +12,7 @@ import {
 import { SolanaSignMessage } from "@solana/wallet-standard-features"
 import { getWallets } from "@wallet-standard/app"
 import { base58 } from "@scure/base"
+import { SolanaMobileWalletAdapter } from "@solana-mobile/wallet-adapter-mobile"
 
 import {
   dispatchAvailableWalletsChanged,
@@ -25,9 +26,20 @@ import {
 } from "./events"
 import { getLocalStorage, KEYS, setLocalStorage } from "./localstorage"
 import { isIosAndRedirectable, isIosAndWalletApp } from "./environment"
-import { THardcodedWalletStandardAdapter, HARDCODED_WALLET_STANDARDS } from "./hardcoded-mobile"
+import {
+  THardcodedWalletStandardAdapter,
+  HARDCODED_WALLET_STANDARDS,
+  SolanaMobileWalletAdapterWalletName,
+} from "./hardcoded-mobile"
 
 export type Cluster = "devnet" | "testnet" | "mainnet-beta"
+export type WalletStandardCluster = "devnet" | "testnet" | "mainnet"
+export function convertToWalletStandardCluster(cluster: Cluster): WalletStandardCluster {
+  if (cluster === "mainnet-beta") {
+    return "mainnet"
+  }
+  return cluster
+}
 
 export type StoreProps = {
   env?: Cluster
@@ -45,6 +57,7 @@ export type WalletInfo =
   | { type: "ios-webview"; wallet: THardcodedWalletStandardAdapter }
   | { type: "standard"; wallet: WalletAdapterCompatibleStandardWallet }
   | { type: "custom"; wallet: CustomWalletAdapter }
+  | { type: "mwa"; wallet: SolanaMobileWalletAdapter }
 
 export type CustomWalletAdapter =
   | BaseSignerWalletAdapter
@@ -63,7 +76,10 @@ export type AccountInfo =
       type: "custom"
       info: CustomWalletAdapter
     }
-
+  | {
+      type: "mwa"
+      info: StandardWalletConnectResult
+    }
 /**
  * Wallet info of connected wallet-standard
  * compatible wallet
@@ -106,8 +122,23 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
   const $walletsMap = atom<Record<string, WalletInfo>>(
     generateWalletMap(additionalWallets?.map(w => ({ type: "custom", wallet: w }))),
   )
-  onSet($walletsMap, ({ newValue }) => {
+  onSet($walletsMap, async ({ newValue }) => {
     dispatchAvailableWalletsChanged({ wallets: Object.values(newValue) })
+
+    // Skip auto-connect since already connected
+    const connected = $isConnected.get()
+    const connecting = $connecting.get()
+    if (connected || connecting) {
+      return
+    }
+
+    // Automatically attempt to connect to
+    // last connected wallet if last wallet
+    // wasn't intentionally disconnected
+    const walletName = getLocalStorage<WalletName>(KEYS.WALLET_NAME)
+    if (walletName) {
+      await connect(walletName)
+    }
   })
 
   const $wallets = computed($walletsMap, walletsMap => {
@@ -174,7 +205,7 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     walletInfo = walletInfo ? walletInfo : $wallet.get()
     if (walletInfo && walletInfo.type === "standard") {
       walletInfo.wallet.features["standard:events"].on("change", e =>
-        onChangeEvent(e, walletInfo.wallet),
+        onChange(walletInfo.wallet, e),
       )
     }
   }
@@ -216,7 +247,6 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
 
   async function connectCustomWallet(name: string): Promise<AccountInfo | undefined> {
     const walletInfo = $walletsMap.get()[name]
-
     if (!walletInfo || walletInfo.type !== "custom") {
       console.error("connectCustomWallet: failed, missing/invalid walletInfo: ", { walletInfo })
       return
@@ -228,6 +258,29 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     return {
       type: "custom",
       info: wallet,
+    }
+  }
+
+  async function connectMwa(name: string): Promise<AccountInfo | undefined> {
+    if (name !== SolanaMobileWalletAdapterWalletName) {
+      throw new Error(`connectMwa: wallet with name: ${name} is not mobile wallet adapter!`)
+    }
+
+    const walletInfo = $walletsMap.get()[name]
+    if (!walletInfo || walletInfo.type !== "mwa") {
+      console.error("connectMwa: failed, missing/invalid walletInfo: ", { walletInfo })
+      return
+    }
+    const res = await walletInfo.wallet.signIn()
+    alert(`mwa wallet sign in res: ${JSON.stringify(res)}`)
+    return {
+      type: "mwa",
+      info: {
+        name: walletInfo.wallet.name,
+        icon: walletInfo.wallet.icon,
+        account: res.account,
+        pubKey: base58.encode(res.account.publicKey),
+      },
     }
   }
 
@@ -272,9 +325,6 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
       if (!wallet.deepUrl) {
         window.open(wallet.url, "_blank")
         return
-        // throw new Error(
-        //   `connect: failed to connect, requested wallet ${name} does NOT have deeplink enabled!`,
-        // )
       }
 
       const url = wallet.deepUrl(window.location)
@@ -302,7 +352,9 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
       const res =
         walletInfo.type === "custom"
           ? await connectCustomWallet(name)
-          : await connectStandardWallet(name)
+          : walletInfo.type === "mwa"
+            ? await connectMwa(name)
+            : await connectStandardWallet(name)
 
       console.error("connectWallet: connect result: ", { res })
       if (!res) {
@@ -334,7 +386,7 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     }
     try {
       $disconnecting.set(true)
-      if (walletInfo.type === "custom") {
+      if (walletInfo.type == "custom" || walletInfo.type === "mwa") {
         await walletInfo.wallet.disconnect()
       } else {
         const wallet = walletInfo.wallet
@@ -352,40 +404,47 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
    * Update standard wallet connected account + public key
    * when change event detected
    */
-  async function onChange(w: StandardWallet, changes: StandardChangeEventProperties) {
+  async function onChange(
+    wallet: WalletAdapterCompatibleStandardWallet,
+    changes: StandardChangeEventProperties,
+  ) {
     console.log("standard event change captured: ", {
-      name: w.name,
+      name: wallet.name,
       accounts: changes.accounts,
     })
     const connectedWalletName = $wallet.get()?.wallet.name
-    if (connectedWalletName && connectedWalletName === w.name) {
-      /**
-       * w.accounts is empty ONLY IF
-       *  1. a disconnect event occurred
-       *  2. user switched wallet account BUT this particular
-       * wallet does NOT allow automatic connection to other
-       * accounts without explicit user permission e.g
-       * auto-connect not checked (Solflare)
-       *
-       * if (2) occurs, we disconnect from the wallet to
-       * reflect the wallet's rejection of the account change
-       */
-      const acc = changes.accounts && changes.accounts[0]
-      console.log("standard wallet change detected: ", { changes })
-      if (acc) {
-        onConnect(changes, {
-          name: w.name,
-          accounts: w.accounts,
-          icon: w.icon,
-          chains: w.chains,
-          version: w.version,
-          features: w.features as any,
-        })
-      } else if (disconnectOnAccountChange) {
-        onDisconnect(changes)
-      }
+    if (!connectedWalletName || connectedWalletName !== wallet.name) {
+      return
+    }
+    /**
+     * w.accounts is empty ONLY IF
+     *  1. a disconnect event occurred
+     *  2. user switched wallet account BUT this particular
+     * wallet does NOT allow automatic connection to other
+     * accounts without explicit user permission e.g
+     * auto-connect not checked (Solflare)
+     *
+     * if (2) occurs, we disconnect from the wallet to
+     * reflect the wallet's rejection of the account change
+     */
+    const acc = changes.accounts && changes.accounts[0]
+    console.log("standard wallet change detected: ", { changes })
+
+    if (!acc) {
+      onDisconnect(changes)
+      return
     }
 
+    onConnect(changes, {
+      name: wallet.name,
+      accounts: wallet.accounts,
+      icon: wallet.icon,
+      chains: wallet.chains,
+      version: wallet.version,
+      features: wallet.features as any,
+    })
+
+    // TODO: check if this step is necessary
     const walletInfos: WalletInfo[] = getStandardWallets().map(w => ({
       type: "standard",
       wallet: w,
@@ -393,20 +452,20 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     $walletsMap.set(generateWalletMap([...$wallets.get(), ...walletInfos]))
   }
 
-  function onChangeEvent(
-    changeProperties: StandardChangeEventProperties,
-    wallet: WalletAdapterCompatibleStandardWallet,
-  ) {
-    console.log("onChangeEvent called: ", { changeProperties, wallet })
-
-    if (isConnectChangeEvent(changeProperties)) {
-      onConnect(changeProperties, wallet)
-    }
-
-    if (isDisconnectChangeEvent(changeProperties)) {
-      onDisconnect(changeProperties)
-    }
-  }
+  // function onChangeEvent(
+  //   changeProperties: StandardChangeEventProperties,
+  //   wallet: WalletAdapterCompatibleStandardWallet,
+  // ) {
+  //   console.log("onChangeEvent called: ", { changeProperties, wallet })
+  //
+  //   if (isConnectChangeEvent(changeProperties)) {
+  //     onConnect(changeProperties, wallet)
+  //   }
+  //
+  //   if (isDisconnectChangeEvent(changeProperties)) {
+  //     onDisconnect(changeProperties)
+  //   }
+  // }
 
   /**
    * Invalidate adapter listeners before refreshing the page
@@ -467,13 +526,15 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
 
   function onMountLoadStandardWallets() {
     const initialWallets: WalletInfo[] = getStandardWalletInfos()
-    initialWallets.forEach(w => {
-      if (w.type === "standard") {
-        w.wallet.features["standard:events"].on("change", async x => {
-          console.log({ x })
-          await onChange(w.wallet, x)
-        })
+
+    initialWallets.forEach(walletInfo => {
+      if (walletInfo.type !== "standard") {
+        return
       }
+      walletInfo.wallet.features["standard:events"].on("change", async changes => {
+        console.log({ changes })
+        await onChange(walletInfo.wallet, changes)
+      })
     })
 
     /**
@@ -484,7 +545,21 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     const addWallet = () => {
       console.log("addWallet: triggered by on('register') event")
       const walletInfos = getStandardWalletInfos()
-      $walletsMap.set(generateWalletMap([...$wallets.get(), ...walletInfos]))
+      const existingWallets = $wallets.get()
+      const existingWalletNames = existingWallets.map(w => w.wallet.name)
+      const newWalletInfos = walletInfos.filter(w => !existingWalletNames.includes(w.wallet.name))
+
+      newWalletInfos.forEach(walletInfo => {
+        if (walletInfo.type !== "standard") {
+          return
+        }
+        walletInfo.wallet.features["standard:events"].on("change", async changes => {
+          console.log({ changes })
+          await onChange(walletInfo.wallet, changes)
+        })
+      })
+
+      $walletsMap.set(generateWalletMap([...existingWallets, ...newWalletInfos]))
     }
 
     /**
@@ -529,20 +604,17 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
    * Automatically connect to most recently connected wallet
    */
   async function onMountAutoConnect() {
-    const walletName = getLocalStorage<WalletName>(KEYS.WALLET_NAME)
-    if (walletName) {
-      await connect(walletName)
+    if (!isIosAndWalletApp()) {
+      return
     }
     // If IOS and within a wallet app
     // we automatically connect to the
     // first standard wallet
-    if (isIosAndWalletApp()) {
-      const standard = $wallets.get().find(w => w.type === "standard")
-      if (!standard) {
-        return
-      }
-      await connect(standard.wallet.name)
+    const standard = $wallets.get().find(w => w.type === "standard")
+    if (!standard) {
+      return
     }
+    await connect(standard.wallet.name)
   }
 
   function initOnMount(): (() => void) | undefined {
@@ -606,16 +678,23 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     }
 
     const acc = connectedAccount.info?.account
-    if (!acc || walletInfo.type !== "standard") {
+    if (!acc) {
       throw new Error("solana:signMessage NOT found in standard wallet features")
     }
 
-    const wallet = walletInfo.wallet
-    if (!(SolanaSignMessage in wallet.features)) {
+    if (walletInfo.type === "mwa") {
+      alert(`${JSON.stringify(acc.features)}`)
+      throw new Error("sign message NOT implemented on mwa YET")
+    }
+
+    if (walletInfo.type !== "standard") {
+      throw new Error("solana:signMessage NOT found in custom wallet features")
+    }
+    if (!(SolanaSignMessage in walletInfo.wallet.features)) {
       throw new Error("solana:signMessage NOT found in standard wallet features")
     }
 
-    const feature = wallet.features[SolanaSignMessage]
+    const feature = walletInfo.wallet.features[SolanaSignMessage]
     const res = await feature.signMessage({
       account: acc,
       message: tx,

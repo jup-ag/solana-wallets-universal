@@ -1,6 +1,5 @@
 {
-  "name": "@solana-wallets-solid/sveltekit-2.0",
-  "version": "0.0.4",
+  "name": "@solana-wallets/sveltekit-2.0",
   "private": true,
   "scripts": {
     "dev": "vite dev",
@@ -11,8 +10,8 @@
     "deploy": "vite build && wrangler pages deploy .svelte-kit/cloudflare"
   },
   "dependencies": {
-    "@solana-wallets-solid/core-2.0": "workspace:*",
-    "@solana-wallets-solid/unified": "workspace:*",
+    "@solana-wallets/core-2.0": "workspace:*",
+    "@solana-wallets/unified": "workspace:*",
     "@solana/web3.js": "^2.0.0-rc.1"
   },
   "devDependencies": {

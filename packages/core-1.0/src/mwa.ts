@@ -10,7 +10,8 @@ import {
   isInWebView,
   isOnAndroid,
   SolanaMobileWalletAdapterWalletName,
-} from "@solana-wallets-solid/core"
+  convertToWalletStandardCluster,
+} from "@solana-wallets/core"
 
 export function getMobileWallet(wallets: WalletAdapterCompatibleStandardWallet[], env: Cluster) {
   /**
@@ -44,20 +45,16 @@ export function getMobileWallet(wallets: WalletAdapterCompatibleStandardWallet[]
    */
   alert(`android: ${isOnAndroid(ua)}, webview: ${isInWebView(ua)}, env: ${env}`)
   if (isOnAndroid(ua) && !isInWebView(ua)) {
+    const network = convertToWalletStandardCluster(env)
     const mobileWalletAdapter = new SolanaMobileWalletAdapter({
       addressSelector: createDefaultAddressSelector(),
       appIdentity: {
         uri: getUriForAppIdentity(),
       },
       authorizationResultCache: createDefaultAuthorizationResultCache(),
-      chain: "solana:devnet",
+      chain: `solana:${network}`,
       onWalletNotFound: createDefaultWalletNotFoundHandler(),
     })
-
-    console.log(
-      "adding new solana mobile wallet adapter! (mobile + android + not webview): ",
-      mobileWalletAdapter,
-    )
     return mobileWalletAdapter
   }
 }

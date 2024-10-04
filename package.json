@@ -1,6 +1,6 @@
 {
-	"name": "solana-wallets-solid",
-	"description": "solana wallets on solidjs",
+	"name": "solana-wallets",
+	"description": "framework agnostic solana wallets package",
 	"version": "0.0.1",
 	"license": "MIT",
 	"author": "aidanaden",

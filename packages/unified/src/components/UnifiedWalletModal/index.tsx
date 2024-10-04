@@ -25,7 +25,7 @@ import {
   isMobile,
   SolanaMobileWalletAdapterWalletName,
   WalletInfo,
-} from "@solana-wallets-solid/core-2.0"
+} from "@solana-wallets/core-2.0"
 import { Dynamic } from "solid-js/web"
 
 import { UnifiedWalletModalProps, useUnifiedWallet } from "../../contexts"

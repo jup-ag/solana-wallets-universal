@@ -1,5 +1,5 @@
 {
-  "name": "@solana-wallets-solid/react-vite-2.0",
+  "name": "@solana-wallets/react-vite-2.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -11,9 +11,10 @@
   },
   "dependencies": {
     "@nanostores/react": "^0.7.3",
-    "@solana-wallets-solid/react-2.0": "workspace:*",
-    "@solana-wallets-solid/unified": "workspace:*",
+    "@solana-wallets/react-2.0": "workspace:*",
+    "@solana-wallets/unified": "workspace:*",
     "@solana/web3.js": "^2.0.0-rc.1",
+    "@solana-program/system": "^0.5.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.26.2",

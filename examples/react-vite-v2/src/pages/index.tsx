@@ -1,5 +1,18 @@
-import { useWallet } from "@solana-wallets-solid/react-2.0"
-import { useEffect, useMemo } from "react"
+import { useWallet } from "@solana-wallets/react-2.0"
+import { useMemo } from "react"
+import {
+  createDefaultRpcTransport,
+  createSolanaRpcFromTransport,
+  pipe,
+  lamports,
+  createTransactionMessage,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  appendTransactionMessageInstruction,
+  address,
+  signAndSendTransactionMessageWithSigners,
+} from "@solana/web3.js"
+import { getTransferSolInstruction } from "@solana-program/system"
 
 const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
 export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
@@ -49,7 +62,7 @@ function WalletInteractionButtons() {
         appendTransactionMessageInstruction(
           getTransferSolInstruction({
             amount,
-            destination: address("BJm85nAD9ZbBpnTFUfuDHmDhQ2T3QK554ppSVPRY6yC5"),
+            destination: address("Hm9YjuVadcekDPbLeCSFE83r1QLpS2ksmKk7Sn5BCpfL"),
             source: transactionSendingSigner,
           }),
           m,

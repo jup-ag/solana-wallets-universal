@@ -1,17 +1,17 @@
 {
-  "name": "@solana-wallets-solid/unified",
+  "name": "@solana-wallets/unified",
   "version": "0.1.0",
-  "description": "Example hello world package in the solana-wallets-solid repository.",
+  "description": "Example hello world package in the solana-wallets repository.",
   "license": "MIT",
   "author": "aidanaden",
   "contributors": [],
-  "homepage": "https://github.com/aidanaden/solana-wallets-solid#readme",
+  "homepage": "https://github.com/aidanaden/solana-wallets#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aidanaden/solana-wallets-solid.git"
+    "url": "git+https://github.com/aidanaden/solana-wallets.git"
   },
   "bugs": {
-    "url": "https://github.com/aidanaden/solana-wallets-solid/issues"
+    "url": "https://github.com/aidanaden/solana-wallets/issues"
   },
   "keywords": [
     "solid"
@@ -64,7 +64,7 @@
   "devDependencies": {
     "@corvu/dialog": "^0.2.3",
     "@nanostores/solid": "^0.4.2",
-    "@solana-wallets-solid/core-2.0": "workspace:*",
+    "@solana-wallets/core-2.0": "workspace:*",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-standard-core": "1.1.1",
     "@solana/wallet-standard-wallet-adapter-base": "^1.1.2",

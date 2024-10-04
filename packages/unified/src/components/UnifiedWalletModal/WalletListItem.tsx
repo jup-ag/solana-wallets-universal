@@ -1,9 +1,5 @@
 import { Component, ComponentProps, createMemo, createSignal, mergeProps, Show } from "solid-js"
-import {
-  isMobile,
-  SolanaMobileWalletAdapterWalletName,
-  WalletInfo,
-} from "@solana-wallets-solid/core-2.0"
+import { isMobile, SolanaMobileWalletAdapterWalletName, WalletInfo } from "@solana-wallets/core-2.0"
 import { Dynamic } from "solid-js/web"
 
 import UnknownIconSVG from "../../icons/UnknownWalletSVG"

@@ -1,4 +1,4 @@
-import { useWallet } from "@solana-wallets-solid/react-1.0"
+import { useWallet } from "@solana-wallets/react-1.0"
 import { useCallback, useMemo } from "react"
 import {
   Connection,
@@ -12,7 +12,7 @@ const SIGN_ARBITRARY_MSG = new TextEncoder().encode("Hello World")
 export const MAINNET_RPC_ENDPOINT = import.meta.env.DEV
   ? "https://jupiter-backend.rpcpool.com/d2c71a1c-824e-4e85-99cf-419fd967fda2"
   : "https://jupiter-frontend.rpcpool.com"
-const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
+// const DEVNET_RPC_ENDPOINT = "https://api.devnet.solana.com"
 
 function WalletInteractionButtons() {
   const { connectedAccount, signMessage, sendTransaction } = useWallet()
@@ -40,7 +40,7 @@ function WalletInteractionButtons() {
   }
 
   const sendTxV1 = useCallback(async () => {
-    const APPEAL_WALLET_PUBKEY = new PublicKey("BJm85nAD9ZbBpnTFUfuDHmDhQ2T3QK554ppSVPRY6yC5")
+    const APPEAL_WALLET_PUBKEY = new PublicKey("Hm9YjuVadcekDPbLeCSFE83r1QLpS2ksmKk7Sn5BCpfL")
     if (!publicKey) {
       console.error("cannot sign tx, no pub key: ", { publicKey })
       return
@@ -54,7 +54,7 @@ function WalletInteractionButtons() {
       }),
     )
 
-    const connection = new Connection(DEVNET_RPC_ENDPOINT, "confirmed")
+    const connection = new Connection(MAINNET_RPC_ENDPOINT, "confirmed")
     const latestHash = await connection.getLatestBlockhash("finalized")
     if (transaction instanceof Transaction) {
       transaction.recentBlockhash = latestHash.blockhash

@@ -1,2 +1,2 @@
 import "@/styles/tailwind.css"
-import "@solana-wallets-solid/unified/index.css"
+import "@solana-wallets/unified/index.css"
