@@ -82,4 +82,4 @@ const useWallet = () => {
 }
 
 export { WalletProvider, useWallet }
-export type { dispatchConnect, dispatchDisconnect, AccountInfo }
+export type * from "@solana-wallets/core-2.0"
