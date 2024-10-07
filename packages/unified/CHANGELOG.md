@@ -1,5 +1,11 @@
 # @solana-wallets/unified
 
+## 0.3.1
+
+### Patch Changes
+
+- no build
+
 ## 0.3.0
 
 ### Minor Changes
