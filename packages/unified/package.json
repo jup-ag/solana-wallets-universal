@@ -21,27 +21,28 @@
     "access": "public"
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.tsx",
+  "module": "./src/index.tsx",
+  "types": "./src/index.tsx",
   "exports": {
     ".": {
       "solid": {
-        "development": "./dist/dev.jsx",
-        "import": "./dist/index.jsx"
+        "development": "./src/index.tsx",
+        "import": "./src/index.tsx"
       },
       "development": {
         "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/dev.js"
+          "types": "./src/index.tsx",
+          "default": "./src/index.tsx"
         }
       },
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./src/index.tsx",
+        "default": "./src/index.tsx"
       }
     },
     "./index.css": {
