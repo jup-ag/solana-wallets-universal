@@ -1,5 +1,12 @@
 # @solana-wallets/solid-2.0
 
+## 0.10.3
+
+### Patch Changes
+
+- test dynamic types
+  - @solana-wallets/core-2.0@0.8.2
+
 ## 0.10.2
 
 ### Patch Changes
