@@ -11,7 +11,8 @@
   },
   "scripts": {
     "dev": "pnpm build --watch",
-    "build": "tsup"
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module",
   "sideEffects": false,

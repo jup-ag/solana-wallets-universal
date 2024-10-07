@@ -1,9 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "include": [
-    "src/**/*",
-    "test/**/*",
-    "../core-1.0/src/mwa.ts"
+    "src/**/*"
   ],
   "compilerOptions": {
     "baseUrl": "."

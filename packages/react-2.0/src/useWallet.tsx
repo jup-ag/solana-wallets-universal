@@ -64,3 +64,4 @@ function useWallet() {
   return useContext(WalletContext)
 }
 export { useWallet, WalletProvider }
+export type * from "@solana-wallets/core-2.0"

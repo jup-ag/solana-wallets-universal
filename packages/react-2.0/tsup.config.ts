@@ -1,7 +1,7 @@
-import childProcess from "node:child_process"
-import fs from "node:fs"
-import { readFile } from "node:fs/promises"
-import path from "node:path"
+// import childProcess from "node:child_process"
+// import fs from "node:fs"
+// import { readFile } from "node:fs/promises"
+// import path from "node:path"
 import { type Options, defineConfig } from "tsup"
 
 const common: Options = {
