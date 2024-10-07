@@ -1,6 +1,6 @@
 {
   "name": "@solana-wallets/unified",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Example hello world package in the solana-wallets repository.",
   "license": "MIT",
   "author": "aidanaden",
@@ -25,24 +25,24 @@
     "src"
   ],
   "type": "module",
-  "main": "./src/index.tsx",
-  "module": "./src/index.tsx",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./src/index.tsx",
   "exports": {
     ".": {
       "solid": {
-        "development": "./src/index.tsx",
-        "import": "./src/index.tsx"
+        "development": "./dist/index.jsx",
+        "import": "./dist/dev.jsx"
       },
       "development": {
         "import": {
           "types": "./src/index.tsx",
-          "default": "./src/index.tsx"
+          "default": "./dist/dev.js"
         }
       },
       "import": {
         "types": "./src/index.tsx",
-        "default": "./src/index.tsx"
+        "default": "./dist/index.js"
       }
     },
     "./index.css": {
