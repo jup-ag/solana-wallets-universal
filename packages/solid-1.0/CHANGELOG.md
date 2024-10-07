@@ -1,5 +1,11 @@
 # @solana-wallets/solid-1.0
 
+## 0.10.0
+
+### Minor Changes
+
+- export all core packages
+
 ## 0.9.0
 
 ### Minor Changes
