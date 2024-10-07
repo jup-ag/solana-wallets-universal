@@ -1,5 +1,11 @@
 # @solana-wallets/core
 
+## 0.8.2
+
+### Patch Changes
+
+- only import solana-mobile-adapter in 1.0 packages
+
 ## 0.8.1
 
 ### Patch Changes

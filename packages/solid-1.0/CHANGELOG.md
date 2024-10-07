@@ -1,5 +1,13 @@
 # @solana-wallets/solid-1.0
 
+## 0.10.4
+
+### Patch Changes
+
+- only import solana-mobile-adapter in 1.0 packages
+- Updated dependencies
+  - @solana-wallets/core-1.0@0.8.3
+
 ## 0.10.3
 
 ### Patch Changes

@@ -6,7 +6,7 @@ import {
   dispatchDisconnect,
   StoreProps,
 } from "@solana-wallets/core-1.0"
-import "@solana-mobile/wallet-adapter-mobile"
+import type {} from "@solana-mobile/wallet-adapter-mobile"
 
 import { createContextProvider } from "./context"
 
