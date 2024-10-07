@@ -1,6 +1,6 @@
 {
   "name": "@solana-wallets/core-1.0",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Example hello world package in the solana-wallets repository.",
   "license": "MIT",
   "author": "aidanaden",
@@ -44,8 +44,10 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@solana-wallets/core": "workspace:*"
+  },
   "devDependencies": {
-    "@solana-wallets/core": "workspace:*",
     "@solana/web3.js": "^1.95.3",
     "@solana/wallet-standard-features": "^1.2.0",
     "@solana-mobile/wallet-adapter-mobile": "^2.1.3",

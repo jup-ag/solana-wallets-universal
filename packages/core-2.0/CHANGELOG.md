@@ -1,5 +1,11 @@
 # @solana-wallets/core-2.0
 
+## 0.8.1
+
+### Patch Changes
+
+- add imported as deps
+
 ## 0.8.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @solana-wallets/solid-2.0
 
+## 0.10.2
+
+### Patch Changes
+
+- add imported as deps
+- Updated dependencies
+  - @solana-wallets/core-2.0@0.8.1
+
 ## 0.10.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@solana-wallets/solid-1.0",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Example hello world package in the solana-wallets repository.",
   "license": "MIT",
   "author": "aidanaden",
@@ -44,9 +44,11 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@solana-wallets/core-1.0": "workspace:*"
+  },
   "devDependencies": {
     "@nanostores/solid": "^0.4.2",
-    "@solana-wallets/core-1.0": "workspace:*",
     "nanostores": "^0.11.3",
     "solid-js": "^1.8.18"
   },
