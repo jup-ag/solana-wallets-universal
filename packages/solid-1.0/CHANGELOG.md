@@ -1,5 +1,11 @@
 # @solana-wallets/solid-1.0
 
+## 0.11.0
+
+### Minor Changes
+
+- update vinxi
+
 ## 0.10.4
 
 ### Patch Changes

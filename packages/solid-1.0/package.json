@@ -1,6 +1,6 @@
 {
   "name": "@solana-wallets/solid-1.0",
-  "version": "0.10.4",
+  "version": "0.11.0",
   "description": "Example hello world package in the solana-wallets repository.",
   "license": "MIT",
   "author": "aidanaden",
