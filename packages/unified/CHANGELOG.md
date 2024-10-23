@@ -1,5 +1,11 @@
 # @solana-wallets/unified
 
+## 0.3.4
+
+### Patch Changes
+
+- remove preflight
+
 ## 0.3.3
 
 ### Patch Changes
