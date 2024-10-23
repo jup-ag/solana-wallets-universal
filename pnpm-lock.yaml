@@ -655,8 +655,8 @@ importers:
         specifier: ^8.4.38
         version: 8.4.41
       solid-element:
-        specifier: ^1.8.1
-        version: 1.8.1(solid-js@1.8.21)
+        specifier: ^1.9.1
+        version: 1.9.1(solid-js@1.8.21)
       solid-js:
         specifier: ^1.8.18
         version: 1.8.21
@@ -4071,8 +4071,8 @@ packages:
   commondir@1.0.1:
     resolution: {integrity: sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==}
 
-  component-register@0.8.6:
-    resolution: {integrity: sha512-ULwqqIglogJSqm6YpPisl6W38jORlplZDg7yNpGmjj+emczvQZ+AVUnSTD5WH3JNnwl7ZwIJw5w2tyfD0V+Ejg==}
+  component-register@0.8.7:
+    resolution: {integrity: sha512-clPS/o1RNfJw7L1/w4q+nkj6l7JV32kFHCx6vW5nSPOEly4B9olMeADNilEgpLV/DdeS7y8JXhHKx9YvSj8vqQ==}
 
   compress-commons@6.0.2:
     resolution: {integrity: sha512-6FqVXeETqWPoGcfzrXb37E50NP0LXT8kAMu5ooZayhWWdgEY4lBEEcbQNXtkuKQsGduxiIcI4gOTsxTmuq/bSg==}
@@ -6717,10 +6717,10 @@ packages:
     peerDependencies:
       solid-js: ^1.8
 
-  solid-element@1.8.1:
-    resolution: {integrity: sha512-YYVVKQSZC2Le/rvkNoQzMq1WWUe5+guW4t+b8N9P65oMagJYz6FbmVOHKw/49xcry+seCxYUlNGHx6BDcFOgyg==}
+  solid-element@1.9.1:
+    resolution: {integrity: sha512-baJy6Qz27oAUgkPlqOf3Y+7RsBiuVQrS51Nrh1ddDbrqrNPvJbIvehpUsTzLNFb2ZHIoHuNnDg330go/ZKcRdg==}
     peerDependencies:
-      solid-js: ^1.8.18
+      solid-js: ^1.9.3
 
   solid-focus-trap@0.1.7:
     resolution: {integrity: sha512-NSJiIkL+WTWGgca+OKQA9rV3bD51lT23iLn1Z+Ap1Qk3rJBxQ8SoEAQ0FvXoQThtyXFKAK1ibcVBBMMEcu6YMw==}
@@ -12032,7 +12032,7 @@ snapshots:
 
   commondir@1.0.1: {}
 
-  component-register@0.8.6: {}
+  component-register@0.8.7: {}
 
   compress-commons@6.0.2:
     dependencies:
@@ -15118,9 +15118,9 @@ snapshots:
       '@corvu/utils': 0.4.1(solid-js@1.8.21)
       solid-js: 1.8.21
 
-  solid-element@1.8.1(solid-js@1.8.21):
+  solid-element@1.9.1(solid-js@1.8.21):
     dependencies:
-      component-register: 0.8.6
+      component-register: 0.8.7
       solid-js: 1.8.21
 
   solid-focus-trap@0.1.7(solid-js@1.8.21):
