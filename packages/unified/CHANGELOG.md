@@ -1,5 +1,11 @@
 # @solana-wallets/unified
 
+## 0.3.6
+
+### Patch Changes
+
+- types
+
 ## 0.3.5
 
 ### Patch Changes
