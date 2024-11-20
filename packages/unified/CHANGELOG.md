@@ -1,5 +1,11 @@
 # @solana-wallets/unified
 
+## 0.3.7
+
+### Patch Changes
+
+- unified logging
+
 ## 0.3.6
 
 ### Patch Changes

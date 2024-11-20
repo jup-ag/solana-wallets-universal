@@ -417,9 +417,15 @@ const UnifiedWalletModal: Component<UnifiedWalletModalProps> = props => {
     )
   })
 
+  createEffect(() => {
+    console.log("filteredAdapters: ", filteredAdapters())
+  })
+
   const list = createMemo<WalletList>(() => {
     // Then, Installed, Top 3, Loadable, NotDetected
     const filtered = filteredAdapters()
+
+    console.log("list createMemo: filtered adapters: ", { filtered })
 
     if (filtered.previouslyConnected.length > 0) {
       const { previouslyConnected, ...rest } = filtered
