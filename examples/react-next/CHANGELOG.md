@@ -1,5 +1,13 @@
 # @solana-wallets/react-next
 
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies
+  - @solana-wallets/unified@0.3.8
+  - @solana-wallets/react-2.0@0.5.0
+
 ## 0.1.12
 
 ### Patch Changes

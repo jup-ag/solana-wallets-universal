@@ -18,6 +18,7 @@ import {
   WalletChangedEvent,
   WalletEvent,
   WalletInfo,
+  dispatchGetAvailableWallets,
 } from "@solana-wallets/core-2.0"
 
 import { DEFAULT_LOCALE, Locale } from "../translation/i18"
@@ -176,6 +177,11 @@ const [_UnifiedWalletProvider, _useUnifiedWallet] = createContextProvider(
           onAvailableWalletsChangedHandler,
         )
       })
+    })
+
+    // Query for existing registered wallets
+    onMount(() => {
+      dispatchGetAvailableWallets()
     })
 
     createEffect(() => {

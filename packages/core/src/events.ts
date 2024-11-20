@@ -128,10 +128,16 @@ type AvailableWalletsChangedEventPayload = {
 }
 export type AvailableWalletsChangedEvent = CustomEvent<AvailableWalletsChangedEventPayload>
 
+export function dispatchGetAvailableWallets() {
+  const getAvailableWalletsEvent = new CustomEvent(WalletEvent.GET_AVAILABLE_WALLETS)
+  window.dispatchEvent(getAvailableWalletsEvent)
+}
+
 export const WalletEvent = {
   CONNECT: "unified:connect",
   DISCONNECT: "unified:disconnect",
   CONNECTING: "unified:connecting",
   WALLET_CHANGED: "unified:wallet-changed",
   AVAILABLE_WALLETS_CHANGED: "unified:available-wallets-changed",
+  GET_AVAILABLE_WALLETS: "unified:get-available-wallets",
 } as const

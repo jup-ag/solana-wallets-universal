@@ -586,6 +586,19 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     $walletsMap.set(generateWalletMap(walletInfos))
   }
 
+  function availableWalletsHandler() {
+    const wallets = Object.values($walletsMap.get())
+    dispatchAvailableWalletsChanged({ wallets })
+  }
+
+  function loadAvailableWalletsHandler() {
+    window.addEventListener(WalletEvent.GET_AVAILABLE_WALLETS, availableWalletsHandler)
+  }
+
+  function cleanupAvailableWalletsHandler() {
+    window.removeEventListener(WalletEvent.GET_AVAILABLE_WALLETS, availableWalletsHandler)
+  }
+
   async function connect(name: string): Promise<void> {
     const existingName = $wallet.get()?.wallet.name
 
@@ -649,10 +662,12 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     loadConnectHandlers()
     const cleanup2 = onMountLoadStandardWallets()
     onMountAutoConnect()
+    loadAvailableWalletsHandler()
     return () => {
       cleanup()
       cleanup2()
       cleanupConnectHandlers()
+      cleanupAvailableWalletsHandler()
     }
   }
 

@@ -1,5 +1,11 @@
 # @solana-wallets/unified
 
+## 0.3.8
+
+### Patch Changes
+
+- query for available wallets on unified mount
+
 ## 0.3.7
 
 ### Patch Changes
