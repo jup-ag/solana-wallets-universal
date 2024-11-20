@@ -123,12 +123,15 @@ export function initStore({ env, disconnectOnAccountChange, additionalWallets = 
     generateWalletMap(additionalWallets?.map(w => ({ type: "custom", wallet: w }))),
   )
   onSet($walletsMap, async ({ newValue }) => {
+    console.log("wallets map changed: ", { newWallets: newValue })
+
     dispatchAvailableWalletsChanged({ wallets: Object.values(newValue) })
 
     // Skip auto-connect since already connected
     const connected = $isConnected.get()
     const connecting = $connecting.get()
     if (connected || connecting) {
+      console.error("wallets map changed: not auto connecting since already connected/connecting")
       return
     }
 

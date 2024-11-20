@@ -1,5 +1,12 @@
 # @solana-wallets/core-1.0
 
+## 0.8.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @solana-wallets/core@0.8.3
+
 ## 0.8.3
 
 ### Patch Changes

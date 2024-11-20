@@ -1,5 +1,11 @@
 # @solana-wallets/core
 
+## 0.8.3
+
+### Patch Changes
+
+- log values
+
 ## 0.8.2
 
 ### Patch Changes

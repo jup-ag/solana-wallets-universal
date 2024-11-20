@@ -1,5 +1,11 @@
 # @solana-wallets/solid-1.0
 
+## 0.11.1
+
+### Patch Changes
+
+- @solana-wallets/core-1.0@0.8.4
+
 ## 0.11.0
 
 ### Minor Changes
