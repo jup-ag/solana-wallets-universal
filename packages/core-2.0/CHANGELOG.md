@@ -1,5 +1,11 @@
 # @solana-wallets/core-2.0
 
+## 0.8.5
+
+### Patch Changes
+
+- add solana web3 dependency to core-2.0
+
 ## 0.8.4
 
 ### Patch Changes
