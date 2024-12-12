@@ -96,10 +96,10 @@ export const UnifiedWalletButton: Component<UnifiedWalletButtonProps> = props =>
       <Switch>
         <Match when={name() && publicKey()}>
           <button
-            type="button"
-            class="flex items-center py-2 px-3 rounded-2xl h-7 cursor-pointer bg-v3-bg text-white w-auto"
+            // type="button"
+            // class="flex items-center py-2 px-3 rounded-2xl h-7 cursor-pointer bg-v3-bg text-white w-auto"
             onClick={dispatchDisconnect}
-            // class={props.currentUserClassName}
+            class={props.currentUserClassName}
           >
             <span
               class="w-4 h-4 rounded-full flex justify-center items-center"
