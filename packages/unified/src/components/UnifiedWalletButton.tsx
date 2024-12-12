@@ -101,15 +101,17 @@ export const UnifiedWalletButton: Component<UnifiedWalletButtonProps> = props =>
             onClick={dispatchDisconnect}
             class={props.currentUserClassName}
           >
-            <span
-              class="w-4 h-4 rounded-full flex justify-center items-center"
-              style={{ position: "relative" }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="Wallet logo" width={16} height={16} src={account()?.info?.icon} />
-            </span>
+            <div class="flex items-center py-2 px-3 rounded-2xl h-7 cursor-pointer bg-v3-bg text-white w-auto">
+              <span
+                class="w-4 h-4 rounded-full flex justify-center items-center"
+                style={{ position: "relative" }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt="Wallet logo" width={16} height={16} src={account()?.info?.icon} />
+              </span>
 
-            <span class="ml-2 text-xs text-white">{shortenAddress(`${publicKey()}`)}</span>
+              <span class="ml-2 text-xs text-white">{shortenAddress(`${publicKey()}`)}</span>
+            </div>
           </button>
         </Match>
         <Match when={props.overrideContent}>

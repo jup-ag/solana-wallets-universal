@@ -1,5 +1,11 @@
 # @solana-wallets/unified
 
+## 0.3.14
+
+### Patch Changes
+
+- test: div within button
+
 ## 0.3.8
 
 ### Patch Changes
